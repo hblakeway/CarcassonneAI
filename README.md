@@ -29,3 +29,5 @@ bash ./PLAY_GAME_UI.sh
 ```
 
 Then a menu will pop up. Click on the **arrows** to choose Player 1 and Player 2. Click `Play` to start the game. The game UI (seen above), powered by `pygame` will pop-up next.
+
+
