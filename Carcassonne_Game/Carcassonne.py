@@ -5,6 +5,7 @@ import math
 
 from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, AvailableMove
 from pygameCarcassonneDir.pygameSettings import MEEPLE_SIZE
+from pygameCarcassonneDir.pygameSettings import BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN
 from Carcassonne_Game.GameFeatures import Monastery
 
 from Carcassonne_Game.Carcassonne_CityUtils import cityConnections, cityClosures
@@ -793,7 +794,7 @@ class CarcassonneState:
         MeepleKey = Move[4]
 
         currentTile = Tile(DisplayTileIndex)
-        
+
         if not(MeepleKey is None):
             feature = MeepleKey[0]
             playerSymbol = MeepleKey[1]
@@ -826,6 +827,14 @@ class CarcassonneState:
         image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
         image = pygame.transform.rotate(image, Rotation)
         GAME_DISPLAY.blit(image, (1100, 580))
+
+        # draw suggestion place rectangle
+        rect = (GAME_X,GAME_Y, Grid_Size, Grid_Size)
+        rect_surf = pygame.Surface(pygame.Rect(rect).size)
+        rect_surf.set_alpha(150)
+        pygame.draw.rect(rect_surf, WHITE, rect_surf.get_rect())
+        GAME_DISPLAY.blit(rect_surf, rect)
+
         print("Game display ")
 
 
@@ -874,3 +883,24 @@ def meepleCoordinatesAI(Location, Feature, DICT, TileIndex):
             
         X,Y = coords[0],coords[1]
         return X,Y
+
+def placeColourTileAI(x, y, DisplayScreen, COLOUR):
+        # display constants
+        Grid_Window_Width = DisplayScreen.Grid_Window_Width
+        Grid_Window_Height = DisplayScreen.Grid_Window_Height
+        Grid_border = DisplayScreen.Grid_border
+        Grid_Size = DisplayScreen.Grid_Size
+        GAME_DISPLAY = DisplayScreen.pygameDisplay
+        
+        # reverse orientation
+        y = y*-1
+        
+        X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + x*Grid_Size + Grid_border
+        Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + y*Grid_Size + Grid_border
+        
+        # draw rectangle
+        rect = (X,Y, Grid_Size, Grid_Size)
+        rect_surf = pygame.Surface(pygame.Rect(rect).size)
+        rect_surf.set_alpha(150)
+        pygame.draw.rect(rect_surf, COLOUR, rect_surf.get_rect())
+        GAME_DISPLAY.blit(rect_surf, rect)

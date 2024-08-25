@@ -201,6 +201,7 @@ def PlayGame(p1, p2):
 
                 else: # Player should be human here 
                     if event.type == pygame.KEYDOWN:
+                        print("KEY DOWN RECIEVED")
                         if event.key == pygame.K_LEFT:
                             rotation = -1
                             newRotation = True
