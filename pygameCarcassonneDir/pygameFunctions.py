@@ -142,6 +142,7 @@ def placeTile(Tile, Rotation, x, y, DisplayScreen):
     # load meeple
     TileMeeple = Tile.Meeple
     if not(TileMeeple is None):
+        print(TileMeeple)
         Feature, Location = TileMeeple[0], TileMeeple[1]
         playerSymbol = TileMeeple[2]
         # meeple image
