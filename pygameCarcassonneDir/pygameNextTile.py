@@ -3,7 +3,7 @@ from Carcassonne_Game.Tile import Tile, showImage
 
 from pygameCarcassonneDir.pygameSettings import MEEPLE_LABEL_X, MEEPLE_LABEL_Y, MEEPLE_LABEL_SHIFT_X, MEEPLE_LABEL_SHIFT_Y
 from pygameCarcassonneDir.pygameSettings import GRID_WINDOW_WIDTH, MENU_WIDTH, BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN, MEEPLE_CHOICE_HIGHLIGHT
-from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_MENU, BLACK
+from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_MENU, BLACK, FONT_COPILOT
 
 from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates
 from pygameCarcassonneDir.pygameLabel import Label
@@ -92,9 +92,12 @@ class nextTile:
             # rotation images and labels
             self.leftRotImage = pygame.image.load('pygame_images/left_rotate.png')
             self.rightRotImage = pygame.image.load('pygame_images/right_rotate.png')
-            
-    
-    
+
+            # ai co pilot label 
+            aiCopilotRect = (0,0, 300, 120)
+            self.aiLabel = pygame.Surface(pygame.Rect(aiCopilotRect).size)
+            self.aiLabel.set_alpha(180)
+            pygame.draw.rect(self.aiLabel, BROWN, self.aiLabel.get_rect(), 10)
     
     def resetImage(self):
         self.image = pygame.image.load(self.image_file)
@@ -156,6 +159,7 @@ class nextTile:
         GAME_DISPLAY.blit(self.leftRotImage, (self.X-60,self.Y+40))
         GAME_DISPLAY.blit(self.rightRotImage, (image_width+self.X+10,self.Y+40))
         GAME_DISPLAY.blit(self.image, (self.X,self.Y))
+        # GAME_DISPLAY.blit(self.image, (self.X + 25,self.Y - 120)) Adds another frame of the tile
         
         
     
@@ -170,6 +174,7 @@ class nextTile:
         width = (self.meepleLabel.get_rect().size)[0]
         GAME_DISPLAY.blit(self.meepleLabel, (Grid_Window_Width + (Menu_Width - width)/2, 300))
         GAME_DISPLAY.blit(self.moveLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 340))
+        GAME_DISPLAY.blit(self.aiLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 250))
         
         
     def possibleCoordinates(self):
@@ -281,10 +286,17 @@ class nextTile:
         """
         Instruct user to press space to force AI to make move
         """
-        text = "Press SPACEBAR (AI move)"
+        text = "AI Opponent making decision"
         spcaebarLabel = Label(text, font_size=FONT_MEEPLE_MENU, background = WHITE)
         self.meepleLabel.blit(spcaebarLabel.text_surface, (20, 70))
-        
+    
+    def coPilotButton(self):
+        """
+        Button for users to press for AI Co pilot
+        """
+        text = "This move is ideal..." # Replace with visual of suggestion
+        suggestionLabel = Label(text, font_size=FONT_COPILOT, background = WHITE)
+        self.aiLabel.blit(suggestionLabel.text_surface, (20, 10))
         
     def updateMeepleMenu(self, location_key, Location, NumberKey, numberSelected):
         

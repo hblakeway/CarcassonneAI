@@ -242,6 +242,22 @@ def playMove(NextTile, player, Carcassonne, TileIndex, isStartOfGame = False, Ma
     
     return Carcassonne.p1, selectedMove
 
+def displayMove(displayScreen, NextTile, player, Carcassonne, TileIndex, isStartOfGame = False, ManualMove=None):
+    
+    # check if there is a possible move
+    if len(Carcassonne.availableMoves()) == 0:
+        print("AI has no move reccomendations")
+        Carcassonne.aiSuggestion([None, TileIndex])
+        return player  # turn not over
+    
+    # get move
+    player = Carcassonne.p2
+    selectedMove = player.chooseAction(Carcassonne)
+    player = Carcassonne.p1
+  
+    # play move on board
+    Carcassonne.aiSuggestion(displayScreen, selectedMove)
+    print('AI SUGGESTION')
 
 
 def printTilesLeft(Carcassonne, displayScreen):
@@ -349,5 +365,5 @@ def printScores(Carcassonne, displayScreen):
     
     total_width = 2*width
     
-    GAME_DISPLAY.blit(label1, (Grid_Window_Width + (Menu_Width - total_width)/2, Grid_Window_Height-180 ))
-    GAME_DISPLAY.blit(label2, (Grid_Window_Width + width + (Menu_Width - total_width)/2, Grid_Window_Height-180 ))
+    GAME_DISPLAY.blit(label1, (Grid_Window_Width + (Menu_Width - total_width)/2, Grid_Window_Height-125 ))
+    GAME_DISPLAY.blit(label2, (Grid_Window_Width + width + (Menu_Width - total_width)/2, Grid_Window_Height-125))

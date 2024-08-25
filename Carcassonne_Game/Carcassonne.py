@@ -1,5 +1,7 @@
 import random as rd
 import itertools as it
+import pygame
+import math
 
 from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, AvailableMove
 from Carcassonne_Game.GameFeatures import Monastery
@@ -740,6 +742,59 @@ class CarcassonneState:
         #Str = str(self.TileIndexList) + "\n" + str(self.Board) + "\n" + str(self.BoardCities) + "\n" + str(self.BoardRoads) + "\n" + str(self.BoardMonasteries) + "\n" + str(self.BoardFarms)
         Str = str(self.TileIndexList)
         return Str
+    
+
+    def aiSuggestion(self, DisplayScreen, Move = None):
+        """
+        Place a tile on the ai sugestion panel 
+        
+        Inputs:
+            - Move (a tuple):
+                - PlayingTileIndex: Index of tile being played
+                - X,Y: Position of tile on the board
+                - Rotation: Rotation of tile
+                - MeepleKey
+        """
+        
+        # display constants
+        Grid_Window_Width = DisplayScreen.Grid_Window_Width
+        Grid_Window_Height = DisplayScreen.Grid_Window_Height
+        Grid_Size = DisplayScreen.Grid_Size
+        Grid_border = DisplayScreen.Grid_border
+        Meeple_Size = DisplayScreen.Meeple_Size
+        GAME_DISPLAY = DisplayScreen.pygameDisplay
+
+        # split up 'Move' object
+        DisplayTileIndex = Move[0]
+        X,Y = Move[1], Move[2]
+        Rotation = Move[3]
+        MeepleKey = Move[4]
+
+        # reverse orientation
+        Y=Y*-1
+    
+        GAME_X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + X*Grid_Size + Grid_border
+        GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + Y*Grid_Size + Grid_border
+
+        # Tile = Tile(DisplayTileIndex)
+
+        # load image
+        image = pygame.image.load('images/' + str(DisplayTileIndex) + '.png')
+
+    
+        #if not(MeepleKey is None):
+            # meeple image
+        #    meepleColour = "blue" 
+        #    meepleImage = pygame.image.load('meeple_images/' + meepleColour + '.png')
+        #    meepleImage = pygame.transform.scale(meepleImage, (Meeple_Size, Meeple_Size))
+        #    print(MeepleKey)
+        #    image.blit(meepleImage, MeepleKey)
+        # add image        
+        image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
+        image = pygame.transform.rotate(image, Rotation)
+        GAME_DISPLAY.blit(image, (100, 120))
+        print("Game display ")
+
 
 
              
