@@ -67,7 +67,7 @@ WIDTH = HEIGHT = 104  # image scaled x2
 
 XSHIFT = YSHIFT = MEEPLE_SIZE//2
 
-MEEPLE_LOCATION_DICT = {
+MEEPLE_LOCATION_DICT_AI = {
     (0,1): [X_DEPTH - XSHIFT, HEIGHT//2 - YSHIFT],
     (0,2): [WIDTH//4 -XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
     (1,1): [WIDTH//2 - XSHIFT, Y_DEPTH - YSHIFT],
@@ -817,17 +817,17 @@ class CarcassonneState:
             meepleColour = "blue" 
             meepleImage = pygame.image.load('meeple_images/' + meepleColour + '.png')
             meepleImage = pygame.transform.scale(meepleImage, (Meeple_Size, Meeple_Size))
-            X,Y = meepleCoordinates(MeepleLocation, feature, MEEPLE_LOCATION_DICT, DisplayTileIndex)
+            X,Y = meepleCoordinatesAI(MeepleLocation, feature, MEEPLE_LOCATION_DICT_AI, DisplayTileIndex)
             print(MeepleKey)
             image.blit(meepleImage, (X,Y))
         # add image        
         image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
         image = pygame.transform.rotate(image, Rotation)
-        GAME_DISPLAY.blit(image, (100, 120))
+        GAME_DISPLAY.blit(image, (300, 120))
         print("Game display ")
 
 
-def meepleCoordinates(Location, Feature, DICT, TileIndex):
+def meepleCoordinatesAI(Location, Feature, DICT, TileIndex):
         """
         Get meeple coordinates from Meeple Tile Location
         """
