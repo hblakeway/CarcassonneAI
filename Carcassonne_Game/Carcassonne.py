@@ -793,8 +793,10 @@ class CarcassonneState:
         MeepleKey = Move[4]
 
         currentTile = Tile(DisplayTileIndex)
-        feature = MeepleKey[0]
-        playerSymbol = MeepleKey[1]
+        
+        if not(MeepleKey is None):
+            feature = MeepleKey[0]
+            playerSymbol = MeepleKey[1]
 
         # reverse orientation
         Y=Y*-1
@@ -823,7 +825,7 @@ class CarcassonneState:
         # add image        
         image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
         image = pygame.transform.rotate(image, Rotation)
-        GAME_DISPLAY.blit(image, (300, 120))
+        GAME_DISPLAY.blit(image, (1100, 580))
         print("Game display ")
 
 
