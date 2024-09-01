@@ -448,6 +448,11 @@ class CarcassonneState:
                 - Rotation: Rotation of tile
                 - MeepleKey
         """
+        # check if game is over
+        if self.TotalTiles == 0:
+            self.EndGameRoutine()
+            return
+        
         # split up 'Move' object
         PlayingTileIndex = Move[0]
         X,Y = Move[1], Move[2]
@@ -506,10 +511,6 @@ class CarcassonneState:
         
         # update virtual scores
         self.UpdateVirtualScores()
-        # check if game is over
-        if self.TotalTiles == 0:
-            self.EndGameRoutine()
-            return
         
         #Turn end routine
         self.playerSymbol = 3 - self.playerSymbol # switch turn

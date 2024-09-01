@@ -57,17 +57,20 @@ NumKeys = [
 # list of player available to choose from
 PLAYERS = [
     ("Human", HumanPlayer()),
-    #("Random", RandomPlayer()),
-    ("Normal", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
-    ("Adaptive", MCTS_RAVEPlayer(isTimeLimited=True, timeLimit=5)),
+    ("GAME AI", MCTS_ES_Player(isTimeLimited=False, timeLimit=5)),
 ]
 
 PLAYER1 = [HumanPlayer()]
-PLAYER2 = [MCTSPlayer(isTimeLimited=False, timeLimit=5)]
+PLAYER2 = [MCTS_ES_Player(isTimeLimited=False, timeLimit=5)]
 
 AI_MOVE_EVENT = pygame.USEREVENT + 1
 AI_DELAY = 1000  # ms
 
+x1, y1 = 980, 545
+x2, y2 = 1260, 637
+width = x2 - x1
+height = y2 - y1
+aiCopilotRect = pygame.Rect(x1, y1, width, height)
 
 # start menu
 def startMenu():
@@ -91,7 +94,6 @@ def startMenu():
     menu.add.button("Play", start_the_game)
     menu.add.button("Quit", pygame_menu.events.EXIT)
     menu.mainloop(surface)
-
 
 def FinalMenu(Carcassonne):
     FS = Carcassonne.FeatureScores
@@ -161,6 +163,7 @@ def PlayGame(p1, p2):
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
 
     firstRotation = True 
+    playAImove = False
 
     # LOOP
     while not done:
@@ -176,7 +179,7 @@ def PlayGame(p1, p2):
             if not isGameOver:
                 
                 if player.isAIPlayer:
-                    print("inside ai")
+    
                     if event.type == AI_MOVE_EVENT:
                         player, selectedMove = playMove(
                             NT,
@@ -216,8 +219,12 @@ def PlayGame(p1, p2):
                                 NT.Meeple = None
                             hasSomethingNew = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        mouseX, mouseY = event.pos
                         X, Y = NT.evaluate_click(pygame.mouse.get_pos(), DisplayScreen)
-                        if (X, Y) in NT.possibleCoordsMeeples:
+
+                        if aiCopilotRect.collidepoint(mouseX, mouseY):
+                            playAImove = True
+                        elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
                             ManualMove = (NT.nextTileIndex, X, Y, rotation, NT.Meeple)
                             player, selectedMove = playMove(
@@ -239,7 +246,6 @@ def PlayGame(p1, p2):
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
                             text = NT.displayTextClickedTile(X, Y)
                             print(text)
-                        # elif () is in AI SUGGESTION COORDINATE
                         else:
                             print(f"Position invalid: X: {X}, Y:{Y}")
   
@@ -250,6 +256,25 @@ def PlayGame(p1, p2):
 
         GAME_DISPLAY.blit(background, (0, 0))
         drawGrid(DisplayScreen)
+
+        if playAImove:
+            Carcassonne.move(selectedMove)
+            print(Carcassonne.TotalTiles)
+
+            if Carcassonne.TotalTiles != 0:
+                player = Carcassonne.p2
+                NT = nextTile(Carcassonne, DisplayScreen)
+                NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50))
+                isStartOfTurn = True
+                hasSomethingNew = True
+                isStartOfGame = False
+                playAImove = False
+                pygame.time.set_timer(AI_MOVE_EVENT, 1)
+            else:
+                Carcassonne.isGameOver
+                if isGameOver:
+                        isStartOfTurn = False
+                        hasSomethingNew = False
 
         # If a move has been made
         if hasSomethingNew:
@@ -268,8 +293,7 @@ def PlayGame(p1, p2):
                     NT.updateMeepleMenu(location_key, location_value, i, numberSelected)
                     i += 1
                 NT.rotate(NT.Rotated, newRotation)
-                diplayGameBoard(Carcassonne, DisplayScreen)
-            # Else if the player is an AI player    
+                diplayGameBoard(Carcassonne, DisplayScreen)  
             else:
                 if not isGameOver:
                     NT.resetImage()
@@ -292,7 +316,7 @@ def PlayGame(p1, p2):
         numberSelected = 0
 
         if firstRotation:
-            image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex)
+            selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex)
             firstRotation = False
             diplayGameBoard(Carcassonne, DisplayScreen)
             NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)

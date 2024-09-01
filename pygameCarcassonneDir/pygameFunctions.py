@@ -435,10 +435,8 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
 
     # Draw on screen
     image_coordinate  = (1100, 580)
-    # GAME_DISPLAY.blit(image, image_coordinate)
-    # GAME_DISPLAY.blit(rect_surf, rect_coordinates)
 
-    return(image,image_coordinate,rect_surf, rect_coordinates)
+    return(selectedMove, image, image_coordinate, rect_surf, rect_coordinates)
 
 def meepleCoordinatesAI(Location, Feature, DICT, TileIndex):
         """

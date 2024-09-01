@@ -97,13 +97,16 @@ class nextTile:
             aiCopilotRect = (0,0, 300, 120)
             self.aiLabel = pygame.Surface(pygame.Rect(aiCopilotRect).size)
             self.aiLabel.set_alpha(180)
-            pygame.draw.rect(self.aiLabel, BROWN, self.aiLabel.get_rect(), 10)
+            rectangle = pygame.draw.rect(self.aiLabel, BROWN, self.aiLabel.get_rect(), 10)
+            # print(rectangle.topleft,rectangle.topright,rectangle.bottomleft, rectangle.bottomright)
     
     def resetImage(self):
-        self.image = pygame.image.load(self.image_file)
-        self.image = self.increaseScale(self.image, 2)
-        self.Rotated = 0
-    
+        if self.image_file:
+            self.image = pygame.image.load(self.image_file)
+            self.image = self.increaseScale(self.image, 2)
+            self.Rotated = 0
+        else:
+            print("No Image file")
     
     def increaseScale(self, image, ratio):
         new_width = int(ratio * (self.image.get_rect().size)[0])
