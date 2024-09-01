@@ -22,7 +22,7 @@ from Carcassonne_Game.Tile import Tile
 from pygameCarcassonneDir.pygameNextTile import nextTile
 from pygameCarcassonneDir.pygameFunctions import (
     playMove,
-    displayMove,
+    getAImove,
     drawGrid,
     diplayGameBoard,
     printScores,
@@ -177,7 +177,6 @@ def PlayGame(p1, p2):
                 
                 if player.isAIPlayer:
                     print("inside ai")
-                    firstRotation = True
                     if event.type == AI_MOVE_EVENT:
                         player, selectedMove = playMove(
                             NT,
@@ -192,6 +191,7 @@ def PlayGame(p1, p2):
                         isStartOfTurn = True
                         hasSomethingNew = True
                         isStartOfGame = False
+                        firstRotation = True
                         isGameOver = Carcassonne.isGameOver
                         if isGameOver:
                             pygame.time.set_timer(AI_MOVE_EVENT, 0)
@@ -205,6 +205,7 @@ def PlayGame(p1, p2):
                         if event.key == pygame.K_LEFT:
                             rotation = -1
                             newRotation = True
+                            print("RECIEVED")
                         elif event.key == pygame.K_RIGHT:
                             rotation = 1
                             newRotation = True
@@ -236,9 +237,9 @@ def PlayGame(p1, p2):
                             isStartOfGame = False
                             pygame.time.set_timer(AI_MOVE_EVENT, 1)
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
-                            print("check")
                             text = NT.displayTextClickedTile(X, Y)
                             print(text)
+                        # elif () is in AI SUGGESTION COORDINATE
                         else:
                             print(f"Position invalid: X: {X}, Y:{Y}")
   
@@ -267,6 +268,7 @@ def PlayGame(p1, p2):
                     NT.updateMeepleMenu(location_key, location_value, i, numberSelected)
                     i += 1
                 NT.rotate(NT.Rotated, newRotation)
+                diplayGameBoard(Carcassonne, DisplayScreen)
             # Else if the player is an AI player    
             else:
                 if not isGameOver:
@@ -275,28 +277,30 @@ def PlayGame(p1, p2):
 
         if isStartOfTurn:
             NT.updateMoveLabel(Carcassonne, selectedMove, isStartOfGame)
-            
+
         printScores(Carcassonne, DisplayScreen)
         printTilesLeft(Carcassonne, DisplayScreen)
 
         # DISPLAY PANEL
         if not isGameOver:
-            NT.coPilotButton()
+            NT.coPilotButton() # Writing
             NT.showNextTile(DisplayScreen, rotation, newRotation)
             NT.showInfos(DisplayScreen)
             NT.highlightPossibleMoves(DisplayScreen)
 
-            if player.name == "Human" and firstRotation:
-                displayMove(DisplayScreen,NT,player,Carcassonne,NT.nextTileIndex,isStartOfGame,ManualMove=None)
-            else: 
-                continue
-
         newRotation = False
         numberSelected = 0
-        firstRotation = False
 
-        diplayGameBoard(Carcassonne, DisplayScreen)
-        pygame.display.flip()
+        if firstRotation:
+            image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex)
+            firstRotation = False
+            diplayGameBoard(Carcassonne, DisplayScreen)
+            NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+            pygame.display.flip()
+        else:
+            diplayGameBoard(Carcassonne, DisplayScreen)
+            NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates)
+            pygame.display.flip()
 
         isStartOfTurn = False
         hasSomethingNew = False

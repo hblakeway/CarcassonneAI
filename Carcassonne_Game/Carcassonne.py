@@ -68,20 +68,6 @@ WIDTH = HEIGHT = 104  # image scaled x2
 
 XSHIFT = YSHIFT = MEEPLE_SIZE//2
 
-MEEPLE_LOCATION_DICT_AI = {
-    (0,1): [X_DEPTH - XSHIFT, HEIGHT//2 - YSHIFT],
-    (0,2): [WIDTH//4 -XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
-    (1,1): [WIDTH//2 - XSHIFT, Y_DEPTH - YSHIFT],
-    (1,2): [WIDTH//4- XSHIFT, Y_DEPTH-YSHIFT],
-    (2,1): [WIDTH - X_DEPTH - XSHIFT, HEIGHT//2 - YSHIFT],
-    (2,2): [3*(WIDTH//4) - XSHIFT, Y_DEPTH-YSHIFT],
-    (3,0): [3*(WIDTH//4) - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
-    (3,1): [WIDTH//2 - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
-    (3,2): [WIDTH//4 - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
-    (0,4): [WIDTH//2 - XSHIFT, HEIGHT//2- YSHIFT],
-    # exceptions
-    0: [3*(WIDTH//4),Y_DEPTH - YSHIFT]
-    }
             
 class CarcassonneState:
     """
@@ -759,148 +745,10 @@ class CarcassonneState:
         return rd.choice(availableMoves)
 
     
-    
-    
     def __repr__(self):
         #Str = str(self.TileIndexList) + "\n" + str(self.Board) + "\n" + str(self.BoardCities) + "\n" + str(self.BoardRoads) + "\n" + str(self.BoardMonasteries) + "\n" + str(self.BoardFarms)
         Str = str(self.TileIndexList)
         return Str
     
 
-    def aiSuggestion(self, DisplayScreen, Move = None):
-        """
-        Place a tile on the ai sugestion panel 
-        
-        Inputs:
-            - Move (a tuple):
-                - PlayingTileIndex: Index of tile being played
-                - X,Y: Position of tile on the board
-                - Rotation: Rotation of tile
-                - MeepleKey
-        """
-        
-        # display constants
-        Grid_Window_Width = DisplayScreen.Grid_Window_Width
-        Grid_Window_Height = DisplayScreen.Grid_Window_Height
-        Grid_Size = DisplayScreen.Grid_Size
-        Grid_border = DisplayScreen.Grid_border
-        Meeple_Size = DisplayScreen.Meeple_Size
-        GAME_DISPLAY = DisplayScreen.pygameDisplay
-
-        # split up 'Move' object
-        DisplayTileIndex = Move[0]
-        X,Y = Move[1], Move[2]
-        Rotation = Move[3]
-        MeepleKey = Move[4]
-
-        currentTile = Tile(DisplayTileIndex)
-
-        if not(MeepleKey is None):
-            feature = MeepleKey[0]
-            playerSymbol = MeepleKey[1]
-
-        # reverse orientation
-        Y=Y*-1
     
-        GAME_X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + X*Grid_Size + Grid_border
-        GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + Y*Grid_Size + Grid_border
-
-        # Tile = DisplayTileIndex
-        # load image
-        image = pygame.image.load('images/' + str(DisplayTileIndex) + '.png')
-
-        print(Move)
-    
-        if not(MeepleKey is None):
-            # add meeple info if one is played
-            MeepleLocation = currentTile.AvailableMeepleLocs[MeepleKey]
-            print(MeepleLocation)
-            currentTile.Meeple = [MeepleKey[0], MeepleLocation, self.playerSymbol]
-        #   meeple image
-            meepleColour = "blue" 
-            meepleImage = pygame.image.load('meeple_images/' + meepleColour + '.png')
-            meepleImage = pygame.transform.scale(meepleImage, (Meeple_Size, Meeple_Size))
-            X,Y = meepleCoordinatesAI(MeepleLocation, feature, MEEPLE_LOCATION_DICT_AI, DisplayTileIndex)
-            print(MeepleKey)
-            image.blit(meepleImage, (X,Y))
-        # add image        
-        image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
-        image = pygame.transform.rotate(image, Rotation)
-        GAME_DISPLAY.blit(image, (1100, 580))
-
-        # draw suggestion place rectangle
-        rect = (GAME_X,GAME_Y, Grid_Size, Grid_Size)
-        rect_surf = pygame.Surface(pygame.Rect(rect).size)
-        rect_surf.set_alpha(150)
-        pygame.draw.rect(rect_surf, WHITE, rect_surf.get_rect())
-        GAME_DISPLAY.blit(rect_surf, rect)
-
-        print("Game display ")
-
-
-def meepleCoordinatesAI(Location, Feature, DICT, TileIndex):
-        """
-        Get meeple coordinates from Meeple Tile Location
-        """
-        coords = DICT[Location]
-        
-        # exceptions 
-        if TileIndex in [8,9]:
-            if Location == (0,2):
-                coords = DICT[(3,0)]
-                
-        elif TileIndex == 14:
-            if Location == (2,1):
-                coords = DICT[(3,0)]
-                
-        elif TileIndex == 16:
-            if Location == (0,2):
-                coords = DICT[0]
-                
-        elif TileIndex == 17:
-            if Location == (2,2):
-                coords = DICT[(3,0)]
-                
-        elif TileIndex in [18,19]:
-            if Location == (0,2):
-                coords = DICT[(2,2)]
-            if Location == (2,2):
-                coords = DICT[(3,0)]
-                
-        elif TileIndex == 22:
-            if Location == (0,1):
-                coords = DICT[(0,4)]
-            if Location == (0,2):
-                coords = DICT[(1,1)]
-                
-        elif TileIndex == 23:
-            if Location == (0,2):
-                coords = DICT[(1,2)]
-            if Location == (1,2):
-                coords = DICT[(2,2)]
-            if Location == (2,2):
-                coords = DICT[(3,0)]
-            
-        X,Y = coords[0],coords[1]
-        return X,Y
-
-def placeColourTileAI(x, y, DisplayScreen, COLOUR):
-        # display constants
-        Grid_Window_Width = DisplayScreen.Grid_Window_Width
-        Grid_Window_Height = DisplayScreen.Grid_Window_Height
-        Grid_border = DisplayScreen.Grid_border
-        Grid_Size = DisplayScreen.Grid_Size
-        GAME_DISPLAY = DisplayScreen.pygameDisplay
-        
-        # reverse orientation
-        y = y*-1
-        
-        X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + x*Grid_Size + Grid_border
-        Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + y*Grid_Size + Grid_border
-        
-        # draw rectangle
-        rect = (X,Y, Grid_Size, Grid_Size)
-        rect_surf = pygame.Surface(pygame.Rect(rect).size)
-        rect_surf.set_alpha(150)
-        pygame.draw.rect(rect_surf, COLOUR, rect_surf.get_rect())
-        GAME_DISPLAY.blit(rect_surf, rect)

@@ -5,7 +5,7 @@ from pygameCarcassonneDir.pygameSettings import MEEPLE_LABEL_X, MEEPLE_LABEL_Y, 
 from pygameCarcassonneDir.pygameSettings import GRID_WINDOW_WIDTH, MENU_WIDTH, BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN, MEEPLE_CHOICE_HIGHLIGHT
 from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_MENU, BLACK, FONT_COPILOT
 
-from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates
+from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates, getAImove, placeColourTileAI
 from pygameCarcassonneDir.pygameLabel import Label
 
 
@@ -290,14 +290,7 @@ class nextTile:
         spcaebarLabel = Label(text, font_size=FONT_MEEPLE_MENU, background = WHITE)
         self.meepleLabel.blit(spcaebarLabel.text_surface, (20, 70))
     
-    def coPilotButton(self):
-        """
-        Button for users to press for AI Co pilot
-        """
-        text = "This move is ideal..." # Replace with visual of suggestion
-        suggestionLabel = Label(text, font_size=FONT_COPILOT, background = WHITE)
-        self.aiLabel.blit(suggestionLabel.text_surface, (20, 10))
-        
+
     def updateMeepleMenu(self, location_key, Location, NumberKey, numberSelected):
         
         Feature = location_key[0]
@@ -362,10 +355,48 @@ class nextTile:
         self.moveLabel.blit(moveLabel4.text_surface, (15, 75))
         self.moveLabel.blit(moveLabel5.text_surface, (15, 95))
         
-        
+    def coPilotButton(self):
+        """
+        Button for users to press for AI Co pilot
+        """
+        text = "This move is ideal..." # Replace with visual of suggestion
+        suggestionLabel = Label(text, font_size=FONT_COPILOT, background = WHITE)
+        self.aiLabel.blit(suggestionLabel.text_surface, (20, 10))
+    
+    
+    def placeAISuggestion(self, displayScreen, tileImage, tilePosition, locationImage, locationPosition):
+        GAME_DISPLAY = displayScreen.pygameDisplay
+        GAME_DISPLAY.blit(tileImage, tilePosition)
+        GAME_DISPLAY.blit(locationImage, locationPosition)   
             
-            
+    """
+    def showNextTile(self, displayScreen, rotation, newRotation):
+        GAME_DISPLAY = displayScreen.pygameDisplay
+        self.rotate(rotation, newRotation)
+        image_width = (self.image.get_rect().size)[0]
         
+        x1 = self.X - 25
+        x2 = self.X + image_width + 25
+        y1 = self.Y + 120
+        
+        left_color = right_color = BLACK
+        
+        # change colour if button clicked
+        if newRotation:
+            left_color = GREEN if rotation == -1 else BLACK 
+            right_color = GREEN if rotation == 1 else BLACK 
+        
+        # arrows
+        pygame.draw.polygon(GAME_DISPLAY, left_color, ((x1,y1), (x1,y1+32), (x1-25,y1+16)))
+        pygame.draw.polygon(GAME_DISPLAY, right_color, ((x2,y1), (x2,y1+32), (x2+25,y1+16)))
+        
+        # image and rotation symbols
+        GAME_DISPLAY.blit(self.leftRotImage, (self.X-60,self.Y+40))
+        GAME_DISPLAY.blit(self.rightRotImage, (image_width+self.X+10,self.Y+40))
+        GAME_DISPLAY.blit(self.image, (self.X,self.Y))
+        # GAME_DISPLAY.blit(self.image, (self.X + 25,self.Y - 120)) Adds another frame of the tile    
+    """        
+    
         
         
         
