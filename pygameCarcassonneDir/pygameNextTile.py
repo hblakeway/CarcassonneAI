@@ -101,12 +101,12 @@ class nextTile:
             # print(rectangle.topleft,rectangle.topright,rectangle.bottomleft, rectangle.bottomright)
     
     def resetImage(self):
-        if self.image_file:
+        if self.image_file is None:
+            return
+        else:
             self.image = pygame.image.load(self.image_file)
             self.image = self.increaseScale(self.image, 2)
             self.Rotated = 0
-        else:
-            print("No Image file")
     
     def increaseScale(self, image, ratio):
         new_width = int(ratio * (self.image.get_rect().size)[0])

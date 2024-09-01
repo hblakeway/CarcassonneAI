@@ -57,11 +57,11 @@ NumKeys = [
 # list of player available to choose from
 PLAYERS = [
     ("Human", HumanPlayer()),
-    ("GAME AI", MCTS_ES_Player(isTimeLimited=False, timeLimit=5)),
+    ("GAME AI", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
 ]
 
 PLAYER1 = [HumanPlayer()]
-PLAYER2 = [MCTS_ES_Player(isTimeLimited=False, timeLimit=5)]
+PLAYER2 = [MCTSPlayer(isTimeLimited=False, timeLimit=5)]
 
 AI_MOVE_EVENT = pygame.USEREVENT + 1
 AI_DELAY = 1000  # ms
@@ -224,6 +224,7 @@ def PlayGame(p1, p2):
 
                         if aiCopilotRect.collidepoint(mouseX, mouseY):
                             playAImove = True
+                            
                         elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
                             ManualMove = (NT.nextTileIndex, X, Y, rotation, NT.Meeple)
