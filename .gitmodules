@@ -1,0 +1,3 @@
+[submodule "py-dynrules"]
+	path = py-dynrules
+	url = https://github.com/hblakeway/py-dynrules.git
