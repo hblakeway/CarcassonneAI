@@ -57,7 +57,7 @@ NumKeys = [
 # list of player available to choose from
 PLAYERS = [
     ("Human", HumanPlayer()),
-    ("GAME AI", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
+    ("CoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
 ]
 
 PLAYER1 = [HumanPlayer()]
@@ -224,7 +224,7 @@ def PlayGame(p1, p2):
 
                         if aiCopilotRect.collidepoint(mouseX, mouseY):
                             playAImove = True
-                            
+
                         elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
                             ManualMove = (NT.nextTileIndex, X, Y, rotation, NT.Meeple)
