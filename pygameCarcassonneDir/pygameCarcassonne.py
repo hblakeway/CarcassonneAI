@@ -9,7 +9,7 @@ print(sys.path)
 print(os.getcwd())
 
 # import local scripts
-from player.Player import HumanPlayer, RandomPlayer
+from player.Player import HumanPlayer, RandomPlayer, AdaptivePlayer
 from player.MCTS_Player import MCTSPlayer
 from player.MCTS_RAVE_Player import MCTS_RAVEPlayer
 from player.MCTS_ES_Player import MCTS_ES_Player
@@ -57,11 +57,13 @@ NumKeys = [
 # list of player available to choose from
 PLAYERS = [
     ("Human", HumanPlayer()),
-    ("CoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
+    ("XCoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
+    ("YCoPilot", AdaptivePlayer())
 ]
 
 PLAYER1 = [HumanPlayer()]
 PLAYER2 = [MCTSPlayer(isTimeLimited=False, timeLimit=5)]
+PLAYER3 = [AdaptivePlayer()]
 
 AI_MOVE_EVENT = pygame.USEREVENT + 1
 AI_DELAY = 1000  # ms
@@ -82,7 +84,7 @@ def startMenu():
 
     def selectPlayer2(value, player):
         PLAYER2[0] = player
-
+    
     def start_the_game():
         p1 = PLAYER1[0]
         p2 = PLAYER2[0]

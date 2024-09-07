@@ -201,6 +201,24 @@ class RandomPlayer(Player):
             print(f'({self.name})   TimeTaken: 0 secs  -  Turn: {state.Turn}  -  Time:{time.strftime("%H:%M:%S", time.localtime())}')
         
         return state.getRandomMove().move
+
+class AdaptivePlayer(Player):
+    
+    def __init__(self, name = 'Adaptive'):
+        super().__init__()
+        self.name = name
+        self.fullName = "Adaptive Player"
+        self.family = "Adaptive"
+        
+    def ClonePlayer(self):
+        return self
+        
+    def chooseAction(self, state):
+        """
+        Make a move from adaptive rule script 
+        """
+        
+        return 
     
     
 
