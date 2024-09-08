@@ -160,6 +160,7 @@ def PlayGame(p1, p2):
     rotation = 0
     newRotation = False
     numberSelected = 0
+    aiCounter = 0
 
     if player.isAIPlayer:
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
@@ -206,11 +207,9 @@ def PlayGame(p1, p2):
 
                 else: # Player should be human here 
                     if event.type == pygame.KEYDOWN:
-                        print("KEY DOWN RECIEVED")
                         if event.key == pygame.K_LEFT:
                             rotation = -1
                             newRotation = True
-                            print("RECIEVED")
                         elif event.key == pygame.K_RIGHT:
                             rotation = 1
                             newRotation = True
@@ -262,8 +261,10 @@ def PlayGame(p1, p2):
 
         if playAImove:
             Carcassonne.move(selectedMove)
-            print(Carcassonne.TotalTiles)
-
+            # print(Carcassonne.TotalTiles)
+            aiCounter += 1 
+            print(f"Current AI Counter = {aiCounter}")
+            
             if Carcassonne.TotalTiles != 0:
                 player = Carcassonne.p2
                 NT = nextTile(Carcassonne, DisplayScreen)
@@ -276,6 +277,7 @@ def PlayGame(p1, p2):
             else:
                 Carcassonne.isGameOver
                 if isGameOver:
+                        print(f"Final AI Counter = {aiCounter}")
                         isStartOfTurn = False
                         hasSomethingNew = False
 
@@ -319,14 +321,14 @@ def PlayGame(p1, p2):
         numberSelected = 0
 
         if firstRotation:
-            selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex)
+            selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
             firstRotation = False
             diplayGameBoard(Carcassonne, DisplayScreen)
             NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
             pygame.display.flip()
         else:
             diplayGameBoard(Carcassonne, DisplayScreen)
-            NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates)
+            NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
             pygame.display.flip()
 
         isStartOfTurn = False
@@ -340,6 +342,9 @@ def PlayGame(p1, p2):
             )
             FinalMenu(Carcassonne)
 
+
+# Metrics
+# Count += 1 if Suggestion is used 
 
 if __name__ == "__main__":
     startMenu()

@@ -374,7 +374,6 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
     
     # Return if AI
     if player == Carcassonne.p2:
-        print("here")
         return player
    
      # get move
@@ -422,8 +421,7 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
         X,Y = meepleCoordinatesAI(MeepleLocation, feature, MEEPLE_LOCATION_DICT_AI, DisplayTileIndex)
         image.blit(meepleImage, (X,Y))
             
-    # add image    
-    print("do i get here")    
+    # add image      
     image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
     image = pygame.transform.rotate(image, Rotation)
     

@@ -183,9 +183,9 @@ class MCTSPlayer(Player):
             self.Backpropogate(node, reward)
 
             endTime = time.time()
-        print(
-            f"({self.name})   Time Taken: {round(endTime - startTime, 2)} secs  -  Turn: {root_state.Turn}"
-        )
+        #print(
+        #    f"({self.name})   Time Taken: {round(endTime - startTime, 2)} secs  -  Turn: {root_state.Turn}"
+        #)
 
     def MCTS_IterationLimit(self, root_node, root_state):
         startTime = time.time()
@@ -208,9 +208,9 @@ class MCTSPlayer(Player):
             self.Backpropogate(node, reward)
 
         endTime = time.time()
-        print(
-            f"({self.name})   TimeTaken: {round(endTime - startTime,3)} secs  -  Turn: {root_state.Turn}"
-        )
+        #(
+        #    f"({self.name})   TimeTaken: {round(endTime - startTime,3)} secs  -  Turn: {root_state.Turn}"
+        #)
         # append info to csv
         if self.logs:  # ADD TREE STRUCTURE LOGS
             data = {

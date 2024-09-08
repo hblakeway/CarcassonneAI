@@ -647,7 +647,7 @@ class CarcassonneState:
         # tile is the next tile in the deck
         TileIndex = self.nextTileIndex() if TileIndexOther is None else TileIndexOther
         if TileIndex == -1:
-            print(f'\n\n\n(Carcassonne.availableMoves)  No Moves!!  -  TileIndex: {TileIndex}  -  isGameOver: {self.isGameOver}  -  Deck Length: {len(self.deck)}  -  Game Turn: {self.Turn} \n\n\n')
+            # print(f'\n\n\n(Carcassonne.availableMoves)  No Moves!!  -  TileIndex: {TileIndex}  -  isGameOver: {self.isGameOver}  -  Deck Length: {len(self.deck)}  -  Game Turn: {self.Turn} \n\n\n')
             return [AvailableMove(-1,0,0,0,None)]  # game over
             
         # get the tile matching the index

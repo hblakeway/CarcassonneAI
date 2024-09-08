@@ -1,6 +1,13 @@
 import sys
 from dynrules import RuleSet, Rule, LearnSystem
 
+
+# Goal of the adaptive AI is to adapt to the players strategy
+# Example Cases:
+# If player is building a city up - make suggestion towards building that 
+# If player is build up a road - make suggestion towards building up that road 
+# 
+
 class CarcassonneAdaptive:
     """
     1. Average Time Strategy 
@@ -12,7 +19,7 @@ class CarcassonneAdaptive:
     # For player that is taking a long time to make decisions -> can probably cover in main game loop
     def help_time():
         """
-        If average time to take a move is > 10 seconds, suggest MCST
+        If average time to take a move is > 10 seconds, suggest MCST. 
         """
         
         return 
@@ -30,11 +37,6 @@ class CarcassonneAdaptive:
         If there is a spot that would block opponent feature by placing tile
         """
 
-    def feature_latch():
-        """
-        Place a tile strategically near an opponents feature to steal points 
-        """
-    
     def fields():
         """
         If fields is in opponents favour, check if there is a way to gain the field back
@@ -48,17 +50,10 @@ class CarcassonneAdaptive:
         """
 
         return 
-    
-    def build_features():
-        """
-        Suggest to add to city/road/field already building
-        """
-        return
 
-    
     def next_best_feature():
         """
-        If there is/isn't a significant strategy and no where to place, suggest (MCST). 
+        If there is/isn't a significant strategy or opponent blocking and no where to place, suggest (MCST). 
         """
     
 
@@ -68,30 +63,30 @@ class AdaptiveRuleSet (RuleSet):
    
 help_time = Rule(1)
 help_time.weight = 5
-help_time.code = " "
+help_time.code = CarcassonneAdaptive.help_time
 
 # Opponent Focussed 
 get_meeple_back = Rule(2)
 get_meeple_back.weight = 10 
+get_meeple_back.code = CarcassonneAdaptive.get_meeple_back
 
 feature_block = Rule(3)
 feature_block.weight = 10 
+feature_block.code = CarcassonneAdaptive.feature_block
 
-feature_latch = Rule(4)
-feature_latch.weight = 10 
+fields = Rule(7)
+fields.weight = 15
+fields.code = CarcassonneAdaptive.fields
 
 # Player Foccussed 
 enhance_strategy = Rule(5)
 enhance_strategy.weight = 15 
+enhance_strategy.code = CarcassonneAdaptive.enhance_strategy
 
-build_features = Rule(6)
-build_features.weight = 15 
+next_best_feature = Rule(6)
+next_best_feature.weight = 5
 
-next_best_feature = Rule(7)
-next_best_feature.weight = 15 
 
-fields = Rule(8)
-fields.weight = 15
 
 
 def run():
