@@ -27,6 +27,7 @@ from pygameCarcassonneDir.pygameFunctions import (
     diplayGameBoard,
     printScores,
     printTilesLeft,
+    Counter
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -134,6 +135,8 @@ def FinalMenu(Carcassonne):
     menu.add.button("Quit", pygame_menu.events.EXIT)
     menu.mainloop(surface)
 
+aiMove = Counter()
+
 # main game loop
 def PlayGame(p1, p2):
     global GAME_DISPLAY, CLOCK
@@ -160,7 +163,9 @@ def PlayGame(p1, p2):
     rotation = 0
     newRotation = False
     numberSelected = 0
-    aiCounter = 0
+
+    
+    
 
     if player.isAIPlayer:
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
@@ -175,6 +180,7 @@ def PlayGame(p1, p2):
             
             # If player quits 
             if event.type == pygame.QUIT:
+                print(f"Player Quit. Counter was up to {aiMove.get()}")
                 pygame.quit()
                 sys.exit()
             
@@ -262,8 +268,8 @@ def PlayGame(p1, p2):
         if playAImove:
             Carcassonne.move(selectedMove)
             # print(Carcassonne.TotalTiles)
-            aiCounter += 1 
-            print(f"Current AI Counter = {aiCounter}")
+            aiMove.add()
+            print(f"Current AI Counter = {aiMove.get()}")
             
             if Carcassonne.TotalTiles != 0:
                 player = Carcassonne.p2
@@ -277,7 +283,7 @@ def PlayGame(p1, p2):
             else:
                 Carcassonne.isGameOver
                 if isGameOver:
-                        print(f"Final AI Counter = {aiCounter}")
+                        print(f"Final AI Counter = {aiMove.get()}")
                         isStartOfTurn = False
                         hasSomethingNew = False
 
@@ -342,9 +348,6 @@ def PlayGame(p1, p2):
             )
             FinalMenu(Carcassonne)
 
-
-# Metrics
-# Count += 1 if Suggestion is used 
 
 if __name__ == "__main__":
     startMenu()

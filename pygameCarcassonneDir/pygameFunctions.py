@@ -62,6 +62,16 @@ MEEPLE_LOCATION_DICT_AI = {
 
 # pygame functions
 
+class Counter:
+    def __init__(self, initial_count=0):
+        self.count = initial_count
+
+    def add(self, value = 1):
+        self.count += value
+
+    def get(self):
+        return self.count
+
 def get_clicked_X(mouse_pos, displayScreen):
     Grid = displayScreen.Grid
     Grid_Size = displayScreen.Grid_Size
@@ -502,3 +512,5 @@ def placeColourTileAI(x, y, DisplayScreen, COLOUR):
         rect_surf.set_alpha(150)
         pygame.draw.rect(rect_surf, COLOUR, rect_surf.get_rect())
         GAME_DISPLAY.blit(rect_surf, rect)
+
+
