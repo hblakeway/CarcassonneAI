@@ -27,7 +27,9 @@ from pygameCarcassonneDir.pygameFunctions import (
     diplayGameBoard,
     printScores,
     printTilesLeft,
-    Counter
+    Counter,
+    playerStrategy,
+    opponentStrategy
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -136,6 +138,8 @@ def FinalMenu(Carcassonne):
     menu.mainloop(surface)
 
 aiMove = Counter()
+playerStrat = playerStrategy()
+opponentStrat = opponentStrategy()
 
 # main game loop
 def PlayGame(p1, p2):
@@ -164,9 +168,6 @@ def PlayGame(p1, p2):
     newRotation = False
     numberSelected = 0
 
-    
-    
-
     if player.isAIPlayer:
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
 
@@ -186,9 +187,7 @@ def PlayGame(p1, p2):
             
             # If the game is not over 
             if not isGameOver:
-                
                 if player.isAIPlayer:
-    
                     if event.type == AI_MOVE_EVENT:
                         player, selectedMove = playMove(
                             NT,
@@ -198,6 +197,7 @@ def PlayGame(p1, p2):
                             isStartOfGame,
                             ManualMove=None,
                         )
+                        opponentStrat.add(selectedMove)
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
                         isStartOfTurn = True
@@ -243,6 +243,11 @@ def PlayGame(p1, p2):
                                 isStartOfGame,
                                 ManualMove,
                             )
+                            #print(f"The selected move is: {selectedMove}")
+                            playerStrat.add(selectedMove)
+                            #print(playerStrat.get())
+                            #print(playerStrat.get_meeple_key())
+
                             NT = nextTile(Carcassonne, DisplayScreen)
                             NT.moveLabel = pygame.Surface(
                                 (DisplayScreen.Window_Width, 50)
@@ -266,6 +271,10 @@ def PlayGame(p1, p2):
         drawGrid(DisplayScreen)
 
         if playAImove:
+            # print(f"The selected move is: {selectedMove}")
+            playerStrat.add(selectedMove)
+            #print(playerStrat.get())
+            #print(playerStrat.get_meeple_key())
             Carcassonne.move(selectedMove)
             # print(Carcassonne.TotalTiles)
             aiMove.add()
@@ -341,6 +350,8 @@ def PlayGame(p1, p2):
         hasSomethingNew = False
 
         CLOCK.tick(60)
+        #print(f"Player Strategy: {playerStrat.get()}")
+        #print(f"Opponent Strategy: {opponentStrat.get()}")
 
         if isGameOver:
             print(

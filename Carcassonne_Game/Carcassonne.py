@@ -453,6 +453,8 @@ class CarcassonneState:
             self.EndGameRoutine()
             return
         
+        # print(f"The selected move is: {Move}")
+
         # split up 'Move' object
         PlayingTileIndex = Move[0]
         X,Y = Move[1], Move[2]

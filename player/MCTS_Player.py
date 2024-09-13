@@ -104,7 +104,7 @@ class MCTSPlayer(Player):
         if playerSymbol == 1:
             bestMove = sorted(root_node.child, key=lambda c: c.Q)[-1].Move
         else:
-            print(sorted(root_node.child, key=lambda c: c.Q)[0])
+            # print(sorted(root_node.child, key=lambda c: c.Q)[0])
             bestMove = sorted(root_node.child, key=lambda c: c.Q)[0].Move
 
         self.latest_root_node = root_node
@@ -250,25 +250,26 @@ class Node:
         self.draws = 0
         self.Q = 0  # Average reward
 
+    # Prints
     def __repr__(self):
         visits = 1 if self.visits == 0 else self.visits
         move = self.Move
         if self.Move:
-            print("\nMCTS best:")
+            # print("\nMCTS best:")
             tile_type = str(TILE_DESC_DICT[move.move[0]])
         else:
             tile_type = str(None)
             
         return (
-            f"["
-            f"\n  Tile type: {tile_type}"
-            f"\n  Wins: {round(self.wins, 1)}"
-            f"\n  Losses: {self.losses}"
-            f"\n  Draws: {self.draws}"
-            f"\n  Q: {round(self.Q, 3)}"
-            f"\n  Wins/Visits: {round(self.wins, 1)}/{self.visits} ({round(self.wins / visits, 3)})"
-            f"\n  Remaining Moves: {len(self.untried_moves)}"
-            f"\n]"
+            #f"["
+            #f"\n  Tile type: {tile_type}"
+            #f"\n  Wins: {round(self.wins, 1)}"
+            #f"\n  Losses: {self.losses}"
+            #f"\n  Draws: {self.draws}"
+            #f"\n  Q: {round(self.Q, 3)}"
+            #f"\n  Wins/Visits: {round(self.wins, 1)}/{self.visits} ({round(self.wins / visits, 3)})"
+            #f"\n  Remaining Moves: {len(self.untried_moves)}"
+            #f"\n]"
         )
 
 

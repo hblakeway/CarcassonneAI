@@ -72,6 +72,84 @@ class Counter:
     def get(self):
         return self.count
 
+class playerStrategy:
+    """
+        PlayingTileIndex = Move[0]
+        X,Y = Move[1], Move[2]
+        Rotation = Move[3]
+        MeepleKey = Move[4]
+    """
+    def __init__(self, player_strategy=None):
+        if player_strategy is None:
+            player_strategy = []
+
+        self.playerStrategy = player_strategy
+
+    def add(self, move=None):
+        if move is None:
+            move = []
+        self.playerStrategy.append(move)
+
+        self.playingTileIndex = move[0]
+        self.coordinateX = move[1]
+        self.coordinateY = move[2]
+        self.rotation = move[3]
+        self.meepleKey = move[4]
+
+    def get(self):
+        return self.playerStrategy
+
+    def get_playing_tile_index(self):
+        return self.playingTileIndex
+    
+    def get_coordx(self):
+        return self.coordinateX
+    
+    def get_coordy(self):
+        return self.coordinateyY
+    
+    def get_rotation(self):
+        return self.rotation
+    
+    def get_meeple_key(self):
+        return self.meepleKey
+
+class opponentStrategy:
+    def __init__(self, opponent_strategy=None):
+        if opponent_strategy is None:
+            opponent_strategy = []
+        self.opponentStrategy = opponent_strategy
+
+    def add(self, move=None):
+        if move is None:
+            move = []
+        self.opponentStrategy.append(move)
+        
+        self.playingTileIndex = move[0]
+        self.coordinateX = move[1]
+        self.coordinateY = move[2]
+        self.rotation = move[3]
+        self.meepleKey = move[4]
+
+    def get(self):
+        return self.playerStrategy
+
+    def get_playing_tile_index(self):
+        return self.playingTileIndex
+    
+    def get_coordx(self):
+        return self.coordinateX
+    
+    def get_coordy(self):
+        return self.coordinateyY
+    
+    def get_rotation(self):
+        return self.rotation
+    
+    def get_meeple_key(self):
+        return self.meepleKey
+
+    
 def get_clicked_X(mouse_pos, displayScreen):
     Grid = displayScreen.Grid
     Grid_Size = displayScreen.Grid_Size
@@ -167,7 +245,7 @@ def placeTile(Tile, Rotation, x, y, DisplayScreen):
     # load meeple
     TileMeeple = Tile.Meeple
     if not(TileMeeple is None):
-        print(TileMeeple)
+        #print(TileMeeple)
         Feature, Location = TileMeeple[0], TileMeeple[1]
         playerSymbol = TileMeeple[2]
         # meeple image
