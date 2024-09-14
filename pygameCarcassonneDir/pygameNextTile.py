@@ -175,8 +175,8 @@ class nextTile:
         Grid_Window_Height = displayScreen.Total_Grid_Height
         Menu_Width = displayScreen.Menu_Width
         width = (self.meepleLabel.get_rect().size)[0]
-        GAME_DISPLAY.blit(self.meepleLabel, (Grid_Window_Width + (Menu_Width - width)/2, 300))
-        GAME_DISPLAY.blit(self.moveLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 340))
+        GAME_DISPLAY.blit(self.meepleLabel, (Grid_Window_Width + (Menu_Width - width)/2, 300)) # Where to place meeple options
+        GAME_DISPLAY.blit(self.moveLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 310)) # Last tile etc. 
         GAME_DISPLAY.blit(self.aiLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 250))
         
         
@@ -362,7 +362,7 @@ class nextTile:
         """
         Button for users to press for AI Co pilot
         """
-        text = "This move is ideal..." # Replace with visual of suggestion
+        text = "" # Replace with visual of suggestion
         suggestionLabel = Label(text, font_size=FONT_COPILOT, background = WHITE)
         self.aiLabel.blit(suggestionLabel.text_surface, (20, 10))
     

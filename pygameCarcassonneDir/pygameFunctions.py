@@ -106,7 +106,7 @@ class playerStrategy:
         return self.coordinateX
     
     def get_coordy(self):
-        return self.coordinateyY
+        return self.coordinateY
     
     def get_rotation(self):
         return self.rotation
@@ -141,7 +141,7 @@ class opponentStrategy:
         return self.coordinateX
     
     def get_coordy(self):
-        return self.coordinateyY
+        return self.coordinateY
     
     def get_rotation(self):
         return self.rotation
@@ -508,19 +508,22 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
         meepleImage = pygame.transform.scale(meepleImage, (Meeple_Size, Meeple_Size))
         X,Y = meepleCoordinatesAI(MeepleLocation, feature, MEEPLE_LOCATION_DICT_AI, DisplayTileIndex)
         image.blit(meepleImage, (X,Y))
+
+    # Make image bigger 
+    size = Grid_Size + 60
             
     # add image      
-    image = pygame.transform.scale(image, (Grid_Size,Grid_Size))
+    image = pygame.transform.scale(image, (size,size))
     image = pygame.transform.rotate(image, Rotation)
     
     # draw suggestion place rectangle
-    rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size)
+    rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size) # White spot size
     rect_surf = pygame.Surface(pygame.Rect(rect_coordinates).size)
     rect_surf.set_alpha(150)
     pygame.draw.rect(rect_surf, WHITE, rect_surf.get_rect())
 
     # Draw on screen
-    image_coordinate  = (1100, 580)
+    image_coordinate  = (1070, 540)
 
     return(selectedMove, image, image_coordinate, rect_surf, rect_coordinates)
 
