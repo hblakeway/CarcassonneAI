@@ -22,6 +22,7 @@ class Player:
         self.logfile = None
         self.fullName = "Definitely has no name"
         self.isAIPlayer = True
+        self.isAdaptive = False
         self.family = None
         self.opponent = None
         
@@ -165,6 +166,7 @@ class HumanPlayer(Player):
         self.name = name
         self.fullName = "Human Player"
         self.isAIPlayer = False
+        self.isAdaptive = False
         self.family = "Human"
     
     def chooseAction(self, state, TileIndex):
@@ -209,16 +211,24 @@ class AdaptivePlayer(Player):
         self.name = name
         self.fullName = "Adaptive Player"
         self.family = "Adaptive"
+        self.isAIPlayer = False
+        self.isAdaptive = True 
         
     def ClonePlayer(self):
         return self
         
-    def chooseAction(self, state):
+    def chooseAction(self, state, TileIndex):
         """
-        Make a move from adaptive rule script 
+        state - The current state of the game board
         """
+        positions = state.availableMoves(TileIndex)
         
-        return 
+        # user input
+        while True:
+            print(f'Available moves: \n {positions} \n')
+            choice = int(input("Input your choice:"))
+            if choice in positions:
+                return choice 
     
     
 

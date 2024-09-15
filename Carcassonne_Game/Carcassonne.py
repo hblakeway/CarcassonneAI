@@ -669,6 +669,7 @@ class CarcassonneState:
             allAvailableMoves = self.availableMoves()
         
         # list of all moves
+        # print(allAvailableMoves)
         return allAvailableMoves
     
     

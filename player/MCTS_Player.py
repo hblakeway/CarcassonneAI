@@ -21,6 +21,7 @@ class MCTSPlayer(Player):
         logfile=None,
         name="MCTS_V",
         rollouts=1,
+        identifier="PlayerType",
     ):
         super().__init__()
         self.iterations = iterations
@@ -38,6 +39,7 @@ class MCTSPlayer(Player):
         self.logfile = logfile
         assert rollouts >= 1, "Rollouts is wrongly assigned. Must be >= 1"
         self.rollouts = rollouts
+        self.identifier = identifier  # Initialize identifier
 
         self.latest_root_node = None  # added
         self.nodes_dict = {}  # added
@@ -70,6 +72,7 @@ class MCTSPlayer(Player):
             logfile=self.logfile,
             name=self.name,
             rollouts=self.rollouts,
+            identifier=self.identifier,
         )
         return Clone
 

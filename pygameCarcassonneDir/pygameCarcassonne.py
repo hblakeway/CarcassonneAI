@@ -32,6 +32,10 @@ from pygameCarcassonneDir.pygameFunctions import (
     opponentStrategy
 )
 
+from pygameCarcassonneDir.pygameAdaptive import (
+    enhance_strategy
+)
+
 from pygameCarcassonneDir.pygameSettings import (
     BLACK,
     WHITE,
@@ -60,13 +64,13 @@ NumKeys = [
 # list of player available to choose from
 PLAYERS = [
     ("Human", HumanPlayer()),
-    ("XCoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5)),
-    ("YCoPilot", AdaptivePlayer())
+    ("XCoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5, identifier="XCoPilot")),
+    ("YCoPilot", MCTSPlayer(isTimeLimited=False, timeLimit=5, identifier="YCoPilot"))
 ]
 
 PLAYER1 = [HumanPlayer()]
 PLAYER2 = [MCTSPlayer(isTimeLimited=False, timeLimit=5)]
-PLAYER3 = [AdaptivePlayer()]
+PLAYER3 = [MCTSPlayer(isTimeLimited=False, timeLimit=5)]
 
 AI_MOVE_EVENT = pygame.USEREVENT + 1
 AI_DELAY = 1000  # ms
@@ -168,6 +172,12 @@ def PlayGame(p1, p2):
     newRotation = False
     numberSelected = 0
 
+
+    if p2.identifier == "YCoPilot":
+        print("Player 2 is YCoPilot")
+    elif p2.identifier == "XCoPilot":
+        print("Player 2 is XCoPilot")
+
     if player.isAIPlayer:
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
 
@@ -243,10 +253,9 @@ def PlayGame(p1, p2):
                                 isStartOfGame,
                                 ManualMove,
                             )
-                            #print(f"The selected move is: {selectedMove}")
+                            
                             playerStrat.add(selectedMove)
-                            #print(playerStrat.get())
-                            #print(playerStrat.get_meeple_key())
+                            # print(playerStrat.get())
 
                             NT = nextTile(Carcassonne, DisplayScreen)
                             NT.moveLabel = pygame.Surface(
@@ -256,6 +265,7 @@ def PlayGame(p1, p2):
                             hasSomethingNew = True
                             isStartOfGame = False
                             pygame.time.set_timer(AI_MOVE_EVENT, 1)
+                            
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
                             text = NT.displayTextClickedTile(X, Y)
                             print(text)
@@ -335,16 +345,32 @@ def PlayGame(p1, p2):
         newRotation = False
         numberSelected = 0
 
-        if firstRotation:
-            selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
-            firstRotation = False
-            diplayGameBoard(Carcassonne, DisplayScreen)
-            NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
-            pygame.display.flip()
-        else:
-            diplayGameBoard(Carcassonne, DisplayScreen)
-            NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
-            pygame.display.flip()
+        player_strategy = playerStrat.get()
+
+        if p2.identifier == "XCoPilot":
+            if firstRotation:
+                selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
+                firstRotation = False
+                diplayGameBoard(Carcassonne, DisplayScreen)
+                NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+                pygame.display.flip()
+            else:
+                diplayGameBoard(Carcassonne, DisplayScreen)
+                NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
+                pygame.display.flip()
+        else: # Player should be y copilot 
+            if firstRotation:
+                enhance_strategy(player_strategy)
+                # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
+                firstRotation = False
+                diplayGameBoard(Carcassonne, DisplayScreen)
+                # NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+                pygame.display.flip()
+            else:
+                # selectedMove, image, ima
+                diplayGameBoard(Carcassonne, DisplayScreen)
+                # NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
+                pygame.display.flip()
 
         isStartOfTurn = False
         hasSomethingNew = False
