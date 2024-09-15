@@ -633,8 +633,6 @@ class CarcassonneState:
         
         return MatchingFeature
     
-    
-    
         
     def availableMoves(self, TilesOnly = False, TileIndexOther = None):
         """
@@ -729,7 +727,7 @@ class CarcassonneState:
                         # monastery options
                         if EvaluatedTile.HasMonastery:
                             availableMoves.append( AvailableMove(TileIndex,X,Y,Rotation,("Monastery",0)) )
-            #print(f'(Carcassonne.availableMovesForRotation) Available Moves: {availableMoves}')
+            # print(f'(Carcassonne.availableMovesForRotation) Available Moves: {availableMoves}')
         
         return availableMoves 
     

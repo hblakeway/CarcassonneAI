@@ -1,10 +1,12 @@
 import sys
 from player.Player import Player
 from collections import Counter as c
+import itertools as it
 from dynrules import RuleSet, Rule, LearnSystem
+from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, AvailableMove
 
 from Carcassonne_Game.Carcassonne import (
-    CarcassonneState, 
+    CarcassonneState,  
 
 )
 
@@ -46,16 +48,17 @@ def leastPlayerStrategy():
 # If player is building a city up - make suggestion towards building that 
 # If player is build up a road - make suggestion towards building up that road 
 
-def enhance_strategy(player_strategy):
+def enhance_strategy(Carcassonne, player_strategy):
     """
     Check if player has a signficant strategy (Meeple on Road/ Meeple on City / Meeple on Monastry / Meple on Field).
     """
 
-    # Have current tile 
+    # remaining meeples
+    meeples = Carcassonne.Meeples
+    p1_meeples = meeples[0]
+    print (p1_meeples)
 
-    # Have all the available spots
-    # var = CarcassonneState.availableMoves
-
+    # Features which the player has placed meeples on 
     meeplePlacements = []
     for i in player_strategy:
         if i[4] is not None:
@@ -65,18 +68,34 @@ def enhance_strategy(player_strategy):
 
     # If there is a majority stratgey check if you can place a meeple on the same feature 
     player_strategy = strategy(meeplePlacements)
-    if player_strategy is not None:
+    if player_strategy is not None and p1_meeples > 0:
         meepleDictionary = {
-            "R": "roads",
-            "C": "cities",
-            "G": "farms",
-            "Monastery": "monastries"
+            "R": "Road",
+            "C": "City",
+            "G": "Farm",
+            "Monastery": "Monastery"
         }
         print(f"Player is building lots of {meepleDictionary[player_strategy]}")
 
-    # If not rule is false 
+        availableMoves = Carcassonne.availableMoves()
 
-    return
+        options = []
+        for i in availableMoves:
+            MeepleInfo = str(i.MeepleInfo)
+            # print(f"Available Move is {i}")
+            # print(f"That meeple infor should equal = {MeepleInfo}")
+            # print(f"The player strategy is {player_strategy}")
+
+            if player_strategy in MeepleInfo:
+                options.append(i)
+        
+        for i in options:
+            print(i)
+    else: 
+        return False
+
+
+    return True 
 
 def complete_feature():
     """
@@ -84,8 +103,6 @@ def complete_feature():
     """
 
     "1. Can the tile complete a feature "
-
-    # Takes available spots
 
     # Checks if any of those spots are connecting to an unfinished meeple feature
 

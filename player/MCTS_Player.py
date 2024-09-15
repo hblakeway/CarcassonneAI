@@ -91,6 +91,7 @@ class MCTSPlayer(Player):
         Assumes 2 alternating players (player 1 starts), with games results in the range [0, 1]
         """
         # Player 1 = 1, Player 2 = 2 (Player 2 wants to the game to be a loss)
+        print(root_state)
         playerSymbol = root_state.playerSymbol
         self.latest_root_node = None  # added
 
