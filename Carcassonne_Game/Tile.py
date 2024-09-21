@@ -43,6 +43,7 @@ class Tile:
         self.TileFarmsIndex = [[None,None,None],[None,None,None],[None,None,None],[None,None,None]]
         self.Rotation = 0
         self.Meeple = None  # [MeepleFeature, (MeepleLocation), PlayerNumber]
+        self.coordinates = None
         
         # image location
         self.image = "images/" + str(self.TileIndex) + ".png"
@@ -98,7 +99,10 @@ class Tile:
     def TileInfo(self):
         return "Tile Index:" + str(self.TileIndex) + " Properties: " + str(self.Properties) + " Rotation: " + str(self.Rotation) + " Meeple: " + str(self.Meeple)
         
-        
+
+    def tile_coordinate(self, x, y):
+        self.coordinates = (x, y)
+    
     # copy the tile
     def CloneTile(self):
         Clone = Tile(self.TileIndex, RunInit = False)

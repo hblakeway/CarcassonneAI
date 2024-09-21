@@ -1,23 +1,26 @@
 from Carcassonne_Game.GameFeatures import City
 
 
-def cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey):
+def cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move):
     # for each side of the tile with disconnected cities, eg. tile with opposite cites and farm in-between (Tile11)
     for i in range(len(PlayingTile.CityOpenings)):
+        # print(f"City Connections {i}")
+        # print(f"Play tile {PlayingTile}")
         # look at each city opening sets
         # Examples: Tile0 = [[0,1,2,3]] (one city set)
         #           Tile11 = [[1], [3]] (two separate city sets)
         CityOpenings = PlayingTile.CityOpenings[i]
+        # print(f"City Opening for i {i}")
         
         AddedMeeples = self.AddMeeple(MeepleUpdate, MeepleKey, "C", i)
         
         OpeningsQuantity = len(CityOpenings)
         # if tile only has one city opening
         if OpeningsQuantity == 1:
-            ClosingCities = cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples)
+            ClosingCities = cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples, Move)
         # if tile has more than 1 city opening
         else:
-            ClosingCities = cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, OpeningsQuantity, Surroundings, AddedMeeples)
+            ClosingCities = cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, OpeningsQuantity, Surroundings, AddedMeeples, Move)
         
     return ClosingCities
 
@@ -44,7 +47,7 @@ def cityConnectionIndex(self, Surroundings, CitySide):
     return MatchingCityIndex
 
 
-def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples):
+def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples, Move):
     
     CitySide = CityOpenings[0]  # 0,1,2 or 3
     
@@ -52,10 +55,13 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
     #    CitySide = (CitySide+2) % 4
     
     # check surrounding tile on the same side as city opening
+
     # treated as new city
     if Surroundings[CitySide] is None:
         NextCityIndex = len(self.BoardCities)  # index is incremented
-        self.BoardCities[NextCityIndex] = City(NextCityIndex,1,1,AddedMeeples)  # add new city to board
+        #print("I should be here on first tile")
+        #print(Move)
+        self.BoardCities[NextCityIndex] = City(NextCityIndex,1,1,AddedMeeples, Move)  # add new city to board
         PlayingTile.TileCitiesIndex[CitySide] = NextCityIndex  # update tile city index (TCI = [Index1, Index2, Index3, Index4])
                 
     # connected to pre-existing city    
@@ -66,7 +72,7 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
         # number of city openings decreases by 1
         # all tiles with one city opening have a value of 1
         # update Meeples
-        MatchingCity.Update(-1,1,AddedMeeples)
+        MatchingCity.Update(-1,1,AddedMeeples, Move)
         
         # check if city is closed
         if MatchingCity.Openings == 0:
@@ -78,7 +84,7 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
     return ClosingCities
 
 
-def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, OpeningsQuantity, Surroundings, AddedMeeples):
+def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, OpeningsQuantity, Surroundings, AddedMeeples, Move):
     ConnectedCities = []
             
     # iterate for all sides with city opening
@@ -97,7 +103,7 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
     if ConnectedCities == []:
         # create a new city
         NextCityIndex = len(self.BoardCities)
-        self.BoardCities[NextCityIndex] = City(NextCityIndex,PlayingTile.CityValues,OpeningsQuantity,AddedMeeples)
+        self.BoardCities[NextCityIndex] = City(NextCityIndex,PlayingTile.CityValues,OpeningsQuantity,AddedMeeples, Move)
         for CitySide in CityOpenings:
             PlayingTile.TileCitiesIndex[CitySide] = NextCityIndex
             
@@ -112,22 +118,23 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
             # openings part of the same city
             if CombinedCityIndex == MatchingCityIndex:
                 if AlreadyMatched:
-                    self.BoardCities[CombinedCityIndex].Update(-1,0,[0,0]) 
+                    self.BoardCities[CombinedCityIndex].Update(-1,0,[0,0], Move) 
                 else:
                     #print(f'(CityUtils.cityMultipleOpenings) {self.BoardCities[CombinedCityIndex]}')
                     #print(f'(CityUtils.cityMultipleOpenings) {PlayingTile}')
                     
-                    self.BoardCities[CombinedCityIndex].Update(OpeningsToAdd-1,PlayingTile.CityValues,AddedMeeples)
+                    self.BoardCities[CombinedCityIndex].Update(OpeningsToAdd-1,PlayingTile.CityValues,AddedMeeples,Move)
                     AlreadyMatched = True
                     
             # openings part of different cities
             else:
                 MatchingCity = self.BoardCities[MatchingCityIndex]
                 MatchingCity.Pointer = CombinedCityIndex
-                self.BoardCities[CombinedCityIndex].Update(MatchingCity.Openings-1,MatchingCity.Value,MatchingCity.Meeples)
+                self.BoardCities[CombinedCityIndex].Update(MatchingCity.Openings-1,MatchingCity.Value,MatchingCity.Meeples,MatchingCity.tileList)
                 MatchingCity.Openings = 0
                 MatchingCity.Value = 0
                 MatchingCity.Meeples = [0,0]
+                MatchingCity.tileList = []
                         
         # update Tile City Index
         for CitySide in CityOpenings:

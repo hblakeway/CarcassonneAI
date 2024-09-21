@@ -1,7 +1,7 @@
 from Carcassonne_Game.GameFeatures import Road
 
 
-def roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey):
+def roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey, Move):
     
     for i in range(len(PlayingTile.RoadOpenings)):
         RoadOpenings = PlayingTile.RoadOpenings[i]
@@ -9,31 +9,31 @@ def roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate,
         OpeningsQuantity = len(RoadOpenings) 
         
         if OpeningsQuantity == 1:
-            ClosingRoads = oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surroundings, AddedMeeples)
+            ClosingRoads = oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surroundings, AddedMeeples, Move)
         else:
-            ClosingRoads = multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, OpeningsQuantity, Surroundings, AddedMeeples)
+            ClosingRoads = multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, OpeningsQuantity, Surroundings, AddedMeeples, Move)
         
     return ClosingRoads
 
-def oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surroundings, AddedMeeples):
+def oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surroundings, AddedMeeples, Move):
 
     RoadSide = RoadOpenings[0]
     if Surroundings[RoadSide] is None:
         NextRoadIndex = len(self.BoardRoads)
-        self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,1,AddedMeeples)
+        self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,1,AddedMeeples, Move)
         PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
     else:
         MatchingRoadIndex = Surroundings[RoadSide].TileRoadsIndex[self.MatchingSide[RoadSide]]
         while self.BoardRoads[MatchingRoadIndex].Pointer != self.BoardRoads[MatchingRoadIndex].ID:                            
             MatchingRoadIndex = self.BoardRoads[MatchingRoadIndex].Pointer
         MatchingRoad = self.BoardRoads[MatchingRoadIndex]
-        MatchingRoad.Update(-1,1,AddedMeeples)
+        MatchingRoad.Update(-1,1,AddedMeeples, Move)
         if MatchingRoad.Openings == 0:
             ClosingRoads.append(MatchingRoadIndex)   
             
     return ClosingRoads
             
-def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, OpeningsQuantity, Surroundings, AddedMeeples):
+def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, OpeningsQuantity, Surroundings, AddedMeeples, Move):
     
     ConnectedRoads = []
     
@@ -47,7 +47,7 @@ def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, Openi
             ConnectedRoads.append([MatchingRoadIndex,RoadSide])
     if ConnectedRoads == []:
         NextRoadIndex = len(self.BoardRoads)
-        self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,OpeningsQuantity,AddedMeeples)
+        self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,OpeningsQuantity,AddedMeeples, Move)
         for RoadSide in RoadOpenings:
             PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
             
@@ -58,17 +58,18 @@ def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, Openi
         for MatchingRoadIndex,RoadSide in ConnectedRoads:                            
             if CombinedRoadIndex == MatchingRoadIndex:
                 if AlreadyMatched:
-                    self.BoardRoads[CombinedRoadIndex].Update(-1,0,[0,0])
+                    self.BoardRoads[CombinedRoadIndex].Update(-1,0,[0,0],Move)
                 else:
-                    self.BoardRoads[CombinedRoadIndex].Update(OpeningsToAdd-1,1,AddedMeeples)
+                    self.BoardRoads[CombinedRoadIndex].Update(OpeningsToAdd-1,1,AddedMeeples, Move)
                     AlreadyMatched = True
             else:
                 MatchingRoad = self.BoardRoads[MatchingRoadIndex]
                 MatchingRoad.Pointer = CombinedRoadIndex
-                self.BoardRoads[CombinedRoadIndex].Update(MatchingRoad.Openings-1,MatchingRoad.Value,MatchingRoad.Meeples)
+                self.BoardRoads[CombinedRoadIndex].Update(MatchingRoad.Openings-1,MatchingRoad.Value,MatchingRoad.Meeples, MatchingRoad.tileList)
                 MatchingRoad.Openings = 0
                 MatchingRoad.Value = 0
                 MatchingRoad.Meeples = [0,0]
+                MatchingRoad.tileList = []
         for RoadSide in RoadOpenings:
             PlayingTile.TileRoadsIndex[RoadSide] = CombinedRoadIndex
         if self.BoardRoads[CombinedRoadIndex].Openings == 0:

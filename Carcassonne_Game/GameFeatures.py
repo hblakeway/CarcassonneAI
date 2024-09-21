@@ -5,30 +5,38 @@ Create objects for each of the features in the game:
     - Farms
     - Roads
 """
-    
-
 class Monastery:
-    def __init__(self, ID = None, Owner = None):
+    def __init__(self, ID = None, Owner = None, playTile=None):
+        self.tileList = []
+
         if ID is not None:
             self.ID = ID
             self.Owner = Owner
             self.Value = 1
+            self.playTile = playTile
     
     def CloneMonastery(self):
         Clone = Monastery()
         Clone.ID = self.ID
         Clone.Owner = self.Owner
         Clone.Value = self.Value
+        Clone.playTile = self.playTile
+        Clone.tileList = [tile for tile in self.tileList] 
         return Clone
     
+    def Update(self, playTile=None):
+        self.tileList.append(playTile)
+    
     def __repr__(self):
-        String = "Monastery ID"+str(self.ID)+"Value"+str(self.Value)+"Owner"+str(self.Owner)
+        String = "Monastery ID: "+str(self.ID)+" Value: "+str(self.Value)+" Owner: "+str(self.Owner)+" Tiles: "+str(self.tileList)
         return String 
 
         
     
 class City:
-    def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0]):
+    def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0], playTile=None):
+        self.tileList = [(16, 0, 0, 0, None)]
+
         if ID is not None:
             self.ID = ID
             self.Pointer = ID
@@ -36,6 +44,8 @@ class City:
             self.Value = Value
             self.Meeples = Meeples
             self.ClosedFlag = False
+            self.playTile = playTile
+            
         
     def CloneCity(self):
         Clone = City()
@@ -45,26 +55,33 @@ class City:
         Clone.Value = self.Value
         Clone.Meeples = [x for x in self.Meeples]
         Clone.ClosedFlag = self.ClosedFlag
+        Clone.playTile = self.playTile
+        Clone.tileList = [tile for tile in self.tileList] 
         return Clone
         
-    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0]):
+    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0], playTile=None):
         self.Openings += OpeningsChange
         self.Value += ValueAdded
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
+        self.tileList.append(playTile)
         
     def __repr__(self):
-        String = "City ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"Clsd?"+str(self.ClosedFlag)
+        #String = "City ID"+str(self.ID)+"Pointer"+str(self.Pointer)+"Value"+str(self.Value)+"Openings"+str(self.Openings)+"Meeples" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"Closed?"+str(self.ClosedFlag)+"Tiles"+str(self.tileList)
+        String = "City ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(self.tileList)
         return String
-    
+      
 
 class Farm:
-    def __init__(self,ID = None, Meeples=[0,0]):
+    def __init__(self,ID = None, Meeples=[0,0], playTile=None):
+        self.tileList = []
+
         if ID is not None:
             self.ID = ID
             self.Pointer = ID
             self.CityIndexes = set()
             self.Meeples = Meeples
+            self.playTile = playTile
     
     def CloneFarm(self):
         Clone = Farm()
@@ -72,28 +89,39 @@ class Farm:
         Clone.Pointer = self.Pointer
         Clone.CityIndexes = set([x for x in self.CityIndexes])
         Clone.Meeples = [x for x in self.Meeples]
+        Clone.playTile = self.playTile
+        Clone.tileList = [tile for tile in self.tileList] 
         return Clone
     
-    def Update(self, NewCityIndexes = [], MeeplesAdded = [0,0]):
+    def Update(self, NewCityIndexes = [], MeeplesAdded = [0,0], playTile=None):
         for CityIndex in NewCityIndexes:
             self.CityIndexes.add(CityIndex)
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
+        self.tileList.append(playTile)
+        
+
         
     def __repr__(self):
-        String = "Farm ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"CI"+str(self.CityIndexes)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
+        #String = "Farm ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"CI"+str(self.CityIndexes)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
+        seen = set()
+        cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
+        String = "Farm ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(cleaned_tileList)
         return String
     
 
     
 class Road:
-    def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0]):
+    def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0], playTile=None):
+        self.tileList = [(16, 0, 0, 0, None)]
+
         if ID is not None:
             self.ID = ID
             self.Pointer = ID
             self.Openings = Openings
             self.Value = Value
             self.Meeples = Meeples
+            self.playTile = playTile
     
     def CloneRoad(self):
         Clone = Road()
@@ -102,14 +130,18 @@ class Road:
         Clone.Openings = self.Openings
         Clone.Value = self.Value
         Clone.Meeples = [x for x in self.Meeples]
+        Clone.playTile = self.playTile
+        Clone.tileList = [tile for tile in self.tileList] 
         return Clone
     
-    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0]):
+    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0], playTile=None):
         self.Openings += OpeningsChange
         self.Value += ValueAdded
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
+        self.tileList.append(playTile)
         
     def __repr__(self):
-        String = "Road ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
+        #String = "Road ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
+        String = "Road ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(self.tileList)
         return String

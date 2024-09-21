@@ -18,6 +18,7 @@ from player.Star2_5_Player import Star2_5
 
 from Carcassonne_Game.Carcassonne import CarcassonneState
 from Carcassonne_Game.Tile import Tile
+from Carcassonne_Game.GameFeatures import Monastery, City, Road, Farm
 
 from pygameCarcassonneDir.pygameNextTile import nextTile
 from pygameCarcassonneDir.pygameFunctions import (
@@ -33,7 +34,8 @@ from pygameCarcassonneDir.pygameFunctions import (
 )
 
 from pygameCarcassonneDir.pygameAdaptive import (
-    enhance_strategy
+    enhance_strategy,
+    complete_feature
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -208,6 +210,7 @@ def PlayGame(p1, p2):
                             ManualMove=None,
                         )
                         opponentStrat.add(selectedMove)
+                        print(selectedMove)
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
                         isStartOfTurn = True
@@ -255,6 +258,7 @@ def PlayGame(p1, p2):
                             )
                             
                             playerStrat.add(selectedMove)
+                            print(selectedMove)
                             # print(playerStrat.get())
 
                             NT = nextTile(Carcassonne, DisplayScreen)
@@ -268,7 +272,7 @@ def PlayGame(p1, p2):
                             
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
                             text = NT.displayTextClickedTile(X, Y)
-                            print(text)
+                            print(f"hello {text}")
                         else:
                             print(f"Position invalid: X: {X}, Y:{Y}")
   
@@ -286,6 +290,7 @@ def PlayGame(p1, p2):
             #print(playerStrat.get())
             #print(playerStrat.get_meeple_key())
             Carcassonne.move(selectedMove)
+            print(selectedMove)
             # print(Carcassonne.TotalTiles)
             aiMove.add()
             print(f"Current AI Counter = {aiMove.get()}")
@@ -349,6 +354,14 @@ def PlayGame(p1, p2):
 
         if p2.identifier == "XCoPilot":
             if firstRotation:
+                #if p1:
+                print(f"Board Cities = {Carcassonne.BoardCities}")
+                print(f"Board Roads = {Carcassonne.BoardRoads}")
+                print(f"Board Farms = {Carcassonne.BoardFarms}")
+                print(f"Board Monastries = {Carcassonne.BoardMonasteries}")
+                    #for x in Carcassonne.BoardCities:
+                    #    print(x)
+
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
@@ -361,6 +374,7 @@ def PlayGame(p1, p2):
         else: # Player should be y copilot 
             if firstRotation:
                 enhance_strategy(Carcassonne, player_strategy)
+                #complete_feature()
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
@@ -378,6 +392,8 @@ def PlayGame(p1, p2):
         CLOCK.tick(60)
         #print(f"Player Strategy: {playerStrat.get()}")
         #print(f"Opponent Strategy: {opponentStrat.get()}")
+
+        
 
         if isGameOver:
             print(

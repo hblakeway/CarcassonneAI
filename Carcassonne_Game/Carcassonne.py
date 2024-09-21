@@ -164,7 +164,7 @@ class CarcassonneState:
             ]
         
         
-        
+
         if RunInit:
             # Number of tiles per TileIndex, i.e. 1 tile for 0th tile, 3 for 1st tile, etc.
             
@@ -193,7 +193,20 @@ class CarcassonneState:
             
             # each game starts with the same tile (Tile16) being placed
             # PlayingTileIndex=16, X,Y = 0,0, Rotation=0, MeepleKey=None
-            self.move([16, 0, 0, 0, None])
+            #Move = (16, 0, 0, 0, None)
+            #PlayingTileIndex = Move[0]
+            #X,Y = Move[1], Move[2]
+            #Rotation = Move[3]
+            #MeepleKey = Move[4]
+            self.move((16, 0, 0, 0, None))
+            
+            #print(self.BoardCities)
+
+            #self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey, Move)
+            #self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+            #self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+            #self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+
             
             # code for running tests by arranging the order of the first few tiles
             """
@@ -285,9 +298,10 @@ class CarcassonneState:
             self.Scores[AffectedMonastery.Owner] += 9  # award points to player
             self.FeatureScores[AffectedMonastery.Owner][2] += 9 # update monastery feature score
             AffectedMonastery.Value = 0  
+
     
     
-    def checkMonasteryCompleteness(self, X,Y, SurroundingSpots, MeepleUpdate, MeepleKey=None ):    
+    def checkMonasteryCompleteness(self, X,Y, SurroundingSpots, MeepleUpdate, MeepleKey=None, Move=None):    
         """
         Monastery completeness check
         
@@ -298,9 +312,12 @@ class CarcassonneState:
             - MeepleKey:Feature to which Meeple is added
         """
         # check if new tile is surrounding a monastery
+        #print(f"MOnastary openings {self.MonasteryOpenings}")
         if (X,Y) in self.MonasteryOpenings:
+
+            #Monastery.Update(Move)
             # check if monastery is completed
-            [(self.completeMonastery(self.BoardMonasteries[AffectedMonasteryIndex]))  for AffectedMonasteryIndex in self.MonasteryOpenings[(X,Y)]]
+            [(self.completeMonastery(self.BoardMonasteries[monastry]))  for monastry in self.MonasteryOpenings[(X,Y)]]
             # spot is now filled, remove from possible locations
             del self.MonasteryOpenings[(X,Y)]  
             
@@ -311,7 +328,7 @@ class CarcassonneState:
                 CompleteSurroundingSpots = SurroundingSpots + [(X-1,Y-1),(X+1,Y+1),(X+1,Y-1),(X-1,Y+1)]
                 NextMonasteryID = len(self.BoardMonasteries)  # increment ID by 1
                 
-                self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1)
+                self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1, Move)
                 AffectedMonastery = self.BoardMonasteries[NextMonasteryID]
                 [self.monasterySurroundings(Spot, AffectedMonastery, NextMonasteryID) for Spot in CompleteSurroundingSpots]
                 
@@ -333,7 +350,7 @@ class CarcassonneState:
             self.MonasteryOpenings[Spot] = [NextMonasteryID]
             
             
-    def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None):
+    def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):
         """
         Check if city has been completed
         
@@ -343,14 +360,15 @@ class CarcassonneState:
             - MeepleUpdate: [p1_Meeple, p2_Meeple] - List of Meeples (e.g [1,0] means P1 is adding a Meeple)
             - MeepleKey:Feature to which Meeple is added
         """
-
+       
         if PlayingTile.HasCities:
             ClosingCities = []  # initialize list of closing cities
-            ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey)
+            ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move)
+            #f"Closing cities {ClosingCities}")
             cityClosures(self, ClosingCities)
                        
             
-    def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None):            
+    def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):            
         """
         Check if road has been completed
             
@@ -362,11 +380,12 @@ class CarcassonneState:
         """
         if PlayingTile.HasRoads:
             ClosingRoads = [] # initialize list of closing cities
-            ClosingRoads = roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey)
+            ClosingRoads = roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey, Move)
+            # print(f"Closing roads {ClosingRoads}")
             roadClosures(self, ClosingRoads)
     
     
-    def checkFarmCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey):
+    def checkFarmCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move=None):
         """
         Check if farm has been completed
         
@@ -377,7 +396,7 @@ class CarcassonneState:
             - MeepleKey:Feature to which Meeple is added
         """
         if PlayingTile.HasFarms:
-            farmConnections(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
+            farmConnections(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
             
             
             
@@ -469,6 +488,7 @@ class CarcassonneState:
         # remove played tile from list of remaining tiles
         self.AvailableSpots.remove((X,Y)) # position of placed tile is no longer available
         PlayingTile = Tile(PlayingTileIndex)
+        PlayingTile.tile_coordinate(X, Y)
         self.deck.remove(PlayingTileIndex) # remove from deck
         self.TileQuantities[PlayingTileIndex] -= 1
         self.TotalTiles -= 1
@@ -506,10 +526,10 @@ class CarcassonneState:
        
         # run logic for each of the game features
         # with new move, it is important to check if any features have been completed
-        self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey)
-        self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
-        self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
-        self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
+        self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey, Move)
+        self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+        self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+        self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
         
         # update virtual scores
         self.UpdateVirtualScores()
@@ -626,7 +646,7 @@ class CarcassonneState:
         # farms
         else:
             MatchingIndex = self.Board.get(SurroundingSpots[Side]).TileFarmsIndex[self.MatchingSide[Side]][self.MatchingLine[FarmLine]]
-        
+            
         while BoardFeature[MatchingIndex].Pointer != BoardFeature[MatchingIndex].ID:                            
                 MatchingIndex = BoardFeature[MatchingIndex].Pointer
         MatchingFeature = BoardFeature[MatchingIndex]    
@@ -752,5 +772,127 @@ class CarcassonneState:
         Str = str(self.TileIndexList)
         return Str
     
+class FeatureTracker:
+    def __init__(self):
+        self.existingFeatures = {}  # Dictionary that stores features
+        self.completedFeatures = {} 
+        self.featureCounter = 0
+        self.randomTiles = []
+
+    def add_tile(self, tile, player):
+        """
+        Add a tile to a feature or create a new feature if it doesn't connect. 
+        """
+        add = False 
+
+        PlayingTileIndex = tile[0]
+        X,Y = tile[1], tile[2]
+        Rotation = tile[3]
+        MeepleKey = tile[4]
+
+        self.update_features() # Double check random tiles are properly assigned to features 
+
+        #Surroundings analysis
+        Surroundings = [None,None,None,None]  # initialization
+        SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
+        
+        # check if there is a tile touching the newly placed tile
+        for i in range(4):
+            if not SurroundingSpots[i] in self.Board:
+                self.AvailableSpots.add(SurroundingSpots[i])
+            else:
+                Surroundings[i] = self.Board[SurroundingSpots[i]]
+        
+        if MeepleKey is not None: # Can only place meeples for the first time on features if they are new 
+            self.existingFeatures[self.featureCounter] = [player, tile, MeepleKey[0]]
+            self.featureCounter += 1
+            print(f"New feature {self.featureCounter} has been created: {self.existingFeatures[self.featureCounter]}")
+            return
+
+        # Check if the tile connects to any of the tiles in existing features based off tile coordinates
+        for features in self.existingFeatures:
+            print(f"Checking feature {features}")
+
+            connection, feature_type = self.is_connected(tile, features) # Checking if tile connects to the feature, returns feature_type if connected
+            
+            print(f"Connection = {connection}, Feature Type = {feature_type}")
+
+            if connection: # Tile is found to connect to the feature
+                # Add tile 
+                self.existingFeatures[features].append([player, tile, feature_type])
+                add = True
+
+                # Check if this merges any features together (valid for city, road or farm)
+                if feature_type != 'Monastery':
+                    self.merge_features()
+
+                # Check if this tile completes a feature (Don't need to check for a farm)
+                if feature_type != 'G':
+                    completed = self.is_completed(tile, feature_type)
+
+                    # If feature completed move it to the completed feature dictionary 
+                    if completed:
+                        self.completedFeatures[feature_type] = self.existingFeatures.pop(features)
+                        print(f"Feature {feature_type} has been completed and moved to completed features")
+        
+        if not add:
+            self.randomTiles.append([player, tile])
+    
+            
+    def update_features(self):
+        """
+        Update tiles before each move is made so we can sort tracking accurately 
+        """
+        if self.randomTiles is None:
+            self.randomTiles = []
+
+        for tile in self.randomTiles():
+            player = tile[0]
+            tile_details = tile[1]
+            for features in self.existingFeatures():
+                connection, feature_type = self.is_connected(tile, features) # Checking if tile connects to the feature, returns feature_type if connected
+                
+                print(f"Connection = {connection}, Feature Type = {feature_type}")
+
+                if connection: # Tile is found to connect to the feature
+                    # Add tile 
+                    self.existingFeatures[features].append([tile, feature_type])
+
+                    # Check if this merges any features together (valid for city, road or farm)
+                    if feature_type != 'Monastery':
+                        self.merge_features()
+
+                    # Check if this tile completes a feature (Don't need to check for a farm)
+                    if feature_type != 'G':
+                        completed = self.is_completed(tile, feature_type)
+
+                        # If feature completed move it to the completed feature dictionary 
+                        if completed:
+                            self.completedFeatures[feature_type] = self.existingFeatures.pop(features)
+                            print(f"Feature {feature_type} has been completed and moved to completed features") 
+                else:
+                    continue # Remains a random tile, continue to the next feature 
+    
+    def is_connected(self, tile, feature):
+        """ 
+        Check if the new tile connects to any existing tiles in the feature. 
+        """
+        X,Y = tile[1], tile[2]
+
+        for feature_tile in feature:
+            coordX, coordY = feature_tile[0][1], feature_tile[0][2]
+
+            # Check coordinates
+
+    def is_completed(self, tile, feature_type):
+        """ Determine if two tiles are connected. """
+        return tile1['edge'] == tile2['edge']  # Example condition
+
+    def merge_features(self):
+        """ Merge two features into one. """
+        if feature_id1 in self.existingFeatures and feature_id2 in self.existingFeatures:
+            self.existingFeatures[feature_id1].extend(self.existingFeatures[feature_id2])
+            del self.existingFeatures[feature_id2]
+            print(f"Merged feature {feature_id2} into feature {feature_id1}: {self.existingFeatures[feature_id1]}")
 
     

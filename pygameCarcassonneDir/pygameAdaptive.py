@@ -22,7 +22,6 @@ from pygameCarcassonneDir.pygameFunctions import (
     opponentStrategy
 )
 
-
 def strategy(strategy_list):
     # Count the occurrences of each element in the list
     count = c(strategy_list)
@@ -35,11 +34,6 @@ def strategy(strategy_list):
         return highest[0][0]
     else:
         return None
-
-def leastPlayerStrategy():
-    """
-
-    """
 
 
 # Player focussed rules 

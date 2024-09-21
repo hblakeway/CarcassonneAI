@@ -79,11 +79,15 @@ class playerStrategy:
         Rotation = Move[3]
         MeepleKey = Move[4]
     """
-    def __init__(self, player_strategy=None):
+    def __init__(self, player_strategy=None, features=None):
         if player_strategy is None:
             player_strategy = []
+        
+        if features is None:
+            features = []
 
         self.playerStrategy = player_strategy
+        self.playerFeatures = features
 
     def add(self, move=None):
         if move is None:
@@ -113,6 +117,7 @@ class playerStrategy:
     
     def get_meeple_key(self):
         return self.meepleKey
+
 
 class opponentStrategy:
     def __init__(self, opponent_strategy=None):
