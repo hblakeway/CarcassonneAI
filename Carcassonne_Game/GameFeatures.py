@@ -18,7 +18,7 @@ class Monastery:
     def CloneMonastery(self):
         Clone = Monastery()
         Clone.ID = self.ID
-        Clone.Owner = self.Owner
+        Clone.Owner = self.Owner # 0 for Player 1, 1 for Player 2 
         Clone.Value = self.Value
         Clone.playTile = self.playTile
         Clone.tileList = [tile for tile in self.tileList] 
@@ -33,7 +33,7 @@ class Monastery:
     def __repr__(self):
         seen = set()
         cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
-        String = "Monastery ID: "+str(self.ID)+" Value: "+str(self.Value)+" Owner: "+str(self.Owner)+" Tiles: "+str(cleaned_tileList)
+        String = "\n"+"Monastery ID:"+str(self.ID)+"\n"+"Value:"+str(self.Value)+"\n"+"Owner:"+str(self.Owner)+"\n"+" Tiles:"+str(cleaned_tileList)+"\n"
         return String 
 
         
@@ -74,7 +74,7 @@ class City:
         
     def __repr__(self):
         #String = "City ID"+str(self.ID)+"Pointer"+str(self.Pointer)+"Value"+str(self.Value)+"Openings"+str(self.Openings)+"Meeples" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"Closed?"+str(self.ClosedFlag)+"Tiles"+str(self.tileList)
-        String = "City ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(self.tileList)
+        String = "\n"+"City ID:"+str(self.ID)+"\n"+"Meeples:" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
       
 
@@ -116,7 +116,7 @@ class Farm:
         #String = "Farm ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"CI"+str(self.CityIndexes)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
         seen = set()
         cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
-        String = "Farm ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(cleaned_tileList)
+        String = "\n"+"Farm ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(cleaned_tileList)+"\n"
         return String
     
 
@@ -153,5 +153,5 @@ class Road:
         
     def __repr__(self):
         #String = "Road ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
-        String = "Road ID: "+str(self.ID)+" Meeples: " + str(self.Meeples[0])+","+ str(self.Meeples[1])+" Tiles: "+str(self.tileList)
+        String = "\n"+"Road ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String

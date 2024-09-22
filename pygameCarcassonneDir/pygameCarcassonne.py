@@ -34,8 +34,7 @@ from pygameCarcassonneDir.pygameFunctions import (
 )
 
 from pygameCarcassonneDir.pygameAdaptive import (
-    enhance_strategy,
-    complete_feature
+    AdaptiveStrategies,
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -366,15 +365,6 @@ def PlayGame(p1, p2):
 
         if p2.identifier == "XCoPilot":
             if firstRotation:
-                #if p1:
-                print(f"Board Cities = {Carcassonne.BoardCities}")
-                print(f"Board Roads = {Carcassonne.BoardRoads}")
-                print(f"Board Farms = {Carcassonne.BoardFarms}")
-                print(f"Board Monastries = {Carcassonne.BoardMonasteries}")
-                    #for x in Carcassonne.BoardCities:
-
-                    #    print(x)
-
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
@@ -386,7 +376,7 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                enhance_strategy(Carcassonne, player_strategy)
+                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
                 #complete_feature()
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
