@@ -149,6 +149,9 @@ class CarcassonneState:
         self.MonasteryOpenings = {}
         self.AvailableSpots = set()
         self.AvailableSpots.add((0,0))  # first tile always placed in this position
+
+        self.coordList = {}
+        
         #self.AvailableMoves = []
         self.Meeples = [7,7]
         self.winner = None
@@ -199,6 +202,7 @@ class CarcassonneState:
             #Rotation = Move[3]
             #MeepleKey = Move[4]
             self.move((16, 0, 0, 0, None))
+            self.add_coordmove(0, 0, (16, 0, 0, 0, None))
             
             #print(self.BoardCities)
 
@@ -287,11 +291,15 @@ class CarcassonneState:
         return AddedMeeples
     
     
-    def completeMonastery(self, AffectedMonastery):
+    def completeMonastery(self, MonasteryID, Move):
         """
         Checks if the monastery is completed (completely surrounded)
         """
+        AffectedMonastery = self.BoardMonasteries[MonasteryID]
+        
+        AffectedMonastery.Update(Move)
         AffectedMonastery.Value += 1
+
         # if monastery is complete
         if AffectedMonastery.Value == 9:
             self.Meeples[AffectedMonastery.Owner] += 1  # return meeple to player
@@ -299,7 +307,6 @@ class CarcassonneState:
             self.FeatureScores[AffectedMonastery.Owner][2] += 9 # update monastery feature score
             AffectedMonastery.Value = 0  
 
-    
     
     def checkMonasteryCompleteness(self, X,Y, SurroundingSpots, MeepleUpdate, MeepleKey=None, Move=None):    
         """
@@ -311,29 +318,31 @@ class CarcassonneState:
             - MeepleUpdate: [p1_Meeple, p2_Meeple] - List of Meeples (e.g [1,0] means P1 is adding a Meeple)
             - MeepleKey:Feature to which Meeple is added
         """
-        # check if new tile is surrounding a monastery
-        #print(f"MOnastary openings {self.MonasteryOpenings}")
         if (X,Y) in self.MonasteryOpenings:
-
-            #Monastery.Update(Move)
             # check if monastery is completed
-            [(self.completeMonastery(self.BoardMonasteries[monastry]))  for monastry in self.MonasteryOpenings[(X,Y)]]
+            for monastry in self.MonasteryOpenings[(X,Y)]:
+                self.completeMonastery(monastry, Move) # Adds that tile to that monastry 
             # spot is now filled, remove from possible locations
             del self.MonasteryOpenings[(X,Y)]  
-            
-        #Monastery logic
-        if MeepleKey is not None:
+        
+        # New Monastry Logic 
+        if MeepleKey is not None: # Monastry is not a feature without a meeple 
             if MeepleKey[0] == "Monastery":
                 # monastery surroundings include all 8 surrounding positions
                 CompleteSurroundingSpots = SurroundingSpots + [(X-1,Y-1),(X+1,Y+1),(X+1,Y-1),(X-1,Y+1)]
                 NextMonasteryID = len(self.BoardMonasteries)  # increment ID by 1
                 
+                # Create a new Monastry and add Move 
                 self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1, Move)
-                AffectedMonastery = self.BoardMonasteries[NextMonasteryID]
-                [self.monasterySurroundings(Spot, AffectedMonastery, NextMonasteryID) for Spot in CompleteSurroundingSpots]
+                self.BoardMonasteries[NextMonasteryID].Update(Move)
+
+                # Check surrounding tiles and add to monastry ID
+                for Spot in CompleteSurroundingSpots:
+                    self.monasterySurroundings(Spot, NextMonasteryID, CompleteSurroundingSpots) 
+
                 
     
-    def monasterySurroundings(self, Spot, AffectedMonastery, NextMonasteryID):
+    def monasterySurroundings(self, Spot, MonasteryID, Surroundings):
         """
         Function for 'for loop'
         
@@ -342,14 +351,32 @@ class CarcassonneState:
             - AffectedMonastery: Monastery feature
             - NextMonasteryID: If Monastery is new, this will be its ID
         """
-        if Spot in self.Board:
-            self.completeMonastery(AffectedMonastery)
-        elif Spot in self.MonasteryOpenings:
-            self.MonasteryOpenings[Spot].append(NextMonasteryID)
+      
+        placedTiles = self.coordList
+        
+        if Spot in placedTiles:
+            Move = placedTiles[Spot]
         else:
-            self.MonasteryOpenings[Spot] = [NextMonasteryID]
-            
-            
+            Move = Spot
+        
+        # print(f"This is the coord list: {self.coordList}")
+
+        if Spot in self.Board:
+            self.completeMonastery(MonasteryID, Move)
+        elif Spot in self.MonasteryOpenings:
+            self.MonasteryOpenings[Spot].append(MonasteryID)
+            self.BoardMonasteries[MonasteryID].Update(Move)
+        else:
+            self.MonasteryOpenings[Spot] = [MonasteryID] # new 
+            #self.BoardMonasteries[MonasteryID].Update(Move)
+
+    def add_coordmove(self, X, Y, Move):
+        
+        self.coordList[(X,Y)] = Move
+
+        return self.coordList
+    
+
     def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):
         """
         Check if city has been completed
@@ -471,12 +498,11 @@ class CarcassonneState:
         if self.TotalTiles == 0:
             self.EndGameRoutine()
             return
-        
-        # print(f"The selected move is: {Move}")
 
         # split up 'Move' object
         PlayingTileIndex = Move[0]
-        X,Y = Move[1], Move[2]
+        X = Move[1]
+        Y = Move[2]
         Rotation = Move[3]
         MeepleKey = Move[4]
         
@@ -488,7 +514,6 @@ class CarcassonneState:
         # remove played tile from list of remaining tiles
         self.AvailableSpots.remove((X,Y)) # position of placed tile is no longer available
         PlayingTile = Tile(PlayingTileIndex)
-        PlayingTile.tile_coordinate(X, Y)
         self.deck.remove(PlayingTileIndex) # remove from deck
         self.TileQuantities[PlayingTileIndex] -= 1
         self.TotalTiles -= 1
@@ -512,7 +537,7 @@ class CarcassonneState:
             
         # rotate tile to rotation specified and place tile on board
         PlayingTile.Rotate(Rotation)
-        
+
         self.Board[(X,Y)] = PlayingTile  # add to board
         if MeepleKey is None:
             MeepleLoc = [0,0]
@@ -537,6 +562,7 @@ class CarcassonneState:
         #Turn end routine
         self.playerSymbol = 3 - self.playerSymbol # switch turn
         self.Turn += 1  # increment turns
+
     
     
     

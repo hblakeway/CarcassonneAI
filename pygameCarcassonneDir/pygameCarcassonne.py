@@ -173,6 +173,7 @@ def PlayGame(p1, p2):
     rotation = 0
     newRotation = False
     numberSelected = 0
+    coordMove = {}
 
 
     if p2.identifier == "YCoPilot":
@@ -210,7 +211,12 @@ def PlayGame(p1, p2):
                             ManualMove=None,
                         )
                         opponentStrat.add(selectedMove)
-                        print(selectedMove)
+
+                        X = selectedMove[1] 
+                        Y = selectedMove[2] 
+                        Carcassonne.add_coordmove(X, Y, selectedMove)
+                        print(Carcassonne.coordList)
+                        
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
                         isStartOfTurn = True
@@ -256,9 +262,12 @@ def PlayGame(p1, p2):
                                 isStartOfGame,
                                 ManualMove,
                             )
-                            
+                            X = selectedMove[1] 
+                            Y = selectedMove[2] 
+                            Carcassonne.add_coordmove(X, Y, selectedMove)
+                            print(Carcassonne.coordList)
+
                             playerStrat.add(selectedMove)
-                            print(selectedMove)
                             # print(playerStrat.get())
 
                             NT = nextTile(Carcassonne, DisplayScreen)
@@ -290,7 +299,10 @@ def PlayGame(p1, p2):
             #print(playerStrat.get())
             #print(playerStrat.get_meeple_key())
             Carcassonne.move(selectedMove)
-            print(selectedMove)
+            X = selectedMove[1]
+            Y = selectedMove[2] 
+            Carcassonne.add_coordmove(X, Y, selectedMove)
+            print(Carcassonne.coordList)
             # print(Carcassonne.TotalTiles)
             aiMove.add()
             print(f"Current AI Counter = {aiMove.get()}")
@@ -360,6 +372,7 @@ def PlayGame(p1, p2):
                 print(f"Board Farms = {Carcassonne.BoardFarms}")
                 print(f"Board Monastries = {Carcassonne.BoardMonasteries}")
                     #for x in Carcassonne.BoardCities:
+
                     #    print(x)
 
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 

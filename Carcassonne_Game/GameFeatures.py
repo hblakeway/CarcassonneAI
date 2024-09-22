@@ -25,17 +25,22 @@ class Monastery:
         return Clone
     
     def Update(self, playTile=None):
+        if not isinstance(playTile, tuple):
+            playTile = tuple(playTile)  # Convert to tuple if it's not already
+
         self.tileList.append(playTile)
     
     def __repr__(self):
-        String = "Monastery ID: "+str(self.ID)+" Value: "+str(self.Value)+" Owner: "+str(self.Owner)+" Tiles: "+str(self.tileList)
+        seen = set()
+        cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
+        String = "Monastery ID: "+str(self.ID)+" Value: "+str(self.Value)+" Owner: "+str(self.Owner)+" Tiles: "+str(cleaned_tileList)
         return String 
 
         
     
 class City:
     def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0], playTile=None):
-        self.tileList = [(16, 0, 0, 0, None)]
+        self.tileList = []
 
         if ID is not None:
             self.ID = ID
@@ -60,6 +65,7 @@ class City:
         return Clone
         
     def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0], playTile=None):
+
         self.Openings += OpeningsChange
         self.Value += ValueAdded
         self.Meeples[1] += MeeplesAdded[1]
@@ -98,6 +104,10 @@ class Farm:
             self.CityIndexes.add(CityIndex)
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
+
+        if not isinstance(playTile, tuple):
+            playTile = tuple(playTile)  # Convert to tuple if it's not already
+
         self.tileList.append(playTile)
         
 
@@ -113,7 +123,7 @@ class Farm:
     
 class Road:
     def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0], playTile=None):
-        self.tileList = [(16, 0, 0, 0, None)]
+        self.tileList = []
 
         if ID is not None:
             self.ID = ID
