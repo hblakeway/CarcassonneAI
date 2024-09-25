@@ -214,7 +214,7 @@ def PlayGame(p1, p2):
                         X = selectedMove[1] 
                         Y = selectedMove[2] 
                         Carcassonne.add_coordmove(X, Y, selectedMove)
-                        print(Carcassonne.coordList)
+                        #print(Carcassonne.coordList)
                         
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
@@ -264,7 +264,7 @@ def PlayGame(p1, p2):
                             X = selectedMove[1] 
                             Y = selectedMove[2] 
                             Carcassonne.add_coordmove(X, Y, selectedMove)
-                            print(Carcassonne.coordList)
+                            #print(Carcassonne.coordList)
 
                             playerStrat.add(selectedMove)
                             # print(playerStrat.get())
@@ -280,7 +280,7 @@ def PlayGame(p1, p2):
                             
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
                             text = NT.displayTextClickedTile(X, Y)
-                            print(f"hello {text}")
+                            print(f"{text}")
                         else:
                             print(f"Position invalid: X: {X}, Y:{Y}")
   
@@ -301,7 +301,7 @@ def PlayGame(p1, p2):
             X = selectedMove[1]
             Y = selectedMove[2] 
             Carcassonne.add_coordmove(X, Y, selectedMove)
-            print(Carcassonne.coordList)
+            #print(Carcassonne.coordList)
             # print(Carcassonne.TotalTiles)
             aiMove.add()
             print(f"Current AI Counter = {aiMove.get()}")
@@ -376,7 +376,7 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
+                AdaptiveStrategies.enhance_feature(Carcassonne, player_strategy)
                 #complete_feature()
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False

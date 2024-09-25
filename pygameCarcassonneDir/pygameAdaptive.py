@@ -3,9 +3,11 @@ from player.Player import Player
 from collections import Counter as c
 import itertools as it
 from dynrules import RuleSet, Rule, LearnSystem
-from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, AvailableMove
+from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, TILE_PROPERTIES_DICT, AvailableMove
 import random
 import json
+import ast
+import re
 
 from Carcassonne_Game.Carcassonne import (
     CarcassonneState,  
@@ -84,17 +86,16 @@ def handle_features(featureList):
             id = int(entry.split("ID:")[1].split("Meeples:")[0].strip())
             meeples = entry.split("Meeples:")[1].split("Tiles:")[0].strip()
             tiles = entry.split("Tiles:")[1].strip()
+            # print(f"handle features {tiles}")
 
             new_feature['ID'] = id
             new_feature['Meeples'] = meeples
             new_feature['Tiles'] = tiles
-            
             features[id] = new_feature
 
     return features
 
 def player_features(featureList):
-
 
     if not featureList:
         return {}
@@ -104,45 +105,141 @@ def player_features(featureList):
 
     for i in featureList:
             for characteristics in featureList[i]:
-                if characteristics == 'ID':
-                    id = featureList[i][characteristics]
                 if characteristics == 'Meeples':
-                    
                     player = int(featureList[i][characteristics][0])
                     opponent = int(featureList[i][characteristics][2])
 
-                    print(player, opponent)
                     if player > opponent:
                         # Player feature 
                         players_features[feature_count] = featureList[i]
                         feature_count += 1
     
     return players_features
+
+def player_features_mon(monList):
+
+    if not monList:
+        return {}
+    
+    players_features = {}
+    feature_count = 0
+    player_mon = False
+
+    for i in monList:
+            for characteristics in monList[i]:
+                if characteristics == 'Owner' and monList[i][characteristics] == '0':
+                    player_mon = True
+                if characteristics == 'Tile' and player_mon == True:
+                    players_features[feature_count] = monList[i][characteristics]
+
+    return players_features
+
+def rotate_list(original_list, degrees):
+   
+   
+    if degrees == 0:
+        return original_list
+    elif degrees == 90:
+        return [original_list[-1]] + original_list[:-1]  # Rotate right (clockwise)
+    elif degrees == 180:
+        return original_list[2:] + original_list[:2] 
+    elif degrees == 270:
+        return original_list[1:] + [original_list[0]]  # Rotate left (counterclockwise)
+    else:
+        return original_list  # Return original for unhandled degrees
         
 class AdaptiveStrategies:
 
     """
     If there is a big feature to contribute to, suggest to add there
-    If not check majority strategy and suggest to build new feature with that strategy -> given that there are more than 0 meeples
     Else Return False for Strategy 
     """
-    def enhance_strategy(Carcassonne, player_strategy):
+    def enhance_feature(Carcassonne, player_strategy):
 
-        # Get all features
-        cityFeatures = handle_features(str(Carcassonne.get_city()))
-        print(cityFeatures)
-        roadFeatures = handle_features(str(Carcassonne.get_road()))
-        farmFeatures = handle_features(str(Carcassonne.get_farm()))
-        monFeatures = handle_features_mon(str(Carcassonne.get_mon()))
-        
+        city_enhancements = []
+        road_enhacements = []
+        farm_enhacements = []
+
+        # List of all the player's features 
+        cityFeatures = player_features(handle_features(str(Carcassonne.get_city())))
+        roadFeatures = player_features(handle_features(str(Carcassonne.get_road())))
+        farmFeatures = player_features(handle_features(str(Carcassonne.get_farm())))
+        #monFeatures = handle_features_mon(str(Carcassonne.get_mon()))
+        #print(player_features_mon(monFeatures))
+
         # Available Moves for the current tile 
         availableMoves = Carcassonne.availableMoves()
+        
+        print(f"Players cities are: {cityFeatures}")
+        print(f"Players roads are: {roadFeatures}")
+        print(f"Players farms are: {farmFeatures}")
+        
+        for tile in availableMoves:
+    
+            X = tile.X
+            Y = tile.Y
+            Rotation = tile.Rotation
+            meepleLocation = tile.MeepleInfo
+            index = tile.TileIndex
+            PlayingTile = Tile(index)
 
-        # Get players features
-        print("players cities")
-        print(player_features(cityFeatures))
+            #Surroundings analysis
+            Surroundings = [None,None,None,None]  # initialization
+            SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
 
-        # Check if any of the moves would add to players features 
+            # left top right bottom
+            tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
+            
+            #print(tile_properties)
+
+            # For each feature tile, get surrounding spots and tile index and tile properties 
+            for cities in cityFeatures:
+                city_tiles = cityFeatures[cities]['Tiles']
+                tuple = ast.literal_eval(city_tiles)
+                for components in tuple:
+                    city_index = components[0]
+                    city_tile = Tile(city_index)
+                    city_x = components[1]
+                    city_y = components[2]
+                    city_rotation = components[3]
+                    city_meeple = components[4]
+                    # print(city_index,city_x,city_y,city_rotation,city_meeple)
+
+                    #Surroundings analysis
+                    CityTileSurroundings = [None,None,None,None]  # initialization
+                    CityTileSurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
+
+                    city_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(city_index)], city_rotation)
+
+                    if (city_x,city_y) in SurroundingSpots and meepleLocation is None:
+
+                        print(f"Assessing available move {tile, tile_properties}")
+
+                        for i in range(4):
+                            """
+                            # For each tile check surrounding spots line up 
+                            # Check coordinates should match 
+                            # Check TILES PROPERTY
+                            # FEATURE[0] TILE [2]
+                            # FEATURE[1] TILE [3]
+                            # FEATURE[2] TILE [0]
+                            # FEATURE[3] TILE [1]
+                            """
+                            if tile_properties[i] == 'C' and city_tile_properties[(i + 2) % 4] == 'C':
+                                if tile not in city_enhancements:
+                                    city_enhancements.append(tile)
+        
+        print(f"Suggest options are {city_enhancements}")
+
+        return 
+        
+    def enhance_strategy(Carcassonne, player_strategy):
+        """
+        suggest to build new feature with that strategy -> given that there are more than 0 meeples
+        """
+
+        # Available Moves for the current tile 
+        availableMoves = Carcassonne.availableMoves()
 
         # remaining meeples
         meeples = Carcassonne.Meeples
@@ -196,6 +293,10 @@ class AdaptiveStrategies:
         return
 
     def steal_points():
+        
+        return
+    
+    def block():
         
         return
 

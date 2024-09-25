@@ -20,6 +20,19 @@ def cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate
         
     return ClosingCities
 
+def cityConnectionsAdaptive(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move):
+    # for each side of the tile with disconnected cities, eg. tile with opposite cites and farm in-between (Tile11)
+    for i in range(len(PlayingTile.CityOpenings)):
+        CityOpenings = PlayingTile.CityOpenings[i]
+        AddedMeeples = self.AddMeeple(MeepleUpdate, MeepleKey, "C", i)
+        OpeningsQuantity = len(CityOpenings)
+        if OpeningsQuantity == 1:
+            ClosingCities = cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples, Move)
+        else:
+            ClosingCities = cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, OpeningsQuantity, Surroundings, AddedMeeples, Move)
+        
+    return ClosingCities
+
 def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples, Move):
     
     CitySide = CityOpenings[0]  # 0,1,2 or 3
