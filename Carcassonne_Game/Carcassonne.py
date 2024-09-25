@@ -8,7 +8,7 @@ from pygameCarcassonneDir.pygameSettings import MEEPLE_SIZE
 from pygameCarcassonneDir.pygameSettings import BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN
 from Carcassonne_Game.GameFeatures import Monastery
 
-from Carcassonne_Game.Carcassonne_CityUtils import cityConnections, cityClosures, cityConnectionsAdaptive
+from Carcassonne_Game.Carcassonne_CityUtils import cityConnections, cityClosures
 from Carcassonne_Game.Carcassonne_RoadUtils import roadConnections, roadClosures
 from Carcassonne_Game.Carcassonne_FarmUtils import farmConnections
 
@@ -381,24 +381,7 @@ class CarcassonneState:
         if PlayingTile.HasCities:
             ClosingCities = []  # initialize list of closing cities
             ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move)
-            #f"Closing cities {ClosingCities}")
-            cityClosures(self, ClosingCities)
-    
-    def checkCityCompletenessAdaptive(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):
-        """
-        Check if city has been completed
-        
-        Inputs:
-            - PlayingTile: Tile just played 
-            - Surroundings: List of surrounding tiles (left,right,above,below)
-            - MeepleUpdate: [p1_Meeple, p2_Meeple] - List of Meeples (e.g [1,0] means P1 is adding a Meeple)
-            - MeepleKey:Feature to which Meeple is added
-        """
-       
-        if PlayingTile.HasCities:
-            ClosingCities = []  # initialize list of closing cities
-            ClosingCities = cityConnectionsAdaptive(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move)
-            #f"Closing cities {ClosingCities}")
+            print(f"Closing cities {ClosingCities}")
             cityClosures(self, ClosingCities)
                            
     def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):            

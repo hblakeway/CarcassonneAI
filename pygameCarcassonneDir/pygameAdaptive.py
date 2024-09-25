@@ -151,14 +151,14 @@ def rotate_list(original_list, degrees):
 class AdaptiveStrategies:
 
     """
-    If there is a big feature to contribute to, suggest to add there
-    Else Return False for Strategy 
+    If there is player feature to contribute to, suggest to add there
+    Else Return False for enhacement of player feature 
     """
     def enhance_feature(Carcassonne, player_strategy):
 
         city_enhancements = []
-        road_enhacements = []
-        farm_enhacements = []
+        road_enhancements = []
+        farm_enhancements = []
 
         # List of all the player's features 
         cityFeatures = player_features(handle_features(str(Carcassonne.get_city())))
@@ -175,63 +175,152 @@ class AdaptiveStrategies:
         print(f"Players farms are: {farmFeatures}")
         
         for tile in availableMoves:
-    
+            
             X = tile.X
             Y = tile.Y
             Rotation = tile.Rotation
             meepleLocation = tile.MeepleInfo
-            index = tile.TileIndex
-            PlayingTile = Tile(index)
 
-            #Surroundings analysis
-            Surroundings = [None,None,None,None]  # initialization
-            SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
+            if meepleLocation is None:
+                index = tile.TileIndex
+                PlayingTile = Tile(index)
+                SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
 
-            # left top right bottom
-            tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
+                # left top right bottom
+                tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
+
+                if PlayingTile.HasCities:
+                    for i in range(len(PlayingTile.CityOpenings)):
+                        CityOpenings = PlayingTile.CityOpenings[i]
             
-            #print(tile_properties)
+                    # For each feature tile, get surrounding spots and tile index and tile properties 
+                    for cities in cityFeatures:
 
-            # For each feature tile, get surrounding spots and tile index and tile properties 
-            for cities in cityFeatures:
-                city_tiles = cityFeatures[cities]['Tiles']
-                tuple = ast.literal_eval(city_tiles)
+                        city_tiles = cityFeatures[cities]['Tiles']
+                        tuple = ast.literal_eval(city_tiles)
+
+                        for components in tuple:
+                            city_index = components[0]
+                            city_tile = Tile(city_index)
+                            city_x = components[1]
+                            city_y = components[2]
+                            city_rotation = components[3]
+                            city_meeple = components[4]
+
+                            city_tile_properties = rotate_list(TILE_PROPERTIES_DICT[city_index], city_rotation)
+                            city_opens = city_tile_properties.count('C')
+
+                            city_index_list = []
+                            for i in range(len(city_tile_properties)):
+                                if city_tile_properties[i] == 'C':
+                                    city_index_list.append(i)
+
+                            coordinate_checks = {
+                                0: (city_x - X),  # For CitySide 0
+                                1: (Y - city_y),  # For CitySide 1
+                                2: (X - city_x),  # For CitySide 2
+                                3: (city_y - Y)   # For CitySide 3
+                            }
+
+                            index_checks = {
+                                0: (2),  # For CitySide 0
+                                1: (3),  # For CitySide 1
+                                2: (0),  # For CitySide 2
+                                3: (1)   # For CitySide 3
+                            }
+
+                            if (city_x,city_y) in SurroundingSpots:
+                                print(f"Checking {tile}")
+                                
+                                if city_opens == 1: # Will definitely have a meeple
+                                    CitySide = city_index_list[0]
+                                    checkCoord = coordinate_checks[CitySide]
+                                    tile_index = index_checks[CitySide]
+                                    print(checkCoord)
+                                    print(tile_properties[tile_index])
+                                    if checkCoord == 1 and tile_properties[tile_index] == 'C':
+                                        if tile not in city_enhancements:
+                                            city_enhancements.append(tile)
+            
+                                elif city_opens == 2 and city_meeple is not None and (city_index == 11 or city_index == 6):  # Account for two cities seperate on one tile, one city has meeple
+                                    checkCoord = coordinate_checks[city_meeple[1]]
+                                    tile_index = index_checks[city_meeple[1]]
+                                    print(checkCoord)
+                                    print(tile_properties[tile_index])
+                                    if checkCoord == 1 and tile_properties[tile_index] == 'C':
+                                        if tile not in city_enhancements:
+                                            city_enhancements.append(tile)
+                                
+                                elif city_index == 11 or city_index == 6: # Account for two cities seperate on one tile, no cities have meeple, one side must be connected to the feature
+                                    if city_meeple is None:
+                                        continue # Skip tile 
+
+                                else: # 2,3 or 4 opening
+                                    for i in city_index_list:
+                                        checkCoord = coordinate_checks[i]
+                                        tile_index = index_checks[i]
+                                        print(checkCoord)
+                                        print(tile_properties[tile_index])
+                                        if checkCoord == 1 and tile_properties[tile_index] == 'C':
+                                            if tile not in city_enhancements:
+                                                city_enhancements.append(tile)
+
+            for roads in roadFeatures:
+                road_tiles = roadFeatures[roads]['Tiles']
+                tuple = ast.literal_eval(road_tiles)
                 for components in tuple:
-                    city_index = components[0]
-                    city_tile = Tile(city_index)
-                    city_x = components[1]
-                    city_y = components[2]
-                    city_rotation = components[3]
-                    city_meeple = components[4]
-                    # print(city_index,city_x,city_y,city_rotation,city_meeple)
+                    road_index = components[0]
+                    road_tile = Tile(road_index)
+                    road_x = components[1]
+                    road_y = components[2]
+                    road_rotation = components[3]
+                    road_meeple = components[4]
 
-                    #Surroundings analysis
-                    CityTileSurroundings = [None,None,None,None]  # initialization
-                    CityTileSurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
+                    road_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(road_index)], road_rotation)
 
-                    city_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(city_index)], city_rotation)
+                    if (road_x,road_y) in SurroundingSpots and meepleLocation is None:
+                        for i in range(4):
+                            if tile_properties[i] == 'R' and road_tile_properties[(i + 2) % 4] == 'R':
+                                # Check that tile placement makes roads align
 
-                    if (city_x,city_y) in SurroundingSpots and meepleLocation is None:
+                                if tile not in road_enhancements:
+                                    road_enhancements.append(tile)
+            
+            for farms in farmFeatures:
+                farm_tiles = farmFeatures[farms]['Tiles']
+                tuple = ast.literal_eval(farm_tiles)
+                for components in tuple:
+                    farm_index = components[0]
+                    farm_x = components[1]
+                    farm_y = components[2]
+                    farm_rotation = components[3]
+                    farm_meeple = components[4]
+
+                    farm_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(farm_index)], farm_rotation)
+
+                    if (farm_x,farm_y) in SurroundingSpots and meepleLocation is None:
 
                         print(f"Assessing available move {tile, tile_properties}")
 
                         for i in range(4):
-                            """
-                            # For each tile check surrounding spots line up 
-                            # Check coordinates should match 
-                            # Check TILES PROPERTY
-                            # FEATURE[0] TILE [2]
-                            # FEATURE[1] TILE [3]
-                            # FEATURE[2] TILE [0]
-                            # FEATURE[3] TILE [1]
-                            """
-                            if tile_properties[i] == 'C' and city_tile_properties[(i + 2) % 4] == 'C':
-                                if tile not in city_enhancements:
-                                    city_enhancements.append(tile)
-        
-        print(f"Suggest options are {city_enhancements}")
+                            if tile_properties[i] == 'G' and farm_tile_properties[(i + 2) % 4] == 'G':
+                                # Check that tile placement makes farms align 
 
-        return 
+                                if tile not in farm_enhancements:
+                                    farm_enhancements.append(tile)
+        
+    
+        all_enhancements = city_enhancements + road_enhancements + farm_enhancements
+
+        if all_enhancements:
+            print(f"All Suggest options are {all_enhancements}")
+            random_suggestion = random.choice(all_enhancements)
+            print(f"Suggestion: {random_suggestion}")
+            return True, random_suggestion
+        else:
+            print("No enhancements available.")
+
+        return False, None
         
     def enhance_strategy(Carcassonne, player_strategy):
         """
