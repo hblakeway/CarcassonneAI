@@ -385,7 +385,8 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                AdaptiveStrategies.enhance_feature(Carcassonne, player_strategy)
+                AdaptiveStrategies.enhance_feature(Carcassonne)
+                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
                 #complete_feature()
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
