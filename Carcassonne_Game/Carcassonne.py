@@ -68,7 +68,7 @@ WIDTH = HEIGHT = 104  # image scaled x2
 
 XSHIFT = YSHIFT = MEEPLE_SIZE//2
 
-            
+      
 class CarcassonneState:
     """
     List of important attributes:
@@ -140,7 +140,8 @@ class CarcassonneState:
         #Never changing:
         self.MatchingSide = [2,3,0,1]
         self.MatchingLine = [2,1,0]
-        #Initialialize variables        
+        #Initialialize variables     
+         
         self.Board = {}
         self.BoardCities = {}
         self.BoardRoads = {}
@@ -227,6 +228,7 @@ class CarcassonneState:
             self.deck[2] = 20
             """
     
+
     def CloneState(self):
         """
         Clones the game state - quicker than using copy.deepcopy()
@@ -278,11 +280,12 @@ class CarcassonneState:
             - FeatureCharacter: Possible Meeple Location
             - i: Possible feature index
         """
-        AddedMeeples = [0,0]
+        AddedMeeples = [0,0,0]
         if MeepleKey is not None:
             # which feature the meeple is added to
-                if MeepleKey[0] == FeatureCharacter and MeepleKey[1] == i:
-                    AddedMeeples = MeepleUpdate
+            if MeepleKey[0] == FeatureCharacter and MeepleKey[1] == i:
+                AddedMeeples = MeepleUpdate
+                AddedMeeples.append(i)
         return AddedMeeples  
     
     def completeMonastery(self, MonasteryID, Move):
@@ -367,6 +370,7 @@ class CarcassonneState:
 
         return self.coordList
     
+    
     def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):
         """
         Check if city has been completed
@@ -381,7 +385,7 @@ class CarcassonneState:
         if PlayingTile.HasCities:
             ClosingCities = []  # initialize list of closing cities
             ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move)
-            print(f"Closing cities {ClosingCities}")
+            # print(f"Closing cities {ClosingCities}")
             cityClosures(self, ClosingCities)
                            
     def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):            
@@ -778,4 +782,6 @@ class CarcassonneState:
     
     def get_mon(self):
         return self.BoardMonasteries
+    
+
     

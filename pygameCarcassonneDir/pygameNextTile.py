@@ -8,6 +8,10 @@ from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_M
 from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates, getAImove, placeColourTileAI
 from pygameCarcassonneDir.pygameLabel import Label
 
+from Carcassonne_Game.Carcassonne import (
+    CarcassonneState
+)
+
 
 # packages
 import pygame
@@ -61,6 +65,7 @@ class nextTile:
             
         self.Tile = Tile(self.nextTileIndex, RunInit)
         self.Meeple = None
+        
         
         if RunInit:
             self.image_file = self.Tile.image
@@ -264,6 +269,7 @@ class nextTile:
         background = None
         thickness = 2
         
+        
         # change colour for selected meeple location
         if NumberKey == numberSelected:
             if NumberKey == 0:
@@ -275,10 +281,10 @@ class nextTile:
                 circleColour = MEEPLE_CHOICE_HIGHLIGHT
                 self.Meeple = location_key
                 thickness = 0
-        
+               
         text = str(NumberKey)
         X,Y = meepleCoordinates(Location, Feature, MEEPLE_LOCATION_DICT_SCALED, TileIndex)
-        
+
         # image label
         meepleLabelImage = Label(text, font_size=FONT_MEEPLE_IMAGE, background = background)
         pygame.draw.circle(self.image, circleColour, (X+7,Y+12), 16, thickness)

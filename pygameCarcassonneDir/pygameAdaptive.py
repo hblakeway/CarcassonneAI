@@ -9,9 +9,7 @@ import json
 import ast
 import re
 
-from Carcassonne_Game.Carcassonne import (
-    CarcassonneState,  
-)
+from Carcassonne_Game.Carcassonne import CarcassonneState
 
 from pygameCarcassonneDir.pygameFunctions import (
     playMove,
@@ -24,6 +22,16 @@ from pygameCarcassonneDir.pygameFunctions import (
     playerStrategy,
     opponentStrategy
 )
+
+keys = {}
+
+# Tile Index and Place Meeple is selected on 
+def updateKeys(index, numberSelected, xy):
+    print("in here")
+    keys[xy] = [index, numberSelected]
+
+def getKeys():
+    return keys
 
 """
 Checks Majority strategy pattern for a player 
@@ -147,6 +155,44 @@ def rotate_list(original_list, degrees):
         return original_list[1:] + [original_list[0]]  # Rotate left (counterclockwise)
     else:
         return original_list  # Return original for unhandled degrees
+
+
+        
+# Returns the tile index where meeple is placed 
+"""
+      1
+
+0           2
+
+      3
+
+"""
+def split_tiles(index, number, rotation):
+    
+    if number == 3 or number == 0:
+        # Meeple is placed on a farm for this tile
+        return 4
+    
+    if index == 11:
+        if number == 1:
+            rotate = {0: 1, 90: 2, 180: 3, 270: 0}
+        
+        if number == 2:
+            rotate = {0: 3, 90: 0, 180: 1, 270: 2}
+
+    elif index == 6: 
+        if number == 1:
+            rotate = {0: 1, 90: 2, 180: 3, 270: 0}
+        
+        if number == 2:
+            rotate = {0: 2, 90: 3, 180: 0, 270: 1}
+    
+    else:
+        return 4
+    
+    return rotate[rotation]
+
+
         
 class AdaptiveStrategies:
 
@@ -169,10 +215,6 @@ class AdaptiveStrategies:
 
         # Available Moves for the current tile 
         availableMoves = Carcassonne.availableMoves()
-        
-        print(f"Players cities are: {cityFeatures}")
-        print(f"Players roads are: {roadFeatures}")
-        print(f"Players farms are: {farmFeatures}")
         
         for tile in availableMoves:
             
@@ -199,6 +241,7 @@ class AdaptiveStrategies:
                         city_tiles = cityFeatures[cities]['Tiles']
                         tuple = ast.literal_eval(city_tiles)
 
+                        # City components
                         for components in tuple:
                             city_index = components[0]
                             city_tile = Tile(city_index)
@@ -228,39 +271,47 @@ class AdaptiveStrategies:
                                 2: (0),  # For CitySide 2
                                 3: (1)   # For CitySide 3
                             }
+                            coords = (city_x,city_y)
 
-                            if (city_x,city_y) in SurroundingSpots:
+                            if coords in SurroundingSpots:
                                 print(f"Checking {tile}")
-                                
+
+                                keys = getKeys()
+
                                 if city_opens == 1: # Will definitely have a meeple
                                     CitySide = city_index_list[0]
                                     checkCoord = coordinate_checks[CitySide]
                                     tile_index = index_checks[CitySide]
-                                    print(checkCoord)
-                                    print(tile_properties[tile_index])
                                     if checkCoord == 1 and tile_properties[tile_index] == 'C':
                                         if tile not in city_enhancements:
                                             city_enhancements.append(tile)
             
-                                elif city_opens == 2 and city_meeple is not None and (city_index == 11 or city_index == 6):  # Account for two cities seperate on one tile, one city has meeple
-                                    checkCoord = coordinate_checks[city_meeple[1]]
-                                    tile_index = index_checks[city_meeple[1]]
-                                    print(checkCoord)
-                                    print(tile_properties[tile_index])
-                                    if checkCoord == 1 and tile_properties[tile_index] == 'C':
-                                        if tile not in city_enhancements:
-                                            city_enhancements.append(tile)
-                                
-                                elif city_index == 11 or city_index == 6: # Account for two cities seperate on one tile, no cities have meeple, one side must be connected to the feature
-                                    if city_meeple is None:
-                                        continue # Skip tile 
+                                elif city_opens == 2 and (city_index == 11 or city_index == 6):  # Account for two cities seperate on one tile, one city has meeple
+                                    
+                                    meeplePlaced = 0
+
+                                    # Gives back the number where meeple was placed 
+                                    if coords in keys:
+                                        meeplePlaced = keys[coords][1]
+                                    
+                                    # Tile Index (Only check the side related to the meeple)
+                                    check = split_tiles(city_index, meeplePlaced, city_rotation)
+                                    print(f"Check = {check}")
+                                    
+                                    if check != 4:
+                                        checkCoord = coordinate_checks[check]
+                                        tile_index = index_checks[check]
+                                        print(f"Coord Check = {checkCoord}")
+                                        print(f"Tile Index = {tile_index}")
+                                    
+                                        if checkCoord == 1 and tile_properties[tile_index] == 'C':
+                                            if tile not in city_enhancements:
+                                                city_enhancements.append(tile)
 
                                 else: # 2,3 or 4 opening
                                     for i in city_index_list:
                                         checkCoord = coordinate_checks[i]
                                         tile_index = index_checks[i]
-                                        print(checkCoord)
-                                        print(tile_properties[tile_index])
                                         if checkCoord == 1 and tile_properties[tile_index] == 'C':
                                             if tile not in city_enhancements:
                                                 city_enhancements.append(tile)

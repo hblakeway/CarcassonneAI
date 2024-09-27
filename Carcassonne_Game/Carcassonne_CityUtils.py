@@ -9,8 +9,10 @@ def cityConnectionIndex(self, Surroundings, CitySide):
 
 def cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move):
     # for each side of the tile with disconnected cities, eg. tile with opposite cites and farm in-between (Tile11)
+    #print(PlayingTile.TileIndex, PlayingTile.CityOpenings)
     for i in range(len(PlayingTile.CityOpenings)):
         CityOpenings = PlayingTile.CityOpenings[i]
+        #print(f"Meeple Key: {MeepleKey}")
         AddedMeeples = self.AddMeeple(MeepleUpdate, MeepleKey, "C", i)
         OpeningsQuantity = len(CityOpenings)
         if OpeningsQuantity == 1:
@@ -36,7 +38,6 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
         self.BoardCities[NextCityIndex].Update(1,1,AddedMeeples, Move)
         PlayingTile.TileCitiesIndex[CitySide] = NextCityIndex  # update tile city index (TCI = [Index1, Index2, Index3, Index4])
 
-        print(f"New City part {self.BoardCities[NextCityIndex].Openings}")
         # check if city is closed
         if self.BoardCities[NextCityIndex].Openings == 0:
             ClosingCities.append(NextCityIndex)  # update list of closing cities
@@ -51,8 +52,6 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
         # update Meeples
         MatchingCity.Update(-1,1,AddedMeeples, Move)
         
-        print(f"Pre Existing City part {MatchingCity.Openings}")
-        # check if city is closed
         if MatchingCity.Openings == 0:
             ClosingCities.append(MatchingCityIndex)  # update list of closing cities
         
@@ -97,7 +96,7 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
             # openings part of the same city
             if CombinedCityIndex == MatchingCityIndex:
                 if AlreadyMatched:
-                    self.BoardCities[CombinedCityIndex].Update(-1,0,[0,0], Move) 
+                    self.BoardCities[CombinedCityIndex].Update(-1,0,[0,0,0], Move) 
                 else:
                     self.BoardCities[CombinedCityIndex].Update(OpeningsToAdd-1,PlayingTile.CityValues,AddedMeeples,Move)
                     AlreadyMatched = True
@@ -109,14 +108,13 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
                 self.BoardCities[CombinedCityIndex].Update(MatchingCity.Openings-1,MatchingCity.Value,MatchingCity.Meeples,MatchingCity.tileList)
                 MatchingCity.Openings = 0
                 MatchingCity.Value = 0
-                MatchingCity.Meeples = [0,0]
+                MatchingCity.Meeples = [0,0,0]
                 MatchingCity.tileList = []
                         
         # update Tile City Index
         for CitySide in CityOpenings:
             PlayingTile.TileCitiesIndex[CitySide] = CombinedCityIndex
         # update list of closing cities
-        print(f"Combined {self.BoardCities[CombinedCityIndex].Openings}")
         if self.BoardCities[CombinedCityIndex].Openings == 0:
             ClosingCities.append(CombinedCityIndex)
 
@@ -129,7 +127,7 @@ def cityClosures(self, ClosingCities):
     for ClosingCityIndex in ClosingCities:
         ClosingCity = self.BoardCities[ClosingCityIndex]
         ClosingCity.ClosedFlag = True
-        print(f"Before removal {self.BoardCities}")
+        # print(f"Before removal {self.BoardCities}")
         if ClosingCity.Meeples[0] == 0 and ClosingCity.Meeples[1] == 0:
             pass
         elif ClosingCity.Meeples[0] > ClosingCity.Meeples[1]:
@@ -149,6 +147,6 @@ def cityClosures(self, ClosingCities):
         ClosingCity.Value = 0
         self.Meeples[0] += ClosingCity.Meeples[0]
         self.Meeples[1] += ClosingCity.Meeples[1]
-        
+        self.Meeples[2] += ClosingCity.Meeples[2]
         removeCity(ClosingCityIndex)
-        print(f"After removal {self.BoardCities}")
+        # print(f"After removal {self.BoardCities}")

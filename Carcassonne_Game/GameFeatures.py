@@ -64,17 +64,19 @@ class City:
         Clone.tileList = [tile for tile in self.tileList] 
         return Clone
         
-    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0], playTile=None):
+    def Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0,0], playTile=None):
 
         self.Openings += OpeningsChange
         self.Value += ValueAdded
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
+        self.Meeples[2] += MeeplesAdded[2]
+        
         self.tileList.append(playTile)
         
     def __repr__(self):
         #String = "City ID"+str(self.ID)+"Pointer"+str(self.Pointer)+"Value"+str(self.Value)+"Openings"+str(self.Openings)+"Meeples" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"Closed?"+str(self.ClosedFlag)+"Tiles"+str(self.tileList)
-        String = "\n"+"City ID:"+str(self.ID)+"\n"+"Meeples:" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
+        String = "\n"+"City ID:"+str(self.ID)+"\n"+"Meeples:" + str(self.Meeples[0])+","+ str(self.Meeples[1])+","+ str(self.Meeples[2])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
       
 

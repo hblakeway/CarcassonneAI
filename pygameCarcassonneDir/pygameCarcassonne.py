@@ -34,7 +34,7 @@ from pygameCarcassonneDir.pygameFunctions import (
 )
 
 from pygameCarcassonneDir.pygameAdaptive import (
-    AdaptiveStrategies,
+    AdaptiveStrategies, updateKeys
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -173,6 +173,8 @@ def PlayGame(p1, p2):
     newRotation = False
     numberSelected = 0
     coordMove = {}
+    current = None
+    number = 0
 
 
     if p2.identifier == "YCoPilot":
@@ -239,6 +241,7 @@ def PlayGame(p1, p2):
                             newRotation = True
                         if event.key in NumKeys:
                             numberStr = pygame.key.name(event.key)
+                            number = 0 + int(numberStr)
                             numberSelected = int(numberStr)
                             if numberSelected == 0:
                                 NT.Meeple = None
@@ -264,6 +267,12 @@ def PlayGame(p1, p2):
                             X = selectedMove[1] 
                             Y = selectedMove[2] 
                             Carcassonne.add_coordmove(X, Y, selectedMove)
+
+                            if p2.identifier == "YCoPilot":
+                                if int(selectedMove[0]) == 11 or int(selectedMove[0]) == 6:
+                                    updateKeys(selectedMove[0], number, (X,Y))
+                                    number = 0
+
                             #print(Carcassonne.coordList)
 
                             playerStrat.add(selectedMove)
@@ -334,7 +343,7 @@ def PlayGame(p1, p2):
                         location_value,
                         i,
                         numberSelected,
-                        NT.nextTileIndex,
+                        NT.nextTileIndex
                     )
                     NT.updateMeepleMenu(location_key, location_value, i, numberSelected)
                     i += 1
