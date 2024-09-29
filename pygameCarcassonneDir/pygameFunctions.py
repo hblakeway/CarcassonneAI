@@ -344,12 +344,12 @@ def playMove(NextTile, player, Carcassonne, TileIndex, isStartOfGame = False, Ma
     # play move on board
     #print(f'(pygame) Selected Move: {selectedMove}')
     #print(f'(pygame) Selected Move[0]: {selectedMove[0]}')
-    Carcassonne.move(selectedMove)
+    meepleLoc = Carcassonne.move(selectedMove)
     # switch player
     if player == Carcassonne.p1:
-        return Carcassonne.p2, selectedMove
+        return Carcassonne.p2, selectedMove, meepleLoc
     
-    return Carcassonne.p1, selectedMove
+    return Carcassonne.p1, selectedMove, meepleLoc
 
 def printTilesLeft(Carcassonne, displayScreen):
     # attributes

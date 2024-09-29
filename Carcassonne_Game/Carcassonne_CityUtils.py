@@ -27,6 +27,8 @@ def removeCity(self, cityIndex):
     if cityIndex in self.BoardCities:
         del self.BoardCities[cityIndex] 
 
+# Update(self, OpeningsChange = 0, ValueAdded = 0, MeeplesAdded = [0,0,0], playTile=None)
+# def __init__(self,ID = None, Value=None, Openings=None, Meeples=[0,0], playTile=None)
 def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings, AddedMeeples, Move):
     
     CitySide = CityOpenings[0]  # 0,1,2 or 3
@@ -35,7 +37,7 @@ def cityOneOpening(self, PlayingTile, ClosingCities, CityOpenings, Surroundings,
     if Surroundings[CitySide] is None:
         NextCityIndex = len(self.BoardCities)  # index is incremented
         self.BoardCities[NextCityIndex] = City(NextCityIndex,1,1,AddedMeeples, Move)  # add new city to board
-        self.BoardCities[NextCityIndex].Update(1,1,AddedMeeples, Move)
+        self.BoardCities[NextCityIndex].Update(1,1,[0,0,0], Move)
         PlayingTile.TileCitiesIndex[CitySide] = NextCityIndex  # update tile city index (TCI = [Index1, Index2, Index3, Index4])
 
         # check if city is closed
@@ -81,7 +83,7 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
         # create a new city
         NextCityIndex = len(self.BoardCities)
         self.BoardCities[NextCityIndex] = City(NextCityIndex,PlayingTile.CityValues,OpeningsQuantity,AddedMeeples, Move)
-        self.BoardCities[NextCityIndex].Update(PlayingTile.CityValues,OpeningsQuantity,AddedMeeples, Move)
+        self.BoardCities[NextCityIndex].Update(PlayingTile.CityValues,OpeningsQuantity,[0,0,0], Move)
         for CitySide in CityOpenings:
             PlayingTile.TileCitiesIndex[CitySide] = NextCityIndex
             

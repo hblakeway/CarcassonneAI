@@ -12,6 +12,10 @@ from Carcassonne_Game.Carcassonne_CityUtils import cityConnections, cityClosures
 from Carcassonne_Game.Carcassonne_RoadUtils import roadConnections, roadClosures
 from Carcassonne_Game.Carcassonne_FarmUtils import farmConnections
 
+from pygameCarcassonneDir.pygameAdaptive import (
+    AdaptiveStrategies, updateKeys, getKeys
+)
+
 
 """
 
@@ -203,7 +207,7 @@ class CarcassonneState:
             #Rotation = Move[3]
             #MeepleKey = Move[4]
             self.move((16, 0, 0, 0, None))
-            self.add_coordmove(0, 0, (16, 0, 0, 0, None))
+            self.add_coordmove(0, 0, (16, 0, 0, 0, None),0)
             
             #print(self.BoardCities)
 
@@ -364,9 +368,9 @@ class CarcassonneState:
             self.MonasteryOpenings[Spot] = [MonasteryID] # new 
             #self.BoardMonasteries[MonasteryID].Update(Move)
 
-    def add_coordmove(self, X, Y, Move):
+    def add_coordmove(self, X, Y, Move, player):
         
-        self.coordList[(X,Y)] = Move
+        self.coordList[(X,Y)] = [Move, player]
 
         return self.coordList
     
@@ -535,7 +539,6 @@ class CarcassonneState:
             MeepleUpdate[player] += 1
             self.Meeples[player] -= 1
             
-       
         # run logic for each of the game features
         # with new move, it is important to check if any features have been completed
         self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey, Move)
@@ -550,6 +553,11 @@ class CarcassonneState:
         self.playerSymbol = 3 - self.playerSymbol # switch turn
         self.Turn += 1  # increment turns
 
+        if not(MeepleKey is None):
+            return MeepleLocation
+        else: 
+            return 0
+        
     def EndGameRoutine(self):
         """
         Logic to handle when game is finished
@@ -782,6 +790,9 @@ class CarcassonneState:
     
     def get_mon(self):
         return self.BoardMonasteries
+    
+    def get_coordList(self):
+        return self.coordList
     
 
     

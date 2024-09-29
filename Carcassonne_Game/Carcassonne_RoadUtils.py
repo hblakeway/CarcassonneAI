@@ -21,7 +21,7 @@ def oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surrounding
     if Surroundings[RoadSide] is None:
         NextRoadIndex = len(self.BoardRoads)
         self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,1,AddedMeeples, Move)
-        self.BoardRoads[NextRoadIndex].Update(1,1,AddedMeeples, Move)
+        self.BoardRoads[NextRoadIndex].Update(1,1,[0,0], Move)
         PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
     else:
         MatchingRoadIndex = Surroundings[RoadSide].TileRoadsIndex[self.MatchingSide[RoadSide]]
@@ -49,7 +49,7 @@ def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, Openi
     if ConnectedRoads == []:
         NextRoadIndex = len(self.BoardRoads)
         self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,OpeningsQuantity,AddedMeeples, Move)
-        self.BoardRoads[NextRoadIndex].Update(1,OpeningsQuantity,AddedMeeples, Move)
+        self.BoardRoads[NextRoadIndex].Update(1,OpeningsQuantity,[0,0,0], Move)
         for RoadSide in RoadOpenings:
             PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
             

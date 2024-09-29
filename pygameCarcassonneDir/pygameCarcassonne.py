@@ -203,7 +203,7 @@ def PlayGame(p1, p2):
             if not isGameOver:
                 if player.isAIPlayer:
                     if event.type == AI_MOVE_EVENT:
-                        player, selectedMove = playMove(
+                        player, selectedMove, meepleLoc = playMove(
                             NT,
                             player,
                             Carcassonne,
@@ -211,12 +211,15 @@ def PlayGame(p1, p2):
                             isStartOfGame,
                             ManualMove=None,
                         )
-                        opponentStrat.add(selectedMove)
 
+                        opponentStrat.add(selectedMove)
                         X = selectedMove[1] 
                         Y = selectedMove[2] 
-                        Carcassonne.add_coordmove(X, Y, selectedMove)
-                        #print(Carcassonne.coordList)
+                        Carcassonne.add_coordmove(X, Y, selectedMove, 2)
+
+                        if p2.identifier == "YCoPilot":
+                            updateKeys(selectedMove[0], meepleLoc, (X,Y))
+                            number = 0
                         
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
@@ -256,7 +259,7 @@ def PlayGame(p1, p2):
                         elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
                             ManualMove = (NT.nextTileIndex, X, Y, rotation, NT.Meeple)
-                            player, selectedMove = playMove(
+                            player, selectedMove, meepleLoc = playMove(
                                 NT,
                                 player,
                                 Carcassonne,
@@ -264,20 +267,16 @@ def PlayGame(p1, p2):
                                 isStartOfGame,
                                 ManualMove,
                             )
+                            
+                            playerStrat.add(selectedMove)
                             X = selectedMove[1] 
                             Y = selectedMove[2] 
-                            Carcassonne.add_coordmove(X, Y, selectedMove)
+                            Carcassonne.add_coordmove(X, Y, selectedMove,1)
 
                             if p2.identifier == "YCoPilot":
-                                if int(selectedMove[0]) == 11 or int(selectedMove[0]) == 6:
-                                    updateKeys(selectedMove[0], number, (X,Y))
-                                    number = 0
-
-                            #print(Carcassonne.coordList)
-
-                            playerStrat.add(selectedMove)
-                            # print(playerStrat.get())
-
+                                updateKeys(selectedMove[0], number, (X,Y))
+                                number = 0
+                                    
                             NT = nextTile(Carcassonne, DisplayScreen)
                             NT.moveLabel = pygame.Surface(
                                 (DisplayScreen.Window_Width, 50)
@@ -302,16 +301,13 @@ def PlayGame(p1, p2):
         drawGrid(DisplayScreen)
 
         if playAImove:
-            # print(f"The selected move is: {selectedMove}")
-            playerStrat.add(selectedMove)
-            #print(playerStrat.get())
-            #print(playerStrat.get_meeple_key())
             Carcassonne.move(selectedMove)
+
+            playerStrat.add(selectedMove)
             X = selectedMove[1]
             Y = selectedMove[2] 
-            Carcassonne.add_coordmove(X, Y, selectedMove)
-            #print(Carcassonne.coordList)
-            # print(Carcassonne.TotalTiles)
+            Carcassonne.add_coordmove(X, Y, selectedMove, 1)
+            
             aiMove.add()
             print(f"Current AI Counter = {aiMove.get()}")
             
@@ -370,8 +366,6 @@ def PlayGame(p1, p2):
         newRotation = False
         numberSelected = 0
 
-        player_strategy = playerStrat.get()
-
         if p2.identifier == "XCoPilot":
             if firstRotation:
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
@@ -385,9 +379,9 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                AdaptiveStrategies.enhance_feature(Carcassonne)
-                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-                #complete_feature()
+                # AdaptiveStrategies.enhance_feature(Carcassonne)
+                # AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
+                AdaptiveStrategies.steal_points(Carcassonne)
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
@@ -403,10 +397,6 @@ def PlayGame(p1, p2):
         hasSomethingNew = False
 
         CLOCK.tick(60)
-        #print(f"Player Strategy: {playerStrat.get()}")
-        #print(f"Opponent Strategy: {opponentStrat.get()}")
-
-        
 
         if isGameOver:
             print(
