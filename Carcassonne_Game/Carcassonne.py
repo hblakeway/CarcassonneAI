@@ -556,7 +556,7 @@ class CarcassonneState:
         if not(MeepleKey is None):
             return MeepleLocation
         else: 
-            return 0
+            return (0,0) # no meeple 
         
     def EndGameRoutine(self):
         """

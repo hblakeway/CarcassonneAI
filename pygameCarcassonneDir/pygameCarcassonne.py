@@ -19,6 +19,7 @@ from player.Star2_5_Player import Star2_5
 from Carcassonne_Game.Carcassonne import CarcassonneState
 from Carcassonne_Game.Tile import Tile
 from Carcassonne_Game.GameFeatures import Monastery, City, Road, Farm
+from Carcassonne_Game.Tile_dict import MEEPLE_LOC_DICT
 
 from pygameCarcassonneDir.pygameNextTile import nextTile
 from pygameCarcassonneDir.pygameFunctions import (
@@ -218,8 +219,7 @@ def PlayGame(p1, p2):
                         Carcassonne.add_coordmove(X, Y, selectedMove, 2)
 
                         if p2.identifier == "YCoPilot":
-                            updateKeys(selectedMove[0], meepleLoc, (X,Y))
-                            number = 0
+                            updateKeys(selectedMove[0], meepleLoc, (X,Y), selectedMove[3])
                         
                         NT = nextTile(Carcassonne, DisplayScreen)
                         NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50)) # Last move label 
@@ -244,7 +244,6 @@ def PlayGame(p1, p2):
                             newRotation = True
                         if event.key in NumKeys:
                             numberStr = pygame.key.name(event.key)
-                            number = 0 + int(numberStr)
                             numberSelected = int(numberStr)
                             if numberSelected == 0:
                                 NT.Meeple = None
@@ -274,8 +273,7 @@ def PlayGame(p1, p2):
                             Carcassonne.add_coordmove(X, Y, selectedMove,1)
 
                             if p2.identifier == "YCoPilot":
-                                updateKeys(selectedMove[0], number, (X,Y))
-                                number = 0
+                                updateKeys(selectedMove[0], meepleLoc, (X,Y), selectedMove[3])
                                     
                             NT = nextTile(Carcassonne, DisplayScreen)
                             NT.moveLabel = pygame.Surface(
@@ -334,6 +332,7 @@ def PlayGame(p1, p2):
                 i = 1
                 for location_key in NT.Tile.AvailableMeepleLocs:
                     location_value = NT.Tile.AvailableMeepleLocs[location_key]
+                    
                     NT.addMeepleLocations(
                         location_key,
                         location_value,
@@ -379,9 +378,9 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                # AdaptiveStrategies.enhance_feature(Carcassonne)
+                AdaptiveStrategies.enhance_feature(Carcassonne)
                 # AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-                AdaptiveStrategies.steal_points(Carcassonne)
+                # AdaptiveStrategies.steal_points(Carcassonne)
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
