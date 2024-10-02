@@ -371,26 +371,68 @@ class AdaptiveStrategies:
                                         if checkCoord == 1 and tile_properties[tile_index] == 'C':
                                             if tile not in city_enhancements:
                                                 city_enhancements.append(['city', tile])
-            #Roads
-            for roads in roadFeatures:
-                road_tiles = roadFeatures[roads]['Tiles']
-                tuple = ast.literal_eval(road_tiles)
-                for components in tuple:
-                    road_index = components[0]
-                    road_x = components[1]
-                    road_y = components[2]
-                    road_rotation = components[3]
+                    
+                if PlayingTile.HasRoads: # Check if it can connect to any roads 
+                    for roads in roadFeatures:
+                        road_tiles = cityFeatures[roads]['Tiles']
+                        tuple = ast.literal_eval(road_tiles)
 
-                    road_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(road_index)], road_rotation)
-                    SurroundingSpots = [(road_x-1,road_y),(road_x,road_y+1),(road_x+1,road_y),(road_x,road_y-1)]
+                        # Individual tiles that make up the road feature 
+                        for components in tuple:
+                            road_index = components[0]
+                            road_x = components[1]
+                            road_y = components[2]
+                            road_rotation = components[3]
 
-                    if (X,Y) in SurroundingSpots and meepleLocation is None:
-                        for i in range(4):
-                            if tile_properties[i] == 'R' and road_tile_properties[(i + 2) % 4] == 'R':
-                                # Check that tile placement makes roads align
+                            road_tile_properties = rotate_list(TILE_PROPERTIES_DICT[road_index], road_rotation)
+                            SurroundingSpots = [(road_x-1,road_y),(road_x,road_y+1),(road_x+1,road_y),(road_x,road_y-1)]  # left, above, right, below
 
-                                if tile not in road_enhancements:
-                                    road_enhancements.append(['road', tile])
+                            road_index_list = [] # road index position on the road feature tile 
+                            for i in range(len(road_tile_properties)):
+                                if road_tile_properties[i] == 'R':
+                                    road_index_list.append(i)
+
+                            coordinate_checks = {
+                                0: (X - road_x),  
+                                1: (road_y - Y),  
+                                2: (road_x - X),  
+                                3: (Y - road_y)   
+                            }
+
+                            index_checks = {
+                                (0,1): 2,  # For Road 0
+                                (1,1): 3,  # For Road 1
+                                (2,1): 0,  # For Road 2
+                                (3,1): 1   # For Road 3
+                            }
+
+                            if (X,Y) in SurroundingSpots: # if the available move is a surrounding tile of this city feature 
+                                
+                                keys = getKeys()
+                                meeplePlaced = 0
+                                check = (0,0)
+                               
+                                # Check if road feature tile we are checking has a meeple on it
+                                if (road_x, road_y) in keys:
+                                    meeplePlaced = keys[(road_x, road_y)][1]
+                                    check = check_tiles(meeplePlaced, road_rotation) # Getting true coordinate of where the meeple is placed on the road feature
+
+                                if check != (0,0) and (index == 18 or index == 19 or index == 23):
+                                    tile_index = index_checks[check] # I want to check this side on the available tile 
+                                    checkCoord = coordinate_checks[tile_index] # Checking if on that index on the available tile is a 'C'
+
+                                    if checkCoord == 1 and tile_properties[tile_index] == 'R':
+                                        if tile not in road_enhancements:
+                                            road_enhancements.append(['road', tile])
+                                else:
+                                    for i in road_index_list:
+                                        tile_index = (i + 2) % 4
+                                        checkCoord = coordinate_checks[tile_index]
+                                        
+                                        if checkCoord == 1 and tile_properties[tile_index] == 'R':
+                                            if tile not in city_enhancements:
+                                                road_enhancements.append(['road', tile])
+
             #Farms
             for farms in farmFeatures:
                 farm_tiles = farmFeatures[farms]['Tiles']
