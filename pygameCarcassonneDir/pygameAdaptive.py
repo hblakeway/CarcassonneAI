@@ -357,8 +357,6 @@ class AdaptiveStrategies:
                                     print("I have a meeple on a split city. Need to be specific")
                                     tile_index = index_checks[check] # I want to check this side on the available tile 
                                     checkCoord = coordinate_checks[tile_index] # Checking if on that index on the available tile is a 'C'
-                                    
-                                    print(f"Meeple yes {tile_properties[tile_index]}, {checkCoord}")
 
                                     if checkCoord == 1 and tile_properties[tile_index] == 'C':
                                         if tile not in city_enhancements:
@@ -374,7 +372,7 @@ class AdaptiveStrategies:
                     
                 if PlayingTile.HasRoads: # Check if it can connect to any roads 
                     for roads in roadFeatures:
-                        road_tiles = cityFeatures[roads]['Tiles']
+                        road_tiles = roadFeatures[roads]['Tiles']
                         tuple = ast.literal_eval(road_tiles)
 
                         # Individual tiles that make up the road feature 
@@ -430,35 +428,78 @@ class AdaptiveStrategies:
                                         checkCoord = coordinate_checks[tile_index]
                                         
                                         if checkCoord == 1 and tile_properties[tile_index] == 'R':
-                                            if tile not in city_enhancements:
+                                            if tile not in road_enhancements:
                                                 road_enhancements.append(['road', tile])
+                    
+                if PlayingTile.HasFarms: # Check if it can connect to any farms 
+                    for farms in farmFeatures:
+                        farm_tiles = farmFeatures[farms]['Tiles']
+                        tuple = ast.literal_eval(farm_tiles)
 
-            #Farms
-            for farms in farmFeatures:
-                farm_tiles = farmFeatures[farms]['Tiles']
-                tuple = ast.literal_eval(farm_tiles)
-                for components in tuple:
-                    print(components)
-                    farm_index = components[0]
-                    farm_x = components[1]
-                    farm_y = components[2]
-                    farm_rotation = components[3]
+                        # Individual tiles that make up the road feature 
+                        for components in tuple:
+                            farm_index = components[0]
+                            farm_x = components[1]
+                            farm_y = components[2]
+                            farm_rotation = components[3]
 
-                    farm_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(farm_index)], farm_rotation)
-                    SurroundingSpots = [(farm_x-1,farm_y),(farm_x,farm_y+1),(farm_x+1,farm_y),(farm_x,farm_y-1)]
+                            farm_tile_properties = rotate_list(TILE_PROPERTIES_DICT[farm_index], farm_rotation)
+                            SurroundingSpots = [(farm_x-1,farm_y),(farm_x,farm_y+1),(farm_x+1,farm_y),(farm_x,farm_y-1)]  # left, above, right, below
 
-                    if (farm_x,farm_y) in SurroundingSpots and meepleLocation is None:
+                            farm_index_list = [] # road index position on the road feature tile 
+                            for i in range(len(farm_tile_properties)):
+                                if farm_tile_properties[i] == 'G':
+                                    farm_index_list.append(i)
 
-                        print(f"Assessing available move {tile, tile_properties}")
+                            coordinate_checks = {
+                                0: (X - farm_x),  
+                                1: (farm_y - Y),  
+                                2: (farm_x - X),  
+                                3: (Y - farm_y)   
+                            }
 
-                        for i in range(4):
-                            if tile_properties[i] == 'G' and farm_tile_properties[(i + 2) % 4] == 'G':
-                                # Check that tile placement makes farms align 
+                            index_checks = {
+                                (0,1): [2],  # For Road 0
+                                (0,2): [2,1],
+                                (1,1): [3],  # For Road 1
+                                (1,2): [0,3],
+                                (2,1): [0],  # For Road 2
+                                (2,2): [0,1],
+                                (3,1): [1],   # For Road 3
+                                (3,2): [1,2]
+                            }
 
-                                if tile not in farm_enhancements:
-                                    farm_enhancements.append(['farm', tile])
-        
-    
+                            if (X,Y) in SurroundingSpots: # if the available move is a surrounding tile of this city feature 
+                                
+                                keys = getKeys()
+                                meeplePlaced = 0
+                                check = (0,0)
+                               
+                                # Check if road feature tile we are checking has a meeple on it
+                                if (farm_x, farm_y) in keys:
+                                    meeplePlaced = keys[(farm_x, farm_y)][1]
+                                    check = check_tiles(meeplePlaced, farm_rotation) # Getting true coordinate of where the meeple is placed on the road feature
+
+                                split_farms = [3, 4, 8, 9, 10, 12, 14, 16, 17, 18, 19, 21, 22, 23]
+                                if check != (0,0) and (index in split_farms):
+                                    tile_index = index_checks[check] # I want to check this side on the available tile 
+                                    count = 0
+                                    for sides in tile_index:
+                                        checkCoord = coordinate_checks[sides] # Checking if on that index on the available tile is a 'C'
+                                        if checkCoord == 1 and tile_properties[sides] == 'G':
+                                            count += 1
+
+                                    if count == len(tile_index) and tile not in farm_enhancements:
+                                        farm_enhancements.append(['farm', tile])
+                                else:
+                                    for i in farm_index_list:
+                                        tile_index = (i + 2) % 4
+                                        checkCoord = coordinate_checks[tile_index]
+                                        
+                                        if checkCoord == 1 and tile_properties[tile_index] == 'G':
+                                            if tile not in farm_enhancements:
+                                                farm_enhancements.append(['farm', tile])
+
         all_enhancements = city_enhancements + road_enhancements + farm_enhancements
         print(all_enhancements)
 
@@ -543,14 +584,13 @@ class AdaptiveStrategies:
         availableMoves = Carcassonne.availableMoves()
         
         for tile in availableMoves:
-            
             X = tile.X
             Y = tile.Y
             Rotation = tile.Rotation
             meepleLocation = tile.MeepleInfo
             index = tile.TileIndex
-            # PlayingTile = Tile(index)
-            # tile_coord = (X,Y)
+
+            SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]
 
             index_checks = {
                 0: (X-1, Y),  
@@ -559,15 +599,12 @@ class AdaptiveStrategies:
                 3: ((X,Y-1)) 
             }
 
-
-            # Rotates the tile properties to equal the available rotation
-            tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
+            tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)  # Rotates the tile properties to equal the available rotation
 
             if meepleLocation is None:  # If we are connecting we wont be able to place meeple 
-                if index in TILE_COMBINE_CITY:
-                    
 
-                    # Gets the index of the openings 
+                if index in TILE_COMBINE_CITY: # If available tile is a city connecting tile 
+
                     city_openings_index = []
                     for i in range(len(tile_properties)):
                             if tile_properties[i] == 'C':
@@ -576,31 +613,43 @@ class AdaptiveStrategies:
                     # Get opponents features
                     for opp_cities in oppcityFeatures:
                         opponents_city_tuple = ast.literal_eval(oppcityFeatures[opp_cities]['Tiles'])
-                        print(f"Opponents tuple {opponents_city_tuple}")
                         opp_feature_length = len(opponents_city_tuple)
                     
-                        
-
                         for opp_components in opponents_city_tuple:
-                            # opp_city_index = opp_components[0]
-                            # opp_city_tile = Tile(opp_city_index)
-                            # Check that opponents_city_tuple has at least one tuple of length 4
                             if not len(opp_components) == 5:
-                                print(f"Skipping invalid tuple {opp_components}.Components must be of length 4. Length = {len(opp_components)}")
-                                continue  # Skip to the next iteration if any tuple is not length 4
-                            
+                                print(f"Skipping invalid tuple {opp_components}. Components must be of length 4. Length = {len(opp_components)}")
+                                continue  
+                            opp_city_index = opp_components[0]
                             opp_city_x = opp_components[1]
                             opp_city_y = opp_components[2]
                             opp_city_rotation = opp_components[3]
                             opp_city_meeple = opp_components[4]
 
-
                             opp_coordinate_checks = {
-                                0: (opp_city_x - X),  # For CitySide 0
-                                1: (Y - opp_city_y),  # For CitySide 1
-                                2: (X - opp_city_x),  # For CitySide 2
-                                3: (opp_city_y - Y)   # For CitySide 3
+                                0: (X - opp_city_x),  # For CitySide 0
+                                1: (opp_city_y - Y),  # For CitySide 1
+                                2: (opp_city_x - X),  # For CitySide 2
+                                3: (Y - opp_city_y)   # For CitySide 3
                             }
+                            
+                            opp_index_checks = {
+                                (0,1): 2,  # For CitySide 0
+                                (1,1): 3,  # For CitySide 1
+                                (2,1): 0,  # For CitySide 2
+                                (3,1): 1   # For CitySide 3
+                            }
+
+                            opponentMeeplePlaced = 0
+
+                            if (opp_city_x, opp_city_y) in keys:
+                                opponentMeeplePlaced = keys[(opp_city_x, opp_city_y)][1]
+                            
+                            opp_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(opp_city_index)],opp_city_rotation)
+
+                            opp_index_list = [] # city index position on the city feature tile 
+                            for i in range(len(opp_tile_properties)):
+                                if opp_tile_properties[i] == 'C':
+                                    opp_index_list.append(i)
 
                             # Get player features 
                             for player_cities in playerCityFeatures:
@@ -608,90 +657,103 @@ class AdaptiveStrategies:
                                 player_feature_length = len(player_city_tuple)
                                 
                                 for player_components in player_city_tuple:
-                                    # player_city_index = player_components[0]
-                                    # player_city_tile = Tile(player_city_index)
+                                    if not len(player_components) == 5:
+                                        print(f"Skipping invalid tuple {player_components}. Components must be of length 4. Length = {len(player_components)}")
+                                        continue  
+                                    player_city_index = player_components[0]
                                     player_city_x = player_components[1]
                                     player_city_y = player_components[2]
                                     player_city_rotation = player_components[3]
                                     player_city_meeple = player_components[4]
 
+                                    player_coordinate_checks = {
+                                        0: (X - player_city_x),  # For CitySide 0
+                                        1: (player_city_y - Y),  # For CitySide 1
+                                        2: (player_city_x - X),  # For CitySide 2
+                                        3: (Y - player_city_y)   # For CitySide 3
+                                    }
+                                    
+                                    player_index_checks = {
+                                        (0,1): 2,  # For CitySide 0
+                                        (1,1): 3,  # For CitySide 1
+                                        (2,1): 0,  # For CitySide 2
+                                        (3,1): 1   # For CitySide 3
+                                    }
+
+                                    playermeeplePlaced = 0
+
                                     if (player_city_x, player_city_y) in keys:
                                         playermeeplePlaced = keys[(player_city_x, player_city_y)][1]
+                                    
+                                    player_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(player_city_index)],player_city_rotation)
+
+                                    player_index_list = [] # city index position on the city feature tile 
+                                    for i in range(len(player_tile_properties)):
+                                        if player_tile_properties[i] == 'C':
+                                            player_index_list.append(i)
 
                                     # Only combine if opponents feature is larger than players
-                                    if (opp_feature_length > player_feature_length):
+                                    if (opp_feature_length > player_feature_length): # These two features are eligible. Now we need to check if the tile fits 
+                                        opp_coords = (opp_city_x, opp_city_y)
+                                        player_coords = (player_city_x, player_city_y)
 
-                                        # Check if tile fits index 
-                                        for index in city_openings_index:
-                                            opp_coords = (opp_city_x, opp_city_y)
-                                            if index_checks[index] == opp_coords:
-                                                    # Check the remaining indices for player coordinates
-                                                    for other_index in city_openings_index:
-                                                        player_coords = (player_city_x, player_city_y)
-                                                        if other_index != index and index_checks[other_index] == player_coords:
-                                                            if opp_city_meeple is not None or player_city_meeple is not None:
-                                                                print(f"Opponent meeple {opp_city_meeple}")
-                                                                print(f"Player meeple {player_city_meeple}")
+                                        if (opp_coords in SurroundingSpots) and (player_coords in SurroundingSpots):
+                                            # Tile connects two tiles. 
+                                            # Check that there isn't a meeple on a seperate side 
+                                            # Check that it is conneted via cities 
 
-                                                                oppmeeplePlaced = 0 
-                                                                playermeeplePlaced = 0 
-                                                                
-                                                                print(keys)
+                                            opp_check = (0,0)
+                                            player_check = (0,0)
+                                           
+                                            opp_check = check_tiles(opponentMeeplePlaced, opp_city_rotation) # Getting true coordinate of where the meeple is placed on the city feature
+                                            player_check = check_tiles(playermeeplePlaced, player_city_rotation)
 
-                                                                # Gives back the number where meeple was placed 
-                                                                if (opp_city_x, opp_city_y) in keys:
-                                                                    print(keys[(opp_city_x, opp_city_y)])
-                                                                    oppmeeplePlaced = keys[(opp_city_x, opp_city_y)][1] # Location of placed meeple
-                                                                    print(oppmeeplePlaced)
+                                            if opp_check != (0,0) and (opp_city_index == 6 or opp_city_index == 11): # Have to check which side meeple is on because there is a meeple on the tile
 
-                                                                if (player_city_x, player_city_y) in keys:
-                                                                    print(keys[(player_city_x, player_city_y)])
-                                                                    playermeeplePlaced = keys[(player_city_x, player_city_y)][1] # Location of placed meeple
-                                                                    print(playermeeplePlaced)
-                                                                
-                                                                print(opp_city_rotation)
-                                                                print(player_city_rotation)
+                                                opp_tile_index = opp_index_checks[opp_check]
+                                                opp_checkCoord = opp_coordinate_checks[opp_tile_index]
 
-                                                                if oppmeeplePlaced != 0:
-                                                                    opp_side_checks = {
-                                                                        0: int(oppmeeplePlaced),  
-                                                                        90: (int(oppmeeplePlaced) + 1) % 4, 
-                                                                        180: (int(oppmeeplePlaced) + 2) % 4,  
-                                                                        270: (int(oppmeeplePlaced) + 3) % 4   
-                                                                    }
+                                                if opp_checkCoord == 1 and tile_properties[opp_tile_index] == 'C': # If this lines up with meeple space check the player  
+                                                    # The tile matches to opponent tile city opening  
 
-                                                                    oppmeeplePlaced = opp_side_checks[opp_city_rotation]
-                                                                
-                                                                if playermeeplePlaced != 0:
-                                                                    player_side_checks = {
-                                                                        0: int(playermeeplePlaced),  
-                                                                        90: (int(playermeeplePlaced) + 1) % 4, 
-                                                                        180: (int(playermeeplePlaced) + 2) % 4,  
-                                                                        270: (int(playermeeplePlaced) + 3) % 4   
-                                                                    }
+                                                    if player_check != (0,0) and (player_city_index == 6 or player_city_index == 11):
+                                                        player_tile_index = player_index_checks[opp_check]
+                                                        player_checkCoord = player_coordinate_checks[player_tile_index]
 
-                                                                    playermeeplePlaced = player_side_checks[player_city_rotation]
+                                                        if player_checkCoord == 1 and tile_properties[player_tile_index] == 'C':
+                                                            if tile not in combination:
+                                                                combination.append(['city', tile])
+                                                    else: # Player city index is not 6 or 11 
+                                                        for i in player_index_list:
+                                                            player_tile_index = (i + 2) % 4
+                                                            player_checkCoord = player_coordinate_checks[player_tile_index]
 
-                                                                # Check that this placement lines up with the tile to about to be placed
-                                                                opp_coordinate_checks = {
-                                                                    0: (opp_city_x - X),  # For CitySide 0
-                                                                    1: (Y - opp_city_y),  # For CitySide 1
-                                                                    2: (X - opp_city_x),  # For CitySide 2
-                                                                    3: (opp_city_y - Y)   # For CitySide 3
-                                                                }
+                                                            if player_checkCoord == 1 and tile_properties[player_tile_index] == 'C':
+                                                                if tile not in combination:
+                                                                    combination.append(['city', tile])
 
-                                                                player_coordinate_checks = {
-                                                                    0: (player_city_x - X),  # For CitySide 0
-                                                                    1: (Y - player_city_y),  # For CitySide 1
-                                                                    2: (X - player_city_x),  # For CitySide 2
-                                                                    3: (player_city_y - Y)   # For CitySide 3
-                                                                }
+                                            else: # Opponents city index is not 6 or 11 
+                                                for i in opp_index_list:
+                                                    opp_tile_index = (i + 2) % 4
+                                                    opp_checkCoord = opp_coordinate_checks[opp_tile_index]
+                                                    if opp_checkCoord == 1 and tile_properties[opp_tile_index] == 'C':
 
-                                                                print(opp_coordinate_checks[oppmeeplePlaced])
-                                                                print(player_coordinate_checks[playermeeplePlaced])
+                                                        if player_check != (0,0) and (player_city_index == 6 or player_city_index == 11):
+                                                            player_tile_index = player_index_checks[opp_check]
+                                                            player_checkCoord = player_coordinate_checks[player_tile_index]
 
-                                                                if opp_coordinate_checks[oppmeeplePlaced] == 1 and player_coordinate_checks[playermeeplePlaced] == 1:
-                                                                    combination.append(['cities', tile])
+                                                            if player_checkCoord == 1 and tile_properties[player_tile_index] == 'C':
+                                                                if tile not in combination:
+                                                                    combination.append(['city', tile])
+                                                        else: # Opponents city index is not 6 or 11 
+                                                            for i in player_index_list:
+                                                                player_tile_index = (i + 2) % 4
+                                                                player_checkCoord = player_coordinate_checks[player_tile_index]
+
+                                                                if player_checkCoord == 1 and tile_properties[player_tile_index] == 'C':
+                                                                    if tile not in combination:
+                                                                        combination.append(['city', tile])
+                                            
                 if index in TILE_COMBINE_ROAD: 
                     roads_openings_index = []
                     for i in range(len(tile_properties)):
