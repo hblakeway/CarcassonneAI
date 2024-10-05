@@ -794,5 +794,8 @@ class CarcassonneState:
     def get_coordList(self):
         return self.coordList
     
+    def get_mon_openings(self):
+        return self.MonasteryOpenings
+    
 
     

@@ -154,6 +154,7 @@ def player_features(featureList):
 
                     if player > opponent:
                         # Player feature 
+                        print(f"FeatureList[i] = {featureList[i]}")
                         players_features[feature_count] = featureList[i]
                         feature_count += 1
     
@@ -193,8 +194,11 @@ def player_features_mon(monList):
             for characteristics in monList[i]:
                 if characteristics == 'Owner' and monList[i][characteristics] == '0':
                     player_mon = True
-                if characteristics == 'Tile' and player_mon == True:
+                if characteristics == 'Tiles' and player_mon == True:
+                    print(f"player mon = {monList[i][characteristics]}")
                     players_features[feature_count] = monList[i][characteristics]
+                    feature_count += 1
+                    player_mon = False
 
     return players_features
 
@@ -272,11 +276,14 @@ class AdaptiveStrategies:
         city_enhancements = []
         road_enhancements = []
         farm_enhancements = []
+        monastery_enhacements = []
 
         # List of all the player's features 
         cityFeatures = player_features(handle_features(str(Carcassonne.get_city())))
         roadFeatures = player_features(handle_features(str(Carcassonne.get_road())))
         farmFeatures = player_features(handle_features(str(Carcassonne.get_farm())))
+        monasteryFeatures = player_features_mon(handle_features_mon(str(Carcassonne.get_mon())))
+        print(monasteryFeatures)
 
         # Available Moves for the current tile 
         availableMoves = Carcassonne.availableMoves()
@@ -287,21 +294,45 @@ class AdaptiveStrategies:
             Y = tile.Y
             Rotation = tile.Rotation
             meepleLocation = tile.MeepleInfo
+            index = tile.TileIndex
+            PlayingTile = Tile(index)
+            tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
 
-            # CITIES 
+            # Check monastery 
+            for mon in monasteryFeatures:
+                mon_tiles = monasteryFeatures[mon]
+                mon_tuple = ast.literal_eval(mon_tiles)
+                clean_tuple = []
+                for item in mon_tuple:
+                    # If the item is a tuple and has length 2, keep only the first element
+                    if isinstance(item, tuple) and len(item) == 2:
+                        clean_tuple.append(item[0])
+                    else:
+                        clean_tuple.append(item)
+
+                for index, item in enumerate(clean_tuple):
+                    if isinstance(item, tuple) and len(item) == 5:
+                        mon_x = item[1]
+                        mon_y = item[2]
+
+                        if isinstance(item[4], tuple) and item[4][0] == 'Monastery':
+                            CompleteSurroundingSpots = [(mon_x-1,mon_y),(mon_x,mon_y+1),(mon_x+1,mon_y),(mon_x,mon_y-1),(mon_x-1,mon_y-1),(mon_x+1,mon_y+1),(mon_x+1,mon_y-1),(mon_x-1,mon_y+1)]
+
+                            if (X,Y) in CompleteSurroundingSpots:
+                                if tile not in monastery_enhacements:
+                                    monastery_enhacements.append(['monastery', tile])
+
             if meepleLocation is None: # Don't want to look at available moves that have meeples 
-                index = tile.TileIndex
-                PlayingTile = Tile(index)
-                tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(index)],Rotation)
-
+                
                 if PlayingTile.HasCities: # Check if it can connect to any cities 
                     for cities in cityFeatures:
                         print(f"Cities: {cities}")
                         city_tiles = cityFeatures[cities]['Tiles']
-                        tuple = ast.literal_eval(city_tiles)
+                        city_tuple = ast.literal_eval(city_tiles)
 
                         # Individual tiles that make up the city feature 
-                        for components in tuple:
+                        for components in city_tuple:
+                            print(f"City component {components}")
                             city_index = components[0]
                             city_x = components[1]
                             city_y = components[2]
@@ -361,10 +392,11 @@ class AdaptiveStrategies:
                 if PlayingTile.HasRoads: # Check if it can connect to any roads 
                     for roads in roadFeatures:
                         road_tiles = roadFeatures[roads]['Tiles']
-                        tuple = ast.literal_eval(road_tiles)
+                        road_tuple = ast.literal_eval(road_tiles)
 
                         # Individual tiles that make up the road feature 
-                        for components in tuple:
+                        for components in road_tuple:
+                            print(f"Road component {components}")
                             road_index = components[0]
                             road_x = components[1]
                             road_y = components[2]
@@ -422,10 +454,11 @@ class AdaptiveStrategies:
                 if PlayingTile.HasFarms: # Check if it can connect to any farms 
                     for farms in farmFeatures:
                         farm_tiles = farmFeatures[farms]['Tiles']
-                        tuple = ast.literal_eval(farm_tiles)
+                        farm_tuple = ast.literal_eval(farm_tiles)
 
                         # Individual tiles that make up the road feature 
-                        for components in tuple:
+                        for components in farm_tuple:
+                            print(f"Farm component {components}")
                             farm_index = components[0]
                             farm_x = components[1]
                             farm_y = components[2]
@@ -488,7 +521,7 @@ class AdaptiveStrategies:
                                             if tile not in farm_enhancements:
                                                 farm_enhancements.append(['farm', tile])
 
-        all_enhancements = city_enhancements + road_enhancements + farm_enhancements
+        all_enhancements = city_enhancements + road_enhancements + farm_enhancements + monastery_enhacements
         print(all_enhancements)
 
         if all_enhancements:
