@@ -655,6 +655,7 @@ class AdaptiveStrategies:
                     # Get opponents features
                     for opp_cities in oppcityFeatures:
                         opponents_city_tuple = ast.literal_eval(oppcityFeatures[opp_cities]['Tiles'])
+                        opp_feature_length = len(opponents_city_tuple)
                         clean_tuple = []
                         clean_tuple = clean(opponents_city_tuple)
                     

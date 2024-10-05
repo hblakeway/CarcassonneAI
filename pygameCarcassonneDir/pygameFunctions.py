@@ -413,8 +413,8 @@ def printScores(Carcassonne, displayScreen):
     p1_Name_Label = Label(" Name: " + name_p1, font_size = 25, background = None, foreground = WHITE)
     p2_Name_Label = Label(" Name: " + name_p2, font_size = 25, background = None, foreground = WHITE)
     
-    p1_Score_Label = Label(" Score: " + str(p1_score), font_size = 25, background = None, foreground = WHITE)
-    p2_Score_Label = Label(" Score: " + str(p2_score), font_size = 25, background = None, foreground = WHITE)
+    p1_Score_Label = Label(" Score: " + str(Carcassonne.Scores[2]), font_size = 25, background = None, foreground = WHITE)
+    p2_Score_Label = Label(" Score: " + str(Carcassonne.Scores[3]), font_size = 25, background = None, foreground = WHITE)
     
     p1_Meeples_Label = Label(" Meeples: " + str(p1_meeples), font_size = 25, background = None, foreground = WHITE)
     p2_Meeples_Label = Label(" Meeples: " + str(p2_meeples), font_size = 25, background = None, foreground = WHITE)
