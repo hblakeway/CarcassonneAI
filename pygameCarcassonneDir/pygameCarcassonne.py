@@ -300,7 +300,6 @@ def PlayGame(p1, p2):
 
         if playAImove:
             Carcassonne.move(selectedMove)
-
             playerStrat.add(selectedMove)
             X = selectedMove[1]
             Y = selectedMove[2] 
@@ -365,6 +364,8 @@ def PlayGame(p1, p2):
         newRotation = False
         numberSelected = 0
 
+        player_strategy = playerStrat.get()
+
         if p2.identifier == "XCoPilot":
             if firstRotation:
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
@@ -379,8 +380,8 @@ def PlayGame(p1, p2):
         else: # Player should be y copilot 
             if firstRotation:
                 AdaptiveStrategies.enhance_feature(Carcassonne)
-                # AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-                # AdaptiveStrategies.steal_points(Carcassonne)
+                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
+                AdaptiveStrategies.steal_points(Carcassonne)
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)

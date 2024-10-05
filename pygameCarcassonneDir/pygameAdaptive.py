@@ -154,7 +154,7 @@ def player_features(featureList):
 
                     if player > opponent:
                         # Player feature 
-                        print(f"FeatureList[i] = {featureList[i]}")
+                        #print(f"FeatureList[i] = {featureList[i]}")
                         players_features[feature_count] = featureList[i]
                         feature_count += 1
     
@@ -195,7 +195,7 @@ def player_features_mon(monList):
                 if characteristics == 'Owner' and monList[i][characteristics] == '0':
                     player_mon = True
                 if characteristics == 'Tiles' and player_mon == True:
-                    print(f"player mon = {monList[i][characteristics]}")
+                    #print(f"player mon = {monList[i][characteristics]}")
                     players_features[feature_count] = monList[i][characteristics]
                     feature_count += 1
                     player_mon = False
@@ -255,15 +255,28 @@ def rotate_dictionary(index, rotation):
 def check_tiles(coord, rotation):
    
     if coord in coord_rotation:
-        print(f"Original: {coord}, Rotation: {rotation}, Final: {coord_rotation[coord][rotation]}")
+        #print(f"Original: {coord}, Rotation: {rotation}, Final: {coord_rotation[coord][rotation]}")
         return coord_rotation[coord][rotation]
     else:
-        print(0,0)
+        #print(0,0)
         return (0,0)
 
 def get_meeple():
 
     return
+
+def clean(original):
+
+    clean_tuple = []
+
+    for item in original:
+        # If the item is a tuple and has length 2, keep only the first element
+        if isinstance(item, tuple) and len(item) == 2:
+            clean_tuple.append(item[0])
+        else:
+            clean_tuple.append(item)
+
+    return clean_tuple
 
 class AdaptiveStrategies:
 
@@ -283,7 +296,6 @@ class AdaptiveStrategies:
         roadFeatures = player_features(handle_features(str(Carcassonne.get_road())))
         farmFeatures = player_features(handle_features(str(Carcassonne.get_farm())))
         monasteryFeatures = player_features_mon(handle_features_mon(str(Carcassonne.get_mon())))
-        print(monasteryFeatures)
 
         # Available Moves for the current tile 
         availableMoves = Carcassonne.availableMoves()
@@ -303,13 +315,8 @@ class AdaptiveStrategies:
                 mon_tiles = monasteryFeatures[mon]
                 mon_tuple = ast.literal_eval(mon_tiles)
                 clean_tuple = []
-                for item in mon_tuple:
-                    # If the item is a tuple and has length 2, keep only the first element
-                    if isinstance(item, tuple) and len(item) == 2:
-                        clean_tuple.append(item[0])
-                    else:
-                        clean_tuple.append(item)
-
+                clean_tuple = clean(mon_tuple)
+                
                 for index, item in enumerate(clean_tuple):
                     if isinstance(item, tuple) and len(item) == 5:
                         mon_x = item[1]
@@ -326,13 +333,18 @@ class AdaptiveStrategies:
                 
                 if PlayingTile.HasCities: # Check if it can connect to any cities 
                     for cities in cityFeatures:
-                        print(f"Cities: {cities}")
+                        #f"Cities: {cities}")
                         city_tiles = cityFeatures[cities]['Tiles']
                         city_tuple = ast.literal_eval(city_tiles)
+                        clean_tuple = []
+                        clean_tuple = clean(city_tuple)
 
                         # Individual tiles that make up the city feature 
-                        for components in city_tuple:
-                            print(f"City component {components}")
+                        for item, components in enumerate(clean_tuple):
+                            #print(f"City component {item}")
+                            if len(components) != 5:
+                                continue
+
                             city_index = components[0]
                             city_x = components[1]
                             city_y = components[2]
@@ -361,19 +373,19 @@ class AdaptiveStrategies:
                             }
 
                             if (X,Y) in SurroundingSpots: # if the available move is a surrounding tile of this city feature 
-                                print("This tile has available spots around one of my already cities")
+                                #print("This tile has available spots around one of my already cities")
                                 keys = getKeys()
                                 meeplePlaced = 0
                                 check = (0,0)
-                                print(city_index, city_rotation)
+                                #print(city_index, city_rotation)
                                 # Check if city feature tile we are checking has a meeple on it
                                 if (city_x, city_y) in keys:
-                                    print("I may have a meeple")
+                                    #print("I may have a meeple")
                                     meeplePlaced = keys[(city_x, city_y)][1]
                                     check = check_tiles(meeplePlaced, city_rotation) # Getting true coordinate of where the meeple is placed on the city feature
 
                                 if check != (0,0) and (index == 6 or index == 11):
-                                    print("I have a meeple on a split city. Need to be specific")
+                                    #print("I have a meeple on a split city. Need to be specific")
                                     tile_index = index_checks[check] # I want to check this side on the available tile 
                                     checkCoord = coordinate_checks[tile_index] # Checking if on that index on the available tile is a 'C'
 
@@ -393,10 +405,17 @@ class AdaptiveStrategies:
                     for roads in roadFeatures:
                         road_tiles = roadFeatures[roads]['Tiles']
                         road_tuple = ast.literal_eval(road_tiles)
+                        clean_tuple = []
+                        clean_tuple = clean(road_tuple)
+                        
 
                         # Individual tiles that make up the road feature 
-                        for components in road_tuple:
-                            print(f"Road component {components}")
+                        for item, components in enumerate(clean_tuple):
+                            #print(f"Road item {item}")
+                            #print(f"Road components {components}")
+                            if len(components) != 5:
+                                continue
+
                             road_index = components[0]
                             road_x = components[1]
                             road_y = components[2]
@@ -455,10 +474,13 @@ class AdaptiveStrategies:
                     for farms in farmFeatures:
                         farm_tiles = farmFeatures[farms]['Tiles']
                         farm_tuple = ast.literal_eval(farm_tiles)
+                        clean_tuple = []
+                        clean_tuple = clean(farm_tuple)
+                        
 
                         # Individual tiles that make up the road feature 
-                        for components in farm_tuple:
-                            print(f"Farm component {components}")
+                        for item, components in enumerate(clean_tuple):
+                            #f"Farm component {item}")
                             farm_index = components[0]
                             farm_x = components[1]
                             farm_y = components[2]
@@ -632,17 +654,14 @@ class AdaptiveStrategies:
                     
                     # Get opponents features
                     for opp_cities in oppcityFeatures:
-                        print(f"opp_cities {opp_cities}")
                         opponents_city_tuple = ast.literal_eval(oppcityFeatures[opp_cities]['Tiles'])
-                        print(f"opponents_city_tuple {opponents_city_tuple}")
-                        opp_feature_length = len(opponents_city_tuple)
+                        clean_tuple = []
+                        clean_tuple = clean(opponents_city_tuple)
                     
-                        for opp_components in opponents_city_tuple:
-                            print(f"opp_component {opp_components}")
-                            if not len(opp_components) == 5:
-                                print(f"Skipping invalid tuple {opp_components}. Components must be of length 4. Length = {len(opp_components)}")
-                                for i in range(len(opp_components)):
-                                    print(opp_components[i])
+                        for item, opp_components in enumerate(clean_tuple):
+                            #f"opp_component {opp_components}")
+                            if len(opp_components) != 5:
+                                print(f"Skipping invalid tuple {item}.")
                                 continue  
                             opp_city_index = opp_components[0]
                             opp_city_x = opp_components[1]
@@ -679,10 +698,12 @@ class AdaptiveStrategies:
                             for player_cities in playerCityFeatures:
                                 player_city_tuple = ast.literal_eval(playerCityFeatures[player_cities]['Tiles'])
                                 player_feature_length = len(player_city_tuple)
+                                clean_tuple = []
+                                clean_tuple = clean(player_city_tuple)
                                 
-                                for player_components in player_city_tuple:
-                                    if not len(player_components) == 5:
-                                        print(f"Skipping invalid tuple {player_components}. Components must be of length 4. Length = {len(player_components)}")
+                                for item, player_components in enumerate(clean_tuple):
+                                    if len(player_components) != 5:
+                                        print(f"Skipping invalid tuple {item}.")
                                         continue  
                                     player_city_index = player_components[0]
                                     player_city_x = player_components[1]
@@ -786,17 +807,17 @@ class AdaptiveStrategies:
                     
                     # Get opponents features
                     for opp_roads in opproadFeatures:
-                        print(f"opp_roads {opp_roads}")
+                        #print(f"opp_roads {opp_roads}")
                         opponents_road_tuple = ast.literal_eval(opproadFeatures[opp_roads]['Tiles'])
-                        print(f"opponents_road_tuple {opponents_road_tuple}")
+                        #print(f"opponents_road_tuple {opponents_road_tuple}")
                         opp_feature_length = len(opponents_road_tuple)
+                        clean_tuple = []
+                        clean_tuple = clean(opponents_road_tuple)
                     
-                        for opp_components in opponents_road_tuple:
-                            print(f"opp_component {opp_components}")
-                            if not len(opp_components) == 5:
-                                print(f"Skipping invalid tuple {opp_components}. Components must be of length 4. Length = {len(opp_components)}")
-                                for i in range(len(opp_components)):
-                                    print(opp_components[i])
+                        for item, opp_components in enumerate(clean_tuple):
+                            #print(f"opp_component {item}")
+                            if len(opp_components) != 5:
+                                print(f"Skipping invalid tuple {opp_components}.")
                                 continue  
                             opp_road_index = opp_components[0]
                             opp_road_x = opp_components[1]
@@ -834,12 +855,15 @@ class AdaptiveStrategies:
                             for player_road in playerRoadFeatures:
                                 player_road_tuple = ast.literal_eval(playerRoadFeatures[player_road]['Tiles'])
                                 player_feature_length = len(player_road_tuple)
+                                clean_tuple = []
+                                clean_tuple = clean(player_road_tuple)
                                 
-                                for player_components in player_road_tuple:
-                                    print(f"player_component {player_components}")
-                                    if not len(player_components) == 5:
-                                        print(f"Skipping invalid tuple {player_components}. Components must be of length 4. Length = {len(player_components)}")
+                                for item, player_components in enumerate(clean_tuple):
+                                    #f"player_component {item}")
+                                    if len(player_components) != 5:
+                                        print(f"Skipping invalid tuple {item}.")
                                         continue  
+
                                     player_road_index = player_components[0]
                                     player_road_x = player_components[1]
                                     player_road_y = player_components[2]
@@ -945,9 +969,14 @@ class AdaptiveStrategies:
                     for opp_farms in oppfarmFeatures:
                         opp_farm_tiles = opproadFeatures[opp_farms]['Tiles']
                         opponents_farm_tuple = ast.literal_eval(opp_farm_tiles)
+                        clean_tuple = []
+                        clean_tuple = clean(opponents_farm_tuple)
                         #print(f"farm {opponents_farm_tuple}")
 
-                        for opp_components in opponents_farm_tuple:
+                        for item, opp_components in enumerate(clean_tuple):
+                            if len(opp_components) != 5:
+                                continue
+
                             opp_farm_index = opp_components[0]
                             opp_farm_tile = Tile(opp_farm_index)
                             opp_farm_x = opp_components[1]
