@@ -50,9 +50,6 @@ def updateKeys(index, meepleCoord, xy, rotation):
 def getKeys():
     return keys
 
-"""
-Checks Majority strategy pattern for a player 
- """
 def strategy(strategy_list):
     # Count the occurrences of each element in the list
     count = c(strategy_list)
@@ -251,15 +248,6 @@ def rotate_dictionary(index, rotation):
 
     return rotated_values
       
-# Returns the tile index where meeple is placed 
-"""
-      1
-
-0           2
-
-      3
-
-"""
 def check_tiles(coord, rotation):
    
     if coord in coord_rotation:
@@ -566,7 +554,6 @@ class AdaptiveStrategies:
     """
     def steal_points(Carcassonne):
         keys = getKeys()
-        print(keys)
         
         combination = []
 
@@ -578,7 +565,7 @@ class AdaptiveStrategies:
         # List of all the player's features 
         playerCityFeatures = player_features(handle_features(str(Carcassonne.get_city())))
         playerRoadFeatures = player_features(handle_features(str(Carcassonne.get_road())))
-        plauyerFarmFeatures = player_features(handle_features(str(Carcassonne.get_farm())))
+        playerFarmFeatures = player_features(handle_features(str(Carcassonne.get_farm())))
 
         # Available Moves for the current tile 
         availableMoves = Carcassonne.availableMoves()
@@ -612,18 +599,22 @@ class AdaptiveStrategies:
                     
                     # Get opponents features
                     for opp_cities in oppcityFeatures:
+                        print(f"opp_cities {opp_cities}")
                         opponents_city_tuple = ast.literal_eval(oppcityFeatures[opp_cities]['Tiles'])
+                        print(f"opponents_city_tuple {opponents_city_tuple}")
                         opp_feature_length = len(opponents_city_tuple)
                     
                         for opp_components in opponents_city_tuple:
+                            print(f"opp_component {opp_components}")
                             if not len(opp_components) == 5:
                                 print(f"Skipping invalid tuple {opp_components}. Components must be of length 4. Length = {len(opp_components)}")
+                                for i in range(len(opp_components)):
+                                    print(opp_components[i])
                                 continue  
                             opp_city_index = opp_components[0]
                             opp_city_x = opp_components[1]
                             opp_city_y = opp_components[2]
                             opp_city_rotation = opp_components[3]
-                            opp_city_meeple = opp_components[4]
 
                             opp_coordinate_checks = {
                                 0: (X - opp_city_x),  # For CitySide 0
@@ -664,7 +655,6 @@ class AdaptiveStrategies:
                                     player_city_x = player_components[1]
                                     player_city_y = player_components[2]
                                     player_city_rotation = player_components[3]
-                                    player_city_meeple = player_components[4]
 
                                     player_coordinate_checks = {
                                         0: (X - player_city_x),  # For CitySide 0
@@ -753,44 +743,164 @@ class AdaptiveStrategies:
                                                                 if player_checkCoord == 1 and tile_properties[player_tile_index] == 'C':
                                                                     if tile not in combination:
                                                                         combination.append(['city', tile])
-                                            
-                if index in TILE_COMBINE_ROAD: 
-                    roads_openings_index = []
+                
+                if index in TILE_COMBINE_ROAD: # If available tile is a road connecting tile 
+
+                    road_openings_index = []
                     for i in range(len(tile_properties)):
                             if tile_properties[i] == 'R':
-                                roads_openings_index.append(i)
-
+                                road_openings_index.append(i)
+                    
+                    # Get opponents features
                     for opp_roads in opproadFeatures:
+                        print(f"opp_roads {opp_roads}")
                         opponents_road_tuple = ast.literal_eval(opproadFeatures[opp_roads]['Tiles'])
+                        print(f"opponents_road_tuple {opponents_road_tuple}")
                         opp_feature_length = len(opponents_road_tuple)
-
+                    
                         for opp_components in opponents_road_tuple:
+                            print(f"opp_component {opp_components}")
                             if not len(opp_components) == 5:
-                                print(f"Skipping invalid tuple {opp_components}.Components must be of length 4. Length = {len(opp_components)}")
-                                continue
-                            
+                                print(f"Skipping invalid tuple {opp_components}. Components must be of length 4. Length = {len(opp_components)}")
+                                for i in range(len(opp_components)):
+                                    print(opp_components[i])
+                                continue  
+                            opp_road_index = opp_components[0]
                             opp_road_x = opp_components[1]
                             opp_road_y = opp_components[2]
+                            opp_road_rotation = opp_components[3]
+
+                            opp_coordinate_checks = {
+                                0: (X - opp_road_x),  
+                                1: (opp_road_y - Y),  
+                                2: (opp_road_x - X),  
+                                3: (Y - opp_road_y)  
+                            }
                             
+                            opp_index_checks = {
+                                (0,1): 2,  
+                                (1,1): 3, 
+                                (2,1): 0,  
+                                (3,1): 1   
+                            }
+
+                            opponentMeeplePlaced = 0
+
+                            if (opp_road_x, opp_road_y) in keys:
+                                opponentMeeplePlaced = keys[(opp_road_x, opp_road_y)][1]
                             
+                            opp_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(opp_road_index)],opp_road_rotation)
+
+                            opp_index_list = [] # road index position on the road feature tile 
+
+                            for i in range(len(opp_tile_properties)):
+                                if opp_tile_properties[i] == 'R':
+                                    opp_index_list.append(i)
+
                             # Get player features 
-                            for player_roads in playerRoadFeatures:
-                                player_road_tuple = ast.literal_eval(playerRoadFeatures[player_roads]['Tiles'])
+                            for player_road in playerRoadFeatures:
+                                player_road_tuple = ast.literal_eval(playerRoadFeatures[player_road]['Tiles'])
                                 player_feature_length = len(player_road_tuple)
                                 
                                 for player_components in player_road_tuple:
+                                    print(f"player_component {player_components}")
+                                    if not len(player_components) == 5:
+                                        print(f"Skipping invalid tuple {player_components}. Components must be of length 4. Length = {len(player_components)}")
+                                        continue  
+                                    player_road_index = player_components[0]
                                     player_road_x = player_components[1]
                                     player_road_y = player_components[2]
+                                    player_road_rotation = player_components[3]
+
+                                    player_coordinate_checks = {
+                                        0: (X - player_road_x),  
+                                        1: (player_road_y - Y),  
+                                        2: (player_road_x - X),  
+                                        3: (Y - player_road_y)   
+                                    }
+                                    
+                                    player_index_checks = {
+                                        (0,1): 2,  
+                                        (1,1): 3,  
+                                        (2,1): 0,  
+                                        (3,1): 1  
+                                    }
+
+                                    playermeeplePlaced = 0
+
+                                    if (player_road_x, player_road_y) in keys:
+                                        playermeeplePlaced = keys[(player_road_x, player_road_y)][1]
+                                    
+                                    player_tile_properties = rotate_list(TILE_PROPERTIES_DICT[int(player_road_index)],player_road_rotation)
+
+                                    player_index_list = [] # road index position on the road feature tile 
+
+                                    for i in range(len(player_tile_properties)):
+                                        if player_tile_properties[i] == 'R':
+                                            player_index_list.append(i)
 
                                     # Only combine if opponents feature is larger than players
-                                    if (opp_feature_length > player_feature_length):
-                                        # Check if tile fits index 
-                                        for index in roads_openings_index:
-                                            if index_checks[index] == (opp_road_x, opp_road_y):
-                                                # Check the remaining indices for player coordinates
-                                                for other_index in roads_openings_index:
-                                                    if other_index != index and index_checks[other_index] == (player_road_x, player_road_y):
-                                                        combination.append(['roads', tile])
+                                    if (opp_feature_length > player_feature_length): # These two features are eligible. Now we need to check if the tile fits 
+                                        opp_coords = (opp_road_x, opp_road_y)
+                                        player_coords = (player_road_x, player_road_y)
+
+                                        if (opp_coords in SurroundingSpots) and (player_coords in SurroundingSpots):
+                                            # Tile connects two tiles. 
+                                            # Check that there isn't a meeple on a seperate side 
+                                            # Check that it is conneted via cities 
+
+                                            opp_check = (0,0)
+                                            player_check = (0,0)
+                                           
+                                            opp_check = check_tiles(opponentMeeplePlaced, opp_road_rotation) # Getting true coordinate of where the meeple is placed on the city feature
+                                            player_check = check_tiles(playermeeplePlaced, player_road_rotation)
+
+                                            if opp_check != (0,0) and (opp_road_index == 18 or opp_road_index == 19 or opp_road_index == 23): # Have to check which side meeple is on because there is a meeple on the tile
+
+                                                opp_tile_index = opp_index_checks[opp_check]
+                                                opp_checkCoord = opp_coordinate_checks[opp_tile_index]
+
+                                                if opp_checkCoord == 1 and tile_properties[opp_tile_index] == 'R': # If this lines up with meeple space check the player  
+                                                    # The tile matches to opponent tile city opening  
+
+                                                    if player_check != (0,0) and (opp_road_index == 18 or opp_road_index == 19 or opp_road_index == 23):
+                                                        player_tile_index = player_index_checks[opp_check]
+                                                        player_checkCoord = player_coordinate_checks[player_tile_index]
+
+                                                        if player_checkCoord == 1 and tile_properties[player_tile_index] == 'R':
+                                                            if tile not in combination:
+                                                                combination.append(['road', tile])
+                                                    else: # Player road index is not 18 or 19 or 23
+                                                        for i in player_index_list:
+                                                            player_tile_index = (i + 2) % 4
+                                                            player_checkCoord = player_coordinate_checks[player_tile_index]
+
+                                                            if player_checkCoord == 1 and tile_properties[player_tile_index] == 'R':
+                                                                if tile not in combination:
+                                                                    combination.append(['road', tile])
+
+                                            else: # Opponents city index is not 6 or 11 
+                                                for i in opp_index_list:
+                                                    opp_tile_index = (i + 2) % 4
+                                                    opp_checkCoord = opp_coordinate_checks[opp_tile_index]
+
+                                                    if opp_checkCoord == 1 and tile_properties[opp_tile_index] == 'R':
+
+                                                        if player_check != (0,0) and (player_road_index == 18 or player_road_index == 19 or player_road_index == 23):
+                                                            player_tile_index = player_index_checks[opp_check]
+                                                            player_checkCoord = player_coordinate_checks[player_tile_index]
+
+                                                            if player_checkCoord == 1 and tile_properties[player_tile_index] == 'R':
+                                                                if tile not in combination:
+                                                                    combination.append(['road', tile])
+                                                        else: # Opponents city index is not 6 or 11 
+                                                            for i in player_index_list:
+                                                                player_tile_index = (i + 2) % 4
+                                                                player_checkCoord = player_coordinate_checks[player_tile_index]
+
+                                                                if player_checkCoord == 1 and tile_properties[player_tile_index] == 'R':
+                                                                    if tile not in combination:
+                                                                        combination.append(['road', tile])
                      
                 if index in TILE_COMBINE_FARM:
                     # Gets the index of the openings 
@@ -824,8 +934,6 @@ class AdaptiveStrategies:
             return True, selectedMove
         else:
             return False, None
-    
-    
 
 class CarcassonneAdaptive():
     """
