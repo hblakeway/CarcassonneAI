@@ -35,7 +35,7 @@ from pygameCarcassonneDir.pygameFunctions import (
 )
 
 from pygameCarcassonneDir.pygameAdaptive import (
-    AdaptiveStrategies, updateKeys
+    AdaptiveStrategies, AdaptiveRules, updateKeys
 )
 
 from pygameCarcassonneDir.pygameSettings import (
@@ -173,12 +173,9 @@ def PlayGame(p1, p2):
     rotation = 0
     newRotation = False
     numberSelected = 0
-    coordMove = {}
-    current = None
-    number = 0
-
 
     if p2.identifier == "YCoPilot":
+        adaptive_rules = AdaptiveRules() # Initialise
         print("Player 2 is YCoPilot")
     elif p2.identifier == "XCoPilot":
         print("Player 2 is XCoPilot")
@@ -379,9 +376,10 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                AdaptiveStrategies.enhance_feature(Carcassonne)
-                AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-                AdaptiveStrategies.steal_points(Carcassonne)
+                AdaptiveRules.adaptive(adaptive_rules, Carcassonne, player_strategy)
+                #AdaptiveStrategies.enhance_feature(Carcassonne)
+                #AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
+                #AdaptiveStrategies.steal_points(Carcassonne)
                 # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)

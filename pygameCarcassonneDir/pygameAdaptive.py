@@ -1,27 +1,8 @@
-import sys
-from player.Player import Player
-from collections import Counter as c
-import itertools as it
-from dynrules import RuleSet, Rule, LearnSystem
-from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, TILE_PROPERTIES_DICT, AvailableMove
+from Carcassonne_Game.Tile import Tile, TILE_PROPERTIES_DICT
 from Carcassonne_Game.Tile_dict import TILE_COMBINE_CITY, TILE_COMBINE_ROAD, TILE_COMBINE_FARM, features_specific
 import random
-import json
 import ast
-import re
-from Carcassonne_Game.Tile_dict import MEEPLE_LOC_DICT
-
-from pygameCarcassonneDir.pygameFunctions import (
-    playMove,
-    getAImove,
-    drawGrid,
-    diplayGameBoard,
-    printScores,
-    printTilesLeft,
-    Counter,
-    playerStrategy,
-    opponentStrategy
-)
+from collections import Counter as c
 
 keys = {}
 
@@ -215,42 +196,6 @@ def rotate_list(original_list, degrees):
         return original_list[1:] + [original_list[0]]  # Rotate left (counterclockwise)
     else:
         return original_list  # Return original for unhandled degrees
-
-def rotate_dictionary(index, rotation):
-    # Check if the specified key exists
-    if index not in features_specific:
-        raise KeyError(f"Index {index} not found in the dictionary.")
-    
-    values = features_specific[index]
-
-    if rotation == 0:
-        rotated_values = values
-    elif rotation == 90:
-        rotated_values = [
-            values[0],                # Keep first value
-            values[3],                # Move last value to second
-            values[1],                # Move second value to third
-            values[2]                 # Move third value to last
-        ]
-    elif rotation == 180:
-        rotated_values = [
-            values[2],                # Move third to first
-            values[1],                # Keep second
-            values[0],                # Move first to third
-            values[3]                 # Keep last
-        ]
-    elif rotation == 270:
-        rotated_values = [
-            values[1],                # Move second to first
-            values[2],                # Move third to second
-            values[3],                # Move last to third
-            values[0]                 # Keep first as last
-        ]
-    else:
-        return features_specific  # Return original for unhandled cases
-
-
-    return rotated_values
       
 def check_tiles(coord, rotation):
    
@@ -260,10 +205,6 @@ def check_tiles(coord, rotation):
     else:
         #print(0,0)
         return (0,0)
-
-def get_meeple():
-
-    return
 
 def clean(original):
 
@@ -547,12 +488,12 @@ class AdaptiveStrategies:
         print(all_enhancements)
 
         if all_enhancements:
-            selectedMove = random.choice(all_enhancements)
-            print(f"Keep adding to your {selectedMove[0]}")
-            print(selectedMove[1])
-            return True, selectedMove
+            # selectedMove = random.choice(all_enhancements) # CHECK WHICH ONE IS HIGHEST IN MCTS 
+            # print(f"Keep adding to your {selectedMove[0]}")
+            #print(selectedMove[1])
+            return all_enhancements
         else:
-            return False, None
+            return False
         
     """
     If player can create a new feature based on what they are predominately building
@@ -580,10 +521,10 @@ class AdaptiveStrategies:
         player_strategy = strategy(meeplePlacements)
         if player_strategy is not None and p1_meeples > 0:
             meepleDictionary = {
-                "R": "Road",
-                "C": "City",
-                "G": "Farm",
-                "Monastery": "Monastery"
+                "R": "road",
+                "C": "city",
+                "G": "farm",
+                "Monastery": "monastery"
             }
 
             options = []
@@ -591,17 +532,17 @@ class AdaptiveStrategies:
                 MeepleInfo = str(i.MeepleInfo)
 
                 if player_strategy in MeepleInfo:
-                    options.append(i)
+                    options.append([meepleDictionary[player_strategy], i])
             
             if not options:
-                return False, None
+                return False
             
-            selectedMove = random.choice(options)
+            # selectedMove = random.choice(options)
             print(f"It would be good to start a new {meepleDictionary[player_strategy]}.")
-            return True, selectedMove
+            return options
         
         else: # Strategy is False for this move
-            return False, None
+            return False
     
     """
     If there is a large opponent feature that you can steal points from 
@@ -960,7 +901,7 @@ class AdaptiveStrategies:
                                                                     if tile not in combination:
                                                                         combination.append(['road', tile])
                      
-                if index in TILE_COMBINE_FARM:
+                if index in TILE_COMBINE_FARM: # If available tile is a farm connecting tile 
                     # Gets the index of the openings 
                     farms_openings_index = []
                     for i in range(len(tile_properties)):
@@ -992,28 +933,70 @@ class AdaptiveStrategies:
 
         if combination:
             print(f"All possibilites: {combination}")
-            selectedMove = random.choice(combination)
-            print(f"This is your opportunity to combine {selectedMove[0]}")
-            return True, selectedMove
+            #selectedMove = random.choice(combination)
+            #print(f"This is your opportunity to combine {selectedMove[0]}")
+            return combination
         else:
-            return False, None
-
-class CarcassonneAdaptive():
-    """
-    1. Average Time Strategy 
-    2. Opponent Winning Strategy
-    3. Player Winning Strategy 
-    4. Fields Strategy 
-    """
-
-    enhance_feature = False, None
-    enhance_strategy = False, None
-    steal_points = False, None
+            return False
 
 
-class AdaptiveRuleSet(RuleSet):
-    """
-    """
-   
+# Class to manage rule status
+class AdaptiveRules:
+    def __init__(self, enhanceFeature=False, enhanceStrategy=False, stealPoints=False):
+        self.enhanceFeature = enhanceFeature
+        self.enhanceStrategy = enhanceStrategy
+        self.stealPoints = stealPoints
+        self.enhanceFeatureWeight = 0
+        self.enhanceStrategyWeight = 0
+        self.stealPointsWeight = 0
+    
+    def update_last_move(self):
+        return 
+    
+    def update_weights():
+        return
+        
+    def adaptive(self, Carcassonne, player_strategy):
+
+        # Enhance feature moves 
+        enhanceFeatureMoves = AdaptiveStrategies.enhance_feature(Carcassonne)
+        print(f"Enhance Features = {enhanceFeatureMoves}")
+
+        # Enhance strategy moves 
+        enhanceStrategyMoves = AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
+        print(f"Enhance Strategy = {enhanceStrategyMoves}")
+        
+        # Steal Point moves 
+        enhanceStealPointMoves = AdaptiveStrategies.steal_points(Carcassonne)
+        print(f"Steal Points = {enhanceStealPointMoves}")
+
+        player = Carcassonne.p2
+        mctsMoves = player.listAction(Carcassonne)
+        player = Carcassonne.p1
+        # print(mctsMoves)
+
+        if enhanceFeatureMoves:
+            print("Check enhance features")
+            for weight, tile in enumerate(mctsMoves):
+                for type, enhanceTile in enumerate(enhanceFeatureMoves):
+                    if str(enhanceTile[1]) == str(tile[1]):
+                        print(f"Found a match {tile, enhanceTile}")
+        
+        if enhanceStrategyMoves:
+            print("Check enhance strategy")
+            for weight, tile in enumerate(mctsMoves):
+                for type, enhanceTile in enumerate(enhanceStrategyMoves):
+                    if str(enhanceTile[1]) == str(tile[1]):
+                        print(f"Found a match {tile, enhanceTile}")
+
+        if enhanceStealPointMoves:
+            print("Check enhance steal points")
+            for weight, tile in enumerate(mctsMoves):
+                for type, enhanceTile in enumerate(enhanceStealPointMoves):
+                    if str(enhanceTile[1]) == str(tile[1]):
+                        print(f"Found a match {tile, enhanceTile}")
 
 
+
+           
+    

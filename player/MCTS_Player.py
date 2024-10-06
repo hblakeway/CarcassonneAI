@@ -5,6 +5,9 @@ import time
 import random
 import numpy as np
 
+from pygameCarcassonneDir.pygameAdaptive import (
+    AdaptiveStrategies, updateKeys
+)
 
 class MCTSPlayer(Player):
 
@@ -83,6 +86,14 @@ class MCTSPlayer(Player):
         return self.MCTS_Search(
             state, self.iterations, self.timeLimit, self.isTimeLimited
         )
+    
+    def listAction(self, state):
+        """
+        List actions using UCT function
+        """
+        return self.MCTS_Search_List(
+            state, self.iterations, self.timeLimit, self.isTimeLimited
+        )
 
     def MCTS_Search(self, root_state, iterations, timeLimit, isTimeLimited):
         """
@@ -108,11 +119,42 @@ class MCTSPlayer(Player):
         if playerSymbol == 1:
             bestMove = sorted(root_node.child, key=lambda c: c.Q)[-1].Move
         else:
-            # print(sorted(root_node.child, key=lambda c: c.Q)[0])
             bestMove = sorted(root_node.child, key=lambda c: c.Q)[0].Move
 
         self.latest_root_node = root_node
         return bestMove.move
+    
+    def MCTS_Search_List(self, root_state, iterations, timeLimit, isTimeLimited):
+        """
+        Conduct a UCT search for itermax iterations starting from rootstate.
+        Return the best move from the rootstate.
+        Assumes 2 alternating players (player 1 starts), with games results in the range [0, 1]
+        """
+        # Player 1 = 1, Player 2 = 2 (Player 2 wants to the game to be a loss)
+        # print(root_state)
+        move_list_formatted = []
+        playerSymbol = root_state.playerSymbol
+        self.latest_root_node = None  # added
+
+        # state the Root Node
+        root_node = Node(state=root_state)
+        self.nodes_dict = {0: root_node}  # added
+        self.id_count = 0  # added
+        if self.isTimeLimited:
+            self.MCTS_TimeLimit(root_node, root_state)
+        else:
+            self.MCTS_IterationLimit(root_node, root_state)
+       
+        if playerSymbol == 1:
+            move_list = sorted(root_node.child, key=lambda c: c.Q) # -1 is player one best, 0 is player two best 
+            
+            for i in range(len(move_list)):
+                move = move_list[i].Move
+                move_list_formatted.append((i,move))
+        
+        # print(sorted(root_node.child, key=lambda c: c.Q)[-1].Move)
+        self.latest_root_node = root_node
+        return move_list_formatted
 
     # 4 steps of MCTS
     def Select(self, node, state):
@@ -265,15 +307,15 @@ class Node:
             tile_type = str(None)
             
         return (
-            #f"["
-            #f"\n  Tile type: {tile_type}"
+            f"["
+            f"\n  Tile type: {tile_type}"
             #f"\n  Wins: {round(self.wins, 1)}"
             #f"\n  Losses: {self.losses}"
             #f"\n  Draws: {self.draws}"
-            #f"\n  Q: {round(self.Q, 3)}"
+            f"\n  Q: {round(self.Q, 3)}"
             #f"\n  Wins/Visits: {round(self.wins, 1)}/{self.visits} ({round(self.wins / visits, 3)})"
             #f"\n  Remaining Moves: {len(self.untried_moves)}"
-            #f"\n]"
+            f"\n]"
         )
 
 
