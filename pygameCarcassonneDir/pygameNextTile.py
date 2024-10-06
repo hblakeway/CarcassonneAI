@@ -16,6 +16,7 @@ from Carcassonne_Game.Carcassonne import (
 # packages
 import pygame
 import cv2
+import random
 
 X_DEPTH = 20
 Y_DEPTH = 40
@@ -335,34 +336,40 @@ class nextTile:
         self.meepleLabel.blit(meepleInfoLabel.text_surface, (x,y))
         
         
-    def updateMoveLabel(self, Carcassonne, selectedMove, isStartOfGame):
-        # check if any moves have been played yet
-        move = selectedMove
-        player = 3 - Carcassonne.playerSymbol
-        
-        # text
-        title = "Last Move:"
-        tile = " Tile: " + str(move[0]) +" - " + Tile(move[0]).tile_desc
-        location = f' X: {move[1]}, Y: {move[2]}, Rotation: {move[3]}'
-        meeple = " Meeple: None" if move[4] is None else f' Meeple: {FEATURE_DICT[move[4][0]]}'
-        player = f' Player {player}'
-        
-        if isStartOfGame:
-            player = " Game Starting Tile"
+    def updateMoveLabel(self):
+
+        title = "Your next strongest move is"
             
-        moveLabel1 = Label(title, font_size=25, background = WHITE)
-        moveLabel2 = Label(tile, font_size=20, background = None, foreground = WHITE)
-        moveLabel3 = Label(location, font_size=20, background = None, foreground = WHITE)
-        moveLabel4 = Label(meeple, font_size=20, background = None, foreground = WHITE)
-        moveLabel5 = Label(player, font_size=20, background = None, foreground = WHITE)
-        
-        #self.meepleLabel.blit(meepleInfoLabel.text_surface, (x,y))
+        moveLabel1 = Label(title, font_size=30, background = WHITE)
         
         self.moveLabel.blit(moveLabel1.text_surface, (15, 10))
-        self.moveLabel.blit(moveLabel2.text_surface, (15, 35))
-        self.moveLabel.blit(moveLabel3.text_surface, (15, 55))
-        self.moveLabel.blit(moveLabel4.text_surface, (15, 75))
-        self.moveLabel.blit(moveLabel5.text_surface, (15, 95))
+   
+    
+    def updateMoveLabelY(self, moveType, strategy):
+
+        text = {
+            'enhance_feature': [
+                f"Keep expanding your {strategy}!",
+                f"Grow your {strategy} further!",
+                f"Keep building your {strategy}!",
+            ],
+            'enhance_strategy': [
+                f"Keep going with your {strategy}-building.",
+                f"Continue {strategy}-building. Create a new one!",
+                f"Your {strategy}-building is strong—keep it up!"
+            ],
+            'steal_points': [
+                f"Seize the chance for points with this {strategy}!",
+                f"Combine to grab points from this {strategy}!",
+                f"Take advantage of this {strategy} for points!"
+            ]
+        }
+
+        title = random.choice(text[moveType])
+        
+        moveLabel1 = Label(title, font_size=23, background = WHITE)
+        
+        self.moveLabel.blit(moveLabel1.text_surface, (15, 10))
         
     def coPilotButton(self):
         """

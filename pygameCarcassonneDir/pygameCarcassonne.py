@@ -184,6 +184,7 @@ def PlayGame(p1, p2):
         pygame.time.set_timer(AI_MOVE_EVENT, AI_DELAY)
 
     firstRotation = True 
+    validMove = False
     playAImove = False
 
     # LOOP
@@ -224,6 +225,7 @@ def PlayGame(p1, p2):
                         hasSomethingNew = True
                         isStartOfGame = False
                         firstRotation = True
+                        validMove = False
                         isGameOver = Carcassonne.isGameOver
                         if isGameOver:
                             pygame.time.set_timer(AI_MOVE_EVENT, 0)
@@ -251,6 +253,9 @@ def PlayGame(p1, p2):
 
                         if aiCopilotRect.collidepoint(mouseX, mouseY):
                             playAImove = True
+                            # Update weighting 
+                            if p2.identifier == "YCoPilot":
+                                AdaptiveRules.update_weights(adaptive_rules, True)
 
                         elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
@@ -271,15 +276,19 @@ def PlayGame(p1, p2):
 
                             if p2.identifier == "YCoPilot":
                                 updateKeys(selectedMove[0], meepleLoc, (X,Y), selectedMove[3])
-                                    
-                            NT = nextTile(Carcassonne, DisplayScreen)
-                            NT.moveLabel = pygame.Surface(
-                                (DisplayScreen.Window_Width, 50)
-                            )
-                            isStartOfTurn = True
-                            hasSomethingNew = True
-                            isStartOfGame = False
-                            pygame.time.set_timer(AI_MOVE_EVENT, 1)
+                                AdaptiveRules.update_weights(adaptive_rules, False)
+                            
+                            if Carcassonne.TotalTiles == 0:
+                                isGameOver = True
+                            else:
+                                NT = nextTile(Carcassonne, DisplayScreen)
+                                NT.moveLabel = pygame.Surface(
+                                    (DisplayScreen.Window_Width, 50)
+                                )
+                                isStartOfTurn = True
+                                hasSomethingNew = True
+                                isStartOfGame = False
+                                pygame.time.set_timer(AI_MOVE_EVENT, 1)
                             
                         elif (X, Y) in list(NT.Carcassonne.Board.keys()):
                             text = NT.displayTextClickedTile(X, Y)
@@ -296,6 +305,12 @@ def PlayGame(p1, p2):
         drawGrid(DisplayScreen)
 
         if playAImove:
+            if p2.identifier == "YCoPilot":
+                DisplayTileIndex = selectedMove.TileIndex
+                X,Y = selectedMove.X, selectedMove.Y
+                Rotation = selectedMove.Rotation
+                MeepleKey = selectedMove.MeepleInfo
+                selectedMove = [DisplayTileIndex,X,Y,Rotation,MeepleKey]
             Carcassonne.move(selectedMove)
             playerStrat.add(selectedMove)
             X = selectedMove[1]
@@ -322,7 +337,7 @@ def PlayGame(p1, p2):
                         hasSomethingNew = False
 
         # If a move has been made
-        if hasSomethingNew:
+        if hasSomethingNew and not isGameOver:
             if player.name == "Human":
                 NT.resetImage()
                 i = 1
@@ -344,10 +359,18 @@ def PlayGame(p1, p2):
                 if not isGameOver:
                     NT.resetImage()
                     NT.pressSpaceInstruction()
+        else:
+            if isGameOver:
+                print(
+                    f"Winner: Player {Carcassonne.winner}, Scores:  P1: {Carcassonne.Scores[0]} - P2: {Carcassonne.Scores[1]}"
+                )
+                FinalMenu(Carcassonne)
 
-        if isStartOfTurn:
-            NT.updateMoveLabel(Carcassonne, selectedMove, isStartOfGame)
 
+        if isStartOfTurn and p2.identifier == "XCoPilot":
+            NT.updateMoveLabel()
+
+        
         printScores(Carcassonne, DisplayScreen)
         printTilesLeft(Carcassonne, DisplayScreen)
 
@@ -365,7 +388,7 @@ def PlayGame(p1, p2):
 
         if p2.identifier == "XCoPilot":
             if firstRotation:
-                selectedMove, image,image_coordinate,rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
+                selectedMove, image,image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
                 NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
@@ -376,19 +399,18 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                AdaptiveRules.adaptive(adaptive_rules, Carcassonne, player_strategy)
-                #AdaptiveStrategies.enhance_feature(Carcassonne)
-                #AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-                #AdaptiveStrategies.steal_points(Carcassonne)
-                # selectedMove, image, image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
+                selectedMove, image,image_coordinate,rect_surf, rect_coordinates, moveType, strategyType = AdaptiveRules.adaptive(adaptive_rules, DisplayScreen, Carcassonne, player_strategy)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
-                # NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+                if selectedMove:
+                    validMove = True
+                    NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+                    NT.updateMoveLabelY(moveType, strategyType)
                 pygame.display.flip()
             else:
-                # selectedMove, image, ima
                 diplayGameBoard(Carcassonne, DisplayScreen)
-                # NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
+                if validMove:
+                    NT.placeAISuggestion(DisplayScreen, image,image_coordinate,rect_surf, rect_coordinates) # Displays the AI suggestion consistently 
                 pygame.display.flip()
 
         isStartOfTurn = False

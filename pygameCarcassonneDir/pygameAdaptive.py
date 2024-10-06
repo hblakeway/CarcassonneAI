@@ -1,8 +1,11 @@
 from Carcassonne_Game.Tile import Tile, TILE_PROPERTIES_DICT
-from Carcassonne_Game.Tile_dict import TILE_COMBINE_CITY, TILE_COMBINE_ROAD, TILE_COMBINE_FARM, features_specific
-import random
+from Carcassonne_Game.Tile_dict import TILE_COMBINE_CITY, TILE_COMBINE_ROAD, TILE_COMBINE_FARM
+from pygameCarcassonneDir.pygameSettings import MEEPLE_SIZE, WHITE
+from pygameCarcassonneDir.pygameFunctions import meepleCoordinatesAI
 import ast
 from collections import Counter as c
+import pygame
+import math
 
 keys = {}
 
@@ -21,6 +24,27 @@ coord_rotation = {
 }
 
 corner_cords = [(3,2), (0,2), (1,2), (2,2)]
+
+X_DEPTH = 10
+Y_DEPTH = 20
+WIDTH = HEIGHT = 104  # image scaled x2
+
+XSHIFT = YSHIFT = MEEPLE_SIZE//2
+
+MEEPLE_LOCATION_DICT_AI = {
+    (0,1): [X_DEPTH - XSHIFT, HEIGHT//2 - YSHIFT],
+    (0,2): [WIDTH//4 -XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
+    (1,1): [WIDTH//2 - XSHIFT, Y_DEPTH - YSHIFT],
+    (1,2): [WIDTH//4- XSHIFT, Y_DEPTH-YSHIFT],
+    (2,1): [WIDTH - X_DEPTH - XSHIFT, HEIGHT//2 - YSHIFT],
+    (2,2): [3*(WIDTH//4) - XSHIFT, Y_DEPTH-YSHIFT],
+    (3,0): [3*(WIDTH//4) - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
+    (3,1): [WIDTH//2 - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
+    (3,2): [WIDTH//4 - XSHIFT, HEIGHT - Y_DEPTH - YSHIFT],
+    (0,4): [WIDTH//2 - XSHIFT, HEIGHT//2- YSHIFT],
+    # exceptions
+    0: [3*(WIDTH//4),Y_DEPTH - YSHIFT]
+    }
 
 # Tile Index and Place Meeple is selected on 
 def updateKeys(index, meepleCoord, xy, rotation):
@@ -485,7 +509,7 @@ class AdaptiveStrategies:
                                                 farm_enhancements.append(['farm', tile])
 
         all_enhancements = city_enhancements + road_enhancements + farm_enhancements + monastery_enhacements
-        print(all_enhancements)
+        #print(all_enhancements)
 
         if all_enhancements:
             # selectedMove = random.choice(all_enhancements) # CHECK WHICH ONE IS HIGHEST IN MCTS 
@@ -538,7 +562,7 @@ class AdaptiveStrategies:
                 return False
             
             # selectedMove = random.choice(options)
-            print(f"It would be good to start a new {meepleDictionary[player_strategy]}.")
+            #print(f"It would be good to start a new {meepleDictionary[player_strategy]}.")
             return options
         
         else: # Strategy is False for this move
@@ -932,7 +956,7 @@ class AdaptiveStrategies:
                     
 
         if combination:
-            print(f"All possibilites: {combination}")
+            #print(f"All possibilites: {combination}")
             #selectedMove = random.choice(combination)
             #print(f"This is your opportunity to combine {selectedMove[0]}")
             return combination
@@ -946,56 +970,166 @@ class AdaptiveRules:
         self.enhanceFeature = enhanceFeature
         self.enhanceStrategy = enhanceStrategy
         self.stealPoints = stealPoints
-        self.enhanceFeatureWeight = 0
-        self.enhanceStrategyWeight = 0
-        self.stealPointsWeight = 0
+        self.enhanceFeatureWeight = 6
+        self.enhanceStrategyWeight = 3
+        self.stealPointsWeight = 9
+        self.lastMove = 'manual'
     
-    def update_last_move(self):
-        return 
-    
-    def update_weights():
-        return
+    def update_weights(self, outcome):
+        if outcome:
+            if self.lastMove == 'enhance_feature':
+                self.enhanceFeatureWeight += 1
+            elif self.lastMove == 'enhance_strategy':
+                self.enhanceStrategyWeight += 1
+            elif self.lastMove == 'steal_points':
+                self.stealPointsWeight += 1
+        else:
+            if self.lastMove == 'enhance_feature':
+                self.enhanceFeatureWeight -= 1
+            elif self.lastMove == 'enhance_strategy':
+                self.enhanceStrategyWeight -= 1
+            elif self.lastMove == 'steal_points':
+                self.stealPointsWeight -= 1
+        print(self.enhanceFeatureWeight,self.enhanceStrategyWeight,self.stealPointsWeight)
         
-    def adaptive(self, Carcassonne, player_strategy):
+    
+    def get_successful_strategy(self):
+    
+        weights = {
+            'enhance_feature': self.enhanceFeatureWeight,
+            'enhance_strategy': self.enhanceStrategyWeight,
+            'steal_points': self.stealPointsWeight
+        }
+        
+        string = max(weights, key=weights.get) 
+        
+        return string
+
+    def adaptive(self, DisplayScreen, Carcassonne, player_strategy):
 
         # Enhance feature moves 
         enhanceFeatureMoves = AdaptiveStrategies.enhance_feature(Carcassonne)
-        print(f"Enhance Features = {enhanceFeatureMoves}")
+        #print(f"Enhance Features = {enhanceFeatureMoves}")
 
         # Enhance strategy moves 
         enhanceStrategyMoves = AdaptiveStrategies.enhance_strategy(Carcassonne, player_strategy)
-        print(f"Enhance Strategy = {enhanceStrategyMoves}")
+        #print(f"Enhance Strategy = {enhanceStrategyMoves}")
         
         # Steal Point moves 
         enhanceStealPointMoves = AdaptiveStrategies.steal_points(Carcassonne)
-        print(f"Steal Points = {enhanceStealPointMoves}")
+        #print(f"Steal Points = {enhanceStealPointMoves}")
 
         player = Carcassonne.p2
         mctsMoves = player.listAction(Carcassonne)
         player = Carcassonne.p1
         # print(mctsMoves)
 
+        adaptiveRules = []
         if enhanceFeatureMoves:
-            print("Check enhance features")
             for weight, tile in enumerate(mctsMoves):
-                for type, enhanceTile in enumerate(enhanceFeatureMoves):
+                for tileType, enhanceTile in enumerate(enhanceFeatureMoves):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        print(f"Found a match {tile, enhanceTile}")
+                        adaptiveRules.append([int(weight + self.enhanceFeatureWeight), tile[1], 'enhance_feature', enhanceTile[0]])
         
         if enhanceStrategyMoves:
-            print("Check enhance strategy")
             for weight, tile in enumerate(mctsMoves):
-                for type, enhanceTile in enumerate(enhanceStrategyMoves):
+                for tileType, enhanceTile in enumerate(enhanceStrategyMoves):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        print(f"Found a match {tile, enhanceTile}")
+                        adaptiveRules.append([int(weight + self.enhanceStrategyWeight), tile[1], 'enhance_strategy', enhanceTile[0]])
 
         if enhanceStealPointMoves:
-            print("Check enhance steal points")
             for weight, tile in enumerate(mctsMoves):
-                for type, enhanceTile in enumerate(enhanceStealPointMoves):
+                for tileType, enhanceTile in enumerate(enhanceStealPointMoves):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        print(f"Found a match {tile, enhanceTile}")
+                        adaptiveRules.append([int(weight + self.stealPointsWeight), tile[1], 'steal_points', enhanceTile[0]])
+        
+        #print(adaptiveRules)
+        selectedMove = None
+        finalMoveType = None
+        finalStrategyType = None
+        if adaptiveRules:
+            max_weight = max(entry[0] for entry in adaptiveRules) 
+            max_weight_entries = [entry for entry in adaptiveRules if entry[0] == max_weight]
 
+            if len(max_weight_entries) > 1:
+                # get max 
+                featureString = self.get_successful_strategy()
+                for i in max_weight_entries:
+                    weightTile, tileFeatures, strategyType, featureType = i
+                    if str(strategyType) == featureString:
+                        selectedMove = tileFeatures
+                        self.lastMove = featureString
+                        finalMoveType = featureString
+                        finalStrategyType = str(featureType)
+            else:
+                selectedMove = max_weight_entries[0][1]
+                self.lastMove = max_weight_entries[0][2]
+                finalMoveType = max_weight_entries[0][2]
+                finalStrategyType = max_weight_entries[0][3]
+        
+        if selectedMove:
+            # Get attributes needed to display on the GUI
+            # play move on board
+            Grid_Window_Width = DisplayScreen.Grid_Window_Width
+            Grid_Window_Height = DisplayScreen.Grid_Window_Height
+            Grid_Size = DisplayScreen.Grid_Size
+            Grid_border = DisplayScreen.Grid_border
+            Meeple_Size = DisplayScreen.Meeple_Size
+            GAME_DISPLAY = DisplayScreen.pygameDisplay
+
+            DisplayTileIndex = selectedMove.TileIndex
+            X,Y = selectedMove.X, selectedMove.Y
+            Rotation = selectedMove.Rotation
+            MeepleKey = selectedMove.MeepleInfo
+
+            currentTile = Tile(DisplayTileIndex)
+
+            if not(MeepleKey is None):
+                feature = MeepleKey[0]
+                playerSymbol = MeepleKey[1]
+
+            # reverse orientation
+            Y=Y*-1
+            
+            GAME_X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + X*Grid_Size + Grid_border
+            GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + Y*Grid_Size + Grid_border
+
+            # Tile = DisplayTileIndex
+            # load image
+            image = pygame.image.load('images/' + str(DisplayTileIndex) + '.png')
+            
+            if not(MeepleKey is None):
+                # add meeple info if one is played
+                MeepleLocation = currentTile.AvailableMeepleLocs[MeepleKey]
+                currentTile.Meeple = [MeepleKey[0], MeepleLocation, playerSymbol]
+                #   meeple image
+                meepleColour = "blue" 
+                meepleImage = pygame.image.load('meeple_images/' + meepleColour + '.png')
+                meepleImage = pygame.transform.scale(meepleImage, (Meeple_Size, Meeple_Size))
+                X,Y = meepleCoordinatesAI(MeepleLocation, feature, MEEPLE_LOCATION_DICT_AI, DisplayTileIndex)
+                image.blit(meepleImage, (X,Y))
+
+            # Make image bigger 
+            size = Grid_Size + 60
+                    
+            # add image      
+            image = pygame.transform.scale(image, (size,size))
+            image = pygame.transform.rotate(image, Rotation)
+            
+            # draw suggestion place rectangle
+            rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size) # White spot size
+            rect_surf = pygame.Surface(pygame.Rect(rect_coordinates).size)
+            rect_surf.set_alpha(150)
+            pygame.draw.rect(rect_surf, WHITE, rect_surf.get_rect())
+
+            # Draw on screen
+            image_coordinate  = (1070, 540)
+
+            return(selectedMove, image, image_coordinate, rect_surf, rect_coordinates, finalMoveType, finalStrategyType )
+        else:
+            return(None, None, None, None, None, None, None)
+
+        
 
 
            
