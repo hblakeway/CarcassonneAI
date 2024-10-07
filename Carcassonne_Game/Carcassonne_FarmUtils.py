@@ -18,7 +18,7 @@ def oneFarmConnection(self, PlayingTile, FarmOpenings, Surroundings, AddedMeeple
     
     if Surroundings[FarmSide] is None:
         NextFarmIndex = len(self.BoardFarms)
-        self.BoardFarms[NextFarmIndex] = Farm(NextFarmIndex,AddedMeeples, Move) #here
+        self.BoardFarms[NextFarmIndex] = Farm(NextFarmIndex,AddedMeeples, None) #here
         self.BoardFarms[NextFarmIndex].Update([PlayingTile.TileCitiesIndex[FRCI] for FRCI in PlayingTile.FarmRelatedCityIndex[i]],[0,0], Move)
         PlayingTile.TileFarmsIndex[FarmSide][FarmLine] = NextFarmIndex
     else:
@@ -40,7 +40,7 @@ def multipleFarmConnections(self, PlayingTile, FarmOpenings, OpeningsQuantity, S
             ConnectedFarms.append([MatchingFarmIndex,FarmSide,FarmLine])
     if ConnectedFarms == []:
         NextFarmIndex = len(self.BoardFarms)
-        self.BoardFarms[NextFarmIndex] = Farm(NextFarmIndex,AddedMeeples, Move)
+        self.BoardFarms[NextFarmIndex] = Farm(NextFarmIndex,AddedMeeples, None)
         #print(PlayingTile.FarmRelatedCityIndex[i],PlayingTile.TileCitiesIndex)
         self.BoardFarms[NextFarmIndex].Update([PlayingTile.TileCitiesIndex[FRCI] for FRCI in PlayingTile.FarmRelatedCityIndex[i]],[0,0], Move)
         for (FarmSide,FarmLine) in FarmOpenings:

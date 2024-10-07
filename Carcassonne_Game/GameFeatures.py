@@ -94,6 +94,9 @@ class Farm:
             self.CityIndexes = set()
             self.Meeples = Meeples
             self.playTile = playTile
+        
+        if playTile is not None:
+                self.tileList.append(playTile)
     
     def CloneFarm(self):
         Clone = Farm()
@@ -111,19 +114,19 @@ class Farm:
         self.Meeples[1] += MeeplesAdded[1]
         self.Meeples[0] += MeeplesAdded[0]
 
-        if not isinstance(playTile, tuple):
-            playTile = tuple(playTile)  # Convert to tuple if it's not already
+        #if not isinstance(playTile, tuple):
+        #    playTile = tuple(playTile)  # Convert to tuple if it's not already
 
-        self.tileList.append(playTile)
+        if playTile is not None:
+                self.tileList.append(playTile)
         
 
         
     def __repr__(self):
         #String = "Farm ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"CI"+str(self.CityIndexes)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
-        seen = set()
-        cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
-        print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
-        String = "\n"+"Farm ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(cleaned_tileList)+"\n"
+        #seen = set()
+        #cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
+        String = "\n"+"Farm ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
     
 
