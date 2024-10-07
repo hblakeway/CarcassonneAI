@@ -86,6 +86,7 @@ def roadClosures(self, ClosingRoads):
 
     for ClosingRoadIndex in ClosingRoads:
         ClosingRoad = self.BoardRoads[ClosingRoadIndex]
+        ClosingRoad.ClosedFlag = True
         if ClosingRoad.Meeples[0] == 0 and ClosingRoad.Meeples[1] == 0:
             pass
         elif ClosingRoad.Meeples[0] > ClosingRoad.Meeples[1]:

@@ -122,6 +122,7 @@ class Farm:
         #String = "Farm ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"CI"+str(self.CityIndexes)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
         seen = set()
         cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
+        print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
         String = "\n"+"Farm ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(cleaned_tileList)+"\n"
         return String
     
@@ -138,6 +139,7 @@ class Road:
             self.Value = Value
             self.Meeples = Meeples
             self.playTile = playTile
+            self.ClosedFlag = False
         
         if playTile is not None:
                 self.tileList.append(playTile)
@@ -148,6 +150,7 @@ class Road:
         Clone.Pointer = self.Pointer
         Clone.Openings = self.Openings
         Clone.Value = self.Value
+        Clone.ClosedFlag = self.ClosedFlag
         Clone.Meeples = [x for x in self.Meeples]
         Clone.playTile = self.playTile
         Clone.tileList = [tile for tile in self.tileList] 
@@ -162,5 +165,6 @@ class Road:
         
     def __repr__(self):
         #String = "Road ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
+        print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
         String = "\n"+"Road ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
