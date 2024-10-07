@@ -1,6 +1,5 @@
 from Carcassonne_Game.GameFeatures import Road
 
-
 def roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey, Move):
     
     for i in range(len(PlayingTile.RoadOpenings)):
@@ -18,17 +17,20 @@ def roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate,
 def oneRoadConnection(self, PlayingTile, ClosingRoads, RoadOpenings, Surroundings, AddedMeeples, Move):
 
     RoadSide = RoadOpenings[0]
+
+    # Create a new road 
     if Surroundings[RoadSide] is None:
         NextRoadIndex = len(self.BoardRoads)
         self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,1,AddedMeeples, Move)
-        self.BoardRoads[NextRoadIndex].Update(1,1,[0,0], Move)
         PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
-    else:
+    else: # Join to existing Road
         MatchingRoadIndex = Surroundings[RoadSide].TileRoadsIndex[self.MatchingSide[RoadSide]]
         while self.BoardRoads[MatchingRoadIndex].Pointer != self.BoardRoads[MatchingRoadIndex].ID:                            
             MatchingRoadIndex = self.BoardRoads[MatchingRoadIndex].Pointer
         MatchingRoad = self.BoardRoads[MatchingRoadIndex]
         MatchingRoad.Update(-1,1,AddedMeeples, Move)
+        
+        # Check for closure
         if MatchingRoad.Openings == 0:
             ClosingRoads.append(MatchingRoadIndex)   
             
@@ -46,14 +48,15 @@ def multipleRoadConnections(self, PlayingTile, ClosingRoads, RoadOpenings, Openi
                 MatchingRoadIndex = self.BoardRoads[MatchingRoadIndex].Pointer
         
             ConnectedRoads.append([MatchingRoadIndex,RoadSide])
+    
+    # Create a new road 
     if ConnectedRoads == []:
         NextRoadIndex = len(self.BoardRoads)
         self.BoardRoads[NextRoadIndex] = Road(NextRoadIndex,1,OpeningsQuantity,AddedMeeples, Move)
-        self.BoardRoads[NextRoadIndex].Update(1,OpeningsQuantity,[0,0,0], Move)
         for RoadSide in RoadOpenings:
             PlayingTile.TileRoadsIndex[RoadSide] = NextRoadIndex
             
-    else:
+    else: # Connects to a pre existing road 
         OpeningsToAdd = OpeningsQuantity - len(ConnectedRoads)
         CombinedRoadIndex = ConnectedRoads[0][0]
         AlreadyMatched = False

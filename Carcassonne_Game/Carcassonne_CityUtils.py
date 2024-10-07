@@ -91,7 +91,7 @@ def cityMultipleOpenings(self,PlayingTile, ClosingCities, CityOpenings, Openings
                 MatchingCity = self.BoardCities[MatchingCityIndex]
                 MatchingCity.Pointer = CombinedCityIndex
                 self.BoardCities[CombinedCityIndex].Update(MatchingCity.Openings-1,MatchingCity.Value,MatchingCity.Meeples,MatchingCity.tileList)
-                self.BoardCities[CombinedCityIndex].Update(0, 0, [0,0], Move)
+                # self.BoardCities[CombinedCityIndex].Update(0, 0, [0,0], Move)
  
                 # Sets the value as 0 because it is merged 
                 MatchingCity.Openings = 0
@@ -117,7 +117,6 @@ def cityClosures(self, ClosingCities):
     for ClosingCityIndex in ClosingCities:
         ClosingCity = self.BoardCities[ClosingCityIndex]
         ClosingCity.ClosedFlag = True
-        # print(f"Before removal {self.BoardCities}")
         if ClosingCity.Meeples[0] == 0 and ClosingCity.Meeples[1] == 0:
             pass
         elif ClosingCity.Meeples[0] > ClosingCity.Meeples[1]:
@@ -137,7 +136,6 @@ def cityClosures(self, ClosingCities):
         ClosingCity.Value = 0
         self.Meeples[0] += ClosingCity.Meeples[0]
         self.Meeples[1] += ClosingCity.Meeples[1]
-        #self.Meeples[2] += ClosingCity.Meeples[2]
         
   
    

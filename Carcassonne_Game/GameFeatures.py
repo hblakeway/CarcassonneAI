@@ -138,6 +138,9 @@ class Road:
             self.Value = Value
             self.Meeples = Meeples
             self.playTile = playTile
+        
+        if playTile is not None:
+                self.tileList.append(playTile)
     
     def CloneRoad(self):
         Clone = Road()
