@@ -292,14 +292,12 @@ class CarcassonneState:
                 AddedMeeples.append(i)
         return AddedMeeples  
     
-    def completeMonastery(self, MonasteryID, Move):
+    def completeMonastery(self, AffectedMonastery, Move):
         """
         Checks if the monastery is completed (completely surrounded)
         """
-        AffectedMonastery = self.BoardMonasteries[MonasteryID]
-        
-        AffectedMonastery.Update(Move)
         AffectedMonastery.Value += 1
+        AffectedMonastery.Update(Move)
 
         # if monastery is complete
         if AffectedMonastery.Value == 9:
@@ -318,12 +316,11 @@ class CarcassonneState:
             - MeepleUpdate: [p1_Meeple, p2_Meeple] - List of Meeples (e.g [1,0] means P1 is adding a Meeple)
             - MeepleKey:Feature to which Meeple is added
         """
+        # check if new tile is surrounding a monastery
         if (X,Y) in self.MonasteryOpenings:
-            # check if monastery is completed
-            for monastry in self.MonasteryOpenings[(X,Y)]:
-                self.completeMonastery(monastry, Move) # Adds that tile to that monastry 
+            [(self.completeMonastery(self.BoardMonasteries[AffectedMonasteryIndex], Move))  for AffectedMonasteryIndex in self.MonasteryOpenings[(X,Y)]]
             # spot is now filled, remove from possible locations
-            del self.MonasteryOpenings[(X,Y)]  
+            del self.MonasteryOpenings[(X,Y)] 
         
         # New Monastry Logic 
         if MeepleKey is not None: # Monastry is not a feature without a meeple 
@@ -334,13 +331,10 @@ class CarcassonneState:
                 
                 # Create a new Monastry and add Move 
                 self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1, Move)
-                self.BoardMonasteries[NextMonasteryID].Update(Move)
-
-                # Check surrounding tiles and add to monastry ID
-                for Spot in CompleteSurroundingSpots:
-                    self.monasterySurroundings(Spot, NextMonasteryID, CompleteSurroundingSpots) 
-                   
-    def monasterySurroundings(self, Spot, MonasteryID, Surroundings):
+                AffectedMonastery = self.BoardMonasteries[NextMonasteryID]
+                [self.monasterySurroundings(Spot, AffectedMonastery, NextMonasteryID, Move) for Spot in CompleteSurroundingSpots]
+                
+    def monasterySurroundings(self, Spot, AffectedMonastery, NextMonasteryID, Move):
         """
         Function for 'for loop'
         
@@ -350,23 +344,12 @@ class CarcassonneState:
             - NextMonasteryID: If Monastery is new, this will be its ID
         """
       
-        placedTiles = self.coordList
-        
-        if Spot in placedTiles:
-            Move = placedTiles[Spot]
-        else:
-            Move = Spot
-        
-        # print(f"This is the coord list: {self.coordList}")
-
         if Spot in self.Board:
-            self.completeMonastery(MonasteryID, Move)
+            self.completeMonastery(AffectedMonastery, Move)
         elif Spot in self.MonasteryOpenings:
-            self.MonasteryOpenings[Spot].append(MonasteryID)
-            self.BoardMonasteries[MonasteryID].Update(Move)
+            self.MonasteryOpenings[Spot].append(NextMonasteryID)
         else:
-            self.MonasteryOpenings[Spot] = [MonasteryID] # new 
-            #self.BoardMonasteries[MonasteryID].Update(Move)
+            self.MonasteryOpenings[Spot] = [NextMonasteryID]
 
     def add_coordmove(self, X, Y, Move, player):
         

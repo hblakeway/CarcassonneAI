@@ -14,6 +14,9 @@ class Monastery:
             self.Owner = Owner
             self.Value = 1
             self.playTile = playTile
+        
+        if playTile is not None:
+                self.tileList.append(playTile)
     
     def CloneMonastery(self):
         Clone = Monastery()
@@ -25,15 +28,11 @@ class Monastery:
         return Clone
     
     def Update(self, playTile=None):
-        if not isinstance(playTile, tuple):
-            playTile = tuple(playTile)  # Convert to tuple if it's not already
-
-        self.tileList.append(playTile)
+        if playTile is not None:
+                self.tileList.append(playTile)
     
     def __repr__(self):
-        seen = set()
-        cleaned_tileList = tuple(x for x in self.tileList if not (x in seen or seen.add(x)))
-        String = "\n"+"Monastery ID:"+str(self.ID)+"\n"+"Value:"+str(self.Value)+"\n"+"Owner:"+str(self.Owner)+"\n"+" Tiles:"+str(cleaned_tileList)+"\n"
+        String = "\n"+"Monastery ID:"+str(self.ID)+"\n"+"Value:"+str(self.Value)+"\n"+"Owner:"+str(self.Owner)+"\n"+" Tiles:"+str(self.tileList)+"\n"
         return String 
 
         
