@@ -924,36 +924,6 @@ class AdaptiveStrategies:
                                                                 if player_checkCoord == 1 and tile_properties[player_tile_index] == 'R':
                                                                     if tile not in combination:
                                                                         combination.append(['road', tile])
-                     
-                if index in TILE_COMBINE_FARM: # If available tile is a farm connecting tile 
-                    # Gets the index of the openings 
-                    farms_openings_index = []
-                    for i in range(len(tile_properties)):
-                            if tile_properties[i] == 'G':
-                                farms_openings_index.append(i)
-
-                    for opp_farms in oppfarmFeatures:
-                        opp_farm_tiles = opproadFeatures[opp_farms]['Tiles']
-                        opponents_farm_tuple = ast.literal_eval(opp_farm_tiles)
-                        clean_tuple = []
-                        clean_tuple = clean(opponents_farm_tuple)
-                        #print(f"farm {opponents_farm_tuple}")
-
-                        for item, opp_components in enumerate(clean_tuple):
-                            if len(opp_components) != 5:
-                                continue
-
-                            opp_farm_index = opp_components[0]
-                            opp_farm_tile = Tile(opp_farm_index)
-                            opp_farm_x = opp_components[1]
-                            opp_farm_y = opp_components[2]
-                            opp_farm_rotation = opp_components[3]
-                            opp_farm_meeple = opp_components[4]
-
-                            # If tile connected two is in two farm features
-                            # and a merging tile can be placed 
-                            # Then suggest
-                    
 
         if combination:
             #print(f"All possibilites: {combination}")
