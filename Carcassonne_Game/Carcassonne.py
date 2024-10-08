@@ -762,6 +762,9 @@ class CarcassonneState:
         Str = str(self.TileIndexList)
         return Str
     
+    #def get_player_city(self):
+    #    for city in self.BoardCities:
+
     def get_city(self):
         return self.BoardCities
     

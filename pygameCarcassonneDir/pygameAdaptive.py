@@ -7,6 +7,7 @@ from collections import Counter as c
 import pygame
 import math
 
+
 keys = {}
 
 coord_rotation = {
@@ -113,7 +114,6 @@ def handle_features(featureList):
             id = int(entry.split("ID:")[1].split("Meeples:")[0].strip())
             meeples = entry.split("Meeples:")[1].split("Tiles:")[0].strip()
             tiles = entry.split("Tiles:")[1].strip()
-            # print(f"handle features {tiles}")
 
             new_feature['ID'] = id
             new_feature['Meeples'] = meeples
@@ -245,6 +245,153 @@ def clean(original):
 
 class AdaptiveStrategies:
 
+    def adaptive_filtering(Carcassonne):
+        # Available Moves for the current tile 
+
+        enhance_feature_tiles = []
+        complete_feature_tiles = []
+        create_feature_tiles = []
+        merge_feature_tiles = []
+
+        availableMoves = Carcassonne.availableMoves()
+
+        for tile in availableMoves:
+            
+            X = tile.X
+            Y = tile.Y
+            Rotation = tile.Rotation
+            MeepleKey = tile.MeepleInfo
+            PlayingTileIndex = tile.TileIndex
+            PlayingTile= Tile(PlayingTileIndex)
+            
+            if PlayingTileIndex == -1:
+                Carcassonne.EndGameRoutine()
+                return
+            
+            Surroundings = [None,None,None,None]  # initialization
+            SurroundingSpots = [(X-1,Y),(X,Y+1),(X+1,Y),(X,Y-1)]  # left, above, right, below
+
+            # check if there is a tile touching the newly placed tile
+            for i in range(4):
+                if SurroundingSpots[i] in Carcassonne.Board:
+                    Surroundings[i] = Carcassonne.Board[SurroundingSpots[i]]
+            
+            # rotate tile to rotation specified and place tile on board
+            PlayingTile.Rotate(Rotation)
+
+            #if MeepleKey is None:
+                #MeepleUpdate = [0,0]
+            #else:
+                #MeepleUpdate = [1,0]
+    
+            # check if new tile is surrounding a monastery
+            if (X,Y) in Carcassonne.MonasteryOpenings:
+                for AffectedMonasteryIndex in Carcassonne.MonasteryOpenings[(X,Y)]:
+                    AffectedMonastry  = Carcassonne.BoardMonasteries[AffectedMonasteryIndex]
+                    if AffectedMonastry.Value == 8 and AffectedMonastry.Owner == 0:
+                        complete_feature_tiles.append(['monastery', tile])
+                    else:
+                        if AffectedMonastry.Owner == 0:
+                            enhance_feature_tiles.append(['monastery', tile])
+
+            # New Monastry Logic 
+            if MeepleKey is not None: # Monastry is not a feature without a meeple 
+                if MeepleKey[0] == "Monastery":
+                    if tile not in create_feature_tiles:
+                        create_feature_tiles.append(['monastery', tile])
+            
+            if PlayingTile.HasCities:
+                for i in range(len(PlayingTile.CityOpenings)):
+                    CityOpenings = PlayingTile.CityOpenings[i]
+                    #AddedMeeples = Carcassonne.AddMeeple(MeepleUpdate, MeepleKey, "C", i)
+                    OpeningsQuantity = len(CityOpenings)
+
+                    if OpeningsQuantity == 1:
+                        CitySide = CityOpenings[0]
+                        
+                        if Surroundings[CitySide] is None: # treated as new city
+                            if MeepleKey is not None and MeepleKey[0] == 'C':
+                                if tile not in create_feature_tiles:
+                                    create_feature_tiles.append(['city', tile])
+                                    
+                        # connected to pre-existing city    
+                        else:
+                            MatchingCityIndex = Surroundings[CitySide].TileCitiesIndex[Carcassonne.MatchingSide[CitySide]]  # index of connected city
+    
+                            while Carcassonne.BoardCities[MatchingCityIndex].Pointer != Carcassonne.BoardCities[MatchingCityIndex].ID:  # update city IDs     
+                                MatchingCityIndex = Carcassonne.BoardCities[MatchingCityIndex].Pointer
+
+                            MatchingCity = Carcassonne.BoardCities[MatchingCityIndex]
+
+                            if MatchingCity.Meeples[0] == 0 and MatchingCity.Meeples[1] == 0: # Empty city no one has claimed 
+                                if MeepleKey is not None and MeepleKey[0] == 'C':
+                                    if tile not in create_feature_tiles:
+                                        create_feature_tiles.append(['city', tile])
+
+                            if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 > 0): # Covers enhancing case 1,1
+                                enhance_feature_tiles.append(['city', tile])
+                            
+                            if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 == 0):  # Covers closing case 1,1
+                                complete_feature_tiles.append(['city', tile])
+                            
+                    else:   
+                        ConnectedCities = [] 
+                        # iterate for all sides with city opening
+                        for CitySide in CityOpenings:
+                            if Surroundings[CitySide] is not None:
+                                MatchingCityIndex = Surroundings[CitySide].TileCitiesIndex[Carcassonne.MatchingSide[CitySide]]  # index of connected city
+    
+                                while Carcassonne.BoardCities[MatchingCityIndex].Pointer != Carcassonne.BoardCities[MatchingCityIndex].ID:  # update city IDs     
+                                    MatchingCityIndex = Carcassonne.BoardCities[MatchingCityIndex].Pointer
+
+                                ConnectedCities.append([MatchingCityIndex,CitySide])
+                                    
+                        # if none of the city openings connect to a pre-existing city
+                        if not ConnectedCities:
+                            if MeepleKey is not None and MeepleKey[0] == 'C':
+                                if tile not in create_feature_tiles:
+                                    # create a new city
+                                    create_feature_tiles.append(['city', tile])  
+
+                        else: # if one of the openings connects to a city
+                            # keep track of entire city openings
+                            #OpeningsToAdd = OpeningsQuantity - len(ConnectedCities)
+                            CombinedCityIndex = ConnectedCities[0][0] # Starting with first connected city 
+                            # AlreadyMatched = False
+
+                            for MatchingCityIndex, CitySide in ConnectedCities: # Iterate through Connected Cities, checking if it connected to combinedcity index
+                                CombinedCity  = Carcassonne.BoardCities[CombinedCityIndex]
+
+                                # Iterating through connnectedCities. If combined and matching match = this is the same city   
+                                if CombinedCityIndex == MatchingCityIndex and CombinedCity.Meeples[0] == 0 and CombinedCity.Meeples[1] == 0: # Case of an unclaimed city 
+                                    if MeepleKey is not None and MeepleKey[0] == 'C':
+                                        if tile not in create_feature_tiles:
+                                            create_feature_tiles.append(['city', tile]) 
+                                # If the index is the same to the one we are comparing to. And player 1 has a meeple on it 
+                                elif CombinedCityIndex == MatchingCityIndex and (CombinedCity.Meeples[0] >= CombinedCity.Meeples[1]) and CombinedCity.Meeples[0] > 0: # Case of a player 1 city
+                                    if tile not in enhance_feature_tiles:
+                                        enhance_feature_tiles.append(['city', tile]) 
+                                
+                                # Index is different, this connects two cities 
+                                else:
+                                    MatchingCity = Carcassonne.BoardCities[MatchingCityIndex]
+                                    MatchingCity.Pointer = CombinedCityIndex
+                                    
+                                    # EITHER ENHANCING TO CREATE ONE BIG FEAUTRE
+                                    # Check owners 
+                                    
+
+                                    # OR MERGING TO STEAL POINTS
+                                    if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
+                                        merge_feature_tiles.append(['city', tile])
+                        
+            #Carcassonne.checkRoadCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
+            #Carcassonne.checkFarmCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
+
+        print(f"Enhancing List = {enhance_feature_tiles}")
+        print(f"Completing List = {complete_feature_tiles}")
+        print(f"Creating New List = {create_feature_tiles}")
+        print(f"Merging List = {merge_feature_tiles}")
     """
     If there is player feature to contribute to, suggest to add there
     Else Return False for enhacement of player feature 
@@ -976,6 +1123,10 @@ class AdaptiveRules:
         return string
 
     def adaptive(self, DisplayScreen, Carcassonne, player_strategy):
+
+        AdaptiveStrategies.adaptive_filtering(Carcassonne)
+
+        print("Successful")
 
         # Enhance feature moves 
         enhanceFeatureMoves = AdaptiveStrategies.enhance_feature(Carcassonne)

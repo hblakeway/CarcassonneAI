@@ -32,6 +32,7 @@ class Monastery:
                 self.tileList.append(playTile)
     
     def __repr__(self):
+        #String = {"ID": self.ID, "Value": self.Value, "Owner": self.Owner, "Tiles": self.tileList}
         String = "\n"+"Monastery ID:"+str(self.ID)+"\n"+"Value:"+str(self.Value)+"\n"+"Owner:"+str(self.Owner)+"\n"+" Tiles:"+str(self.tileList)+"\n"
         return String 
 
@@ -70,15 +71,15 @@ class City:
 
         self.Openings += OpeningsChange
         self.Value += ValueAdded
-        self.Meeples[1] += MeeplesAdded[1] # Player 1 
-        self.Meeples[0] += MeeplesAdded[0] # Player 2 
+        self.Meeples[1] += MeeplesAdded[1] # MCST 
+        self.Meeples[0] += MeeplesAdded[0] # Player 1
         
         self.tileList.append(playTile)
     
         
     def __repr__(self):
         #String = "City ID"+str(self.ID)+"Pointer"+str(self.Pointer)+"Value"+str(self.Value)+"Openings"+str(self.Openings)+"Meeples" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"Closed?"+str(self.ClosedFlag)+"Tiles"+str(self.tileList)
-        print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
+        # String = {"ID": self.ID, "Meeples": (self.Meeples[0], self.Meeples[1]), "Tiles": self.tileList}
         String = "\n"+"City ID:"+str(self.ID)+"\n"+"Meeples:" + str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
       
@@ -167,6 +168,6 @@ class Road:
         
     def __repr__(self):
         #String = "Road ID"+str(self.ID)+"Ptr"+str(self.Pointer)+"V"+str(self.Value)+"Ops"+str(self.Openings)+"Mps" + str(self.Meeples[0])+","+ str(self.Meeples[1])
-        print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
+        #print(f"Openings = {self.ID, self.Openings, self.ClosedFlag}")
         String = "\n"+"Road ID:"+str(self.ID)+"\n"+"Meeples:"+str(self.Meeples[0])+","+ str(self.Meeples[1])+"\n"+"Tiles:"+str(self.tileList)+"\n"
         return String
