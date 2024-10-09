@@ -278,11 +278,6 @@ class AdaptiveStrategies:
             
             # rotate tile to rotation specified and place tile on board
             PlayingTile.Rotate(Rotation)
-
-            #if MeepleKey is None:
-                #MeepleUpdate = [0,0]
-            #else:
-                #MeepleUpdate = [1,0]
     
             # check if new tile is surrounding a monastery
             if (X,Y) in Carcassonne.MonasteryOpenings:
@@ -303,7 +298,6 @@ class AdaptiveStrategies:
             if PlayingTile.HasCities:
                 for i in range(len(PlayingTile.CityOpenings)):
                     CityOpenings = PlayingTile.CityOpenings[i]
-                    #AddedMeeples = Carcassonne.AddMeeple(MeepleUpdate, MeepleKey, "C", i)
                     OpeningsQuantity = len(CityOpenings)
 
                     if OpeningsQuantity == 1:
@@ -334,7 +328,7 @@ class AdaptiveStrategies:
                             if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 == 0):  # Covers closing case 1,1
                                 complete_feature_tiles.append(['city', tile])
                             
-                    else:   
+                    else:   # Multiple Openings
                         ConnectedCities = [] 
                         # iterate for all sides with city opening
                         for CitySide in CityOpenings:
@@ -355,14 +349,12 @@ class AdaptiveStrategies:
 
                         else: # if one of the openings connects to a city
                             # keep track of entire city openings
-                            #OpeningsToAdd = OpeningsQuantity - len(ConnectedCities)
                             CombinedCityIndex = ConnectedCities[0][0] # Starting with first connected city 
-                            # AlreadyMatched = False
 
                             for MatchingCityIndex, CitySide in ConnectedCities: # Iterate through Connected Cities, checking if it connected to combinedcity index
                                 CombinedCity  = Carcassonne.BoardCities[CombinedCityIndex]
 
-                                # Iterating through connnectedCities. If combined and matching match = this is the same city   
+                                # Iterating through connnectedCities. If combined and matching match = this is the same city  
                                 if CombinedCityIndex == MatchingCityIndex and CombinedCity.Meeples[0] == 0 and CombinedCity.Meeples[1] == 0: # Case of an unclaimed city 
                                     if MeepleKey is not None and MeepleKey[0] == 'C':
                                         if tile not in create_feature_tiles:
@@ -375,15 +367,37 @@ class AdaptiveStrategies:
                                 # Index is different, this connects two cities 
                                 else:
                                     MatchingCity = Carcassonne.BoardCities[MatchingCityIndex]
-                                    MatchingCity.Pointer = CombinedCityIndex
+                                    MatchingCity.Pointer = CombinedCityIndex # Changing the pointer to that city 
                                     
-                                    # EITHER ENHANCING TO CREATE ONE BIG FEAUTRE
                                     # Check owners 
+                                    MatchingOwner = None
+                                    if MatchingCity.Meeples[0] > MatchingCity.Meeples[1]:
+                                        MatchingOwner = 1
+                                    elif MatchingCity.Meeples[1] > MatchingCity.Meeples[0]:
+                                        MatchingOwner = 2
+                                    else:
+                                        MatchingOwner = 0
                                     
-
-                                    # OR MERGING TO STEAL POINTS
-                                    if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
-                                        merge_feature_tiles.append(['city', tile])
+                                    CombinedOwner = None 
+                                    if CombinedCity.Meeples[0] > CombinedCity.Meeples[1]:
+                                        CombinedOwner = 1
+                                    elif CombinedCity.Meeples[1] > CombinedCity.Meeples[0]:
+                                        CombinedOwner = 2
+                                    else:
+                                        CombinedOwner = 0
+                                    
+                                    if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging cities, can create a new
+                                        if MeepleKey is not None and MeepleKey[0] == 'C':
+                                            if tile not in create_feature_tiles:
+                                                create_feature_tiles.append(['city', tile]) 
+                                    elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
+                                        if tile not in enhance_feature_tiles:
+                                                enhance_feature_tiles.append(['city', tile]) 
+                                    elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
+                                        if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
+                                            if tile not in merge_feature_tiles:
+                                                merge_feature_tiles.append(['city', tile])
+                                   
                         
             #Carcassonne.checkRoadCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
             #Carcassonne.checkFarmCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
