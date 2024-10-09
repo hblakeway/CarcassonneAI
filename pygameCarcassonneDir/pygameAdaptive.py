@@ -292,7 +292,7 @@ class AdaptiveStrategies:
             # New Monastry Logic 
             if MeepleKey is not None: # Monastry is not a feature without a meeple 
                 if MeepleKey[0] == "Monastery":
-                    if tile not in create_feature_tiles:
+                    if ['monastery', tile] not in create_feature_tiles:
                         create_feature_tiles.append(['monastery', tile])
             
             if PlayingTile.HasCities:
@@ -305,7 +305,7 @@ class AdaptiveStrategies:
                         
                         if Surroundings[CitySide] is None: # treated as new city
                             if MeepleKey is not None and MeepleKey[0] == 'C':
-                                if tile not in create_feature_tiles:
+                                if ['city', tile] not in create_feature_tiles:
                                     create_feature_tiles.append(['city', tile])
                                     
                         # connected to pre-existing city    
@@ -319,7 +319,7 @@ class AdaptiveStrategies:
 
                             if MatchingCity.Meeples[0] == 0 and MatchingCity.Meeples[1] == 0: # Empty city no one has claimed 
                                 if MeepleKey is not None and MeepleKey[0] == 'C':
-                                    if tile not in create_feature_tiles:
+                                    if ['city', tile] not in create_feature_tiles:
                                         create_feature_tiles.append(['city', tile])
 
                             if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 > 0): # Covers enhancing case 1,1
@@ -343,7 +343,7 @@ class AdaptiveStrategies:
                         # if none of the city openings connect to a pre-existing city
                         if not ConnectedCities:
                             if MeepleKey is not None and MeepleKey[0] == 'C':
-                                if tile not in create_feature_tiles:
+                                if ['city', tile] not in create_feature_tiles:
                                     # create a new city
                                     create_feature_tiles.append(['city', tile])  
 
@@ -357,11 +357,11 @@ class AdaptiveStrategies:
                                 # Iterating through connnectedCities. If combined and matching match = this is the same city  
                                 if CombinedCityIndex == MatchingCityIndex and CombinedCity.Meeples[0] == 0 and CombinedCity.Meeples[1] == 0: # Case of an unclaimed city 
                                     if MeepleKey is not None and MeepleKey[0] == 'C':
-                                        if tile not in create_feature_tiles:
+                                        if ['city', tile] not in create_feature_tiles:
                                             create_feature_tiles.append(['city', tile]) 
                                 # If the index is the same to the one we are comparing to. And player 1 has a meeple on it 
                                 elif CombinedCityIndex == MatchingCityIndex and (CombinedCity.Meeples[0] >= CombinedCity.Meeples[1]) and CombinedCity.Meeples[0] > 0: # Case of a player 1 city
-                                    if tile not in enhance_feature_tiles:
+                                    if ['city', tile] not in enhance_feature_tiles:
                                         enhance_feature_tiles.append(['city', tile]) 
                                 
                                 # Index is different, this connects two cities 
@@ -388,18 +388,112 @@ class AdaptiveStrategies:
                                     
                                     if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging cities, can create a new
                                         if MeepleKey is not None and MeepleKey[0] == 'C':
-                                            if tile not in create_feature_tiles:
+                                            if ['city', tile] not in create_feature_tiles:
                                                 create_feature_tiles.append(['city', tile]) 
                                     elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
-                                        if tile not in enhance_feature_tiles:
+                                        if ['city', tile] not in enhance_feature_tiles:
                                                 enhance_feature_tiles.append(['city', tile]) 
                                     elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
                                         if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
-                                            if tile not in merge_feature_tiles:
+                                            if ['city', tile] not in merge_feature_tiles:
                                                 merge_feature_tiles.append(['city', tile])
                                    
+            if PlayingTile.HasRoads:
+                for i in range(len(PlayingTile.RoadOpenings)):
+                    RoadOpenings = PlayingTile.RoadOpenings[i]      
+                    OpeningsQuantity = len(RoadOpenings) 
+                    
+                    if OpeningsQuantity == 1: 
+                        RoadSide = RoadOpenings[0]
+
+                        # Create a new road 
+                        if Surroundings[RoadSide] is None:
+                            if MeepleKey is not None and MeepleKey[0] == 'R':
+                                if ['road', tile] not in create_feature_tiles:
+                                    create_feature_tiles.append(['road', tile])
+                        else: # Join to existing Road
+                            MatchingRoadIndex = Surroundings[RoadSide].TileRoadsIndex[Carcassonne.MatchingSide[RoadSide]]
+                            while Carcassonne.BoardRoads[MatchingRoadIndex].Pointer != Carcassonne.BoardRoads[MatchingRoadIndex].ID:                            
+                                MatchingRoadIndex = Carcassonne.BoardRoads[MatchingRoadIndex].Pointer
+
+                            MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
+
+                            if MatchingRoad.Meeples[0] == 0 and MatchingRoad.Meeples[1] == 0: # Empty road no one has claimed 
+                                if MeepleKey is not None and MeepleKey[0] == 'R':
+                                    if ['road', tile] not in create_feature_tiles:
+                                        create_feature_tiles.append(['road', tile])
+
+                            if (MatchingRoad.Meeples[0] >= MatchingRoad.Meeples[1]) and MatchingRoad.Meeples[0] > 0 and (MatchingRoad.Openings - 1 > 0): # Covers enhancing case 1,1
+                                enhance_feature_tiles.append(['road', tile])
+                            
+                            if (MatchingRoad.Meeples[0] >= MatchingRoad.Meeples[1]) and MatchingRoad.Meeples[0] > 0 and (MatchingRoad.Openings - 1 == 0):  # Covers closing case 1,1
+                                complete_feature_tiles.append(['road', tile])
+                    else:
+                        ConnectedRoads = []
+    
+                        for RoadSide in RoadOpenings:
+                            if Surroundings[RoadSide] is not None:
+                                MatchingRoadIndex = Surroundings[RoadSide].TileRoadsIndex[Carcassonne.MatchingSide[RoadSide]]
+                                while Carcassonne.BoardRoads[MatchingRoadIndex].Pointer != Carcassonne.BoardRoads[MatchingRoadIndex].ID:                            
+                                    MatchingRoadIndex = Carcassonne.BoardRoads[MatchingRoadIndex].Pointer
+                            
+                                ConnectedRoads.append([MatchingRoadIndex,RoadSide])
                         
-            #Carcassonne.checkRoadCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
+                        # Create a new road 
+                        if not ConnectedRoads:
+                            if MeepleKey is not None and MeepleKey[0] == 'R':
+                                if ['road', tile] not in create_feature_tiles:
+                                    # create a new road
+                                    create_feature_tiles.append(['road', tile]) 
+                                
+                        else: # Connects to a pre existing road 
+                            CombinedRoadIndex = ConnectedRoads[0][0] # Current road on the board as reference 
+                        
+                            for MatchingRoadIndex,RoadSide in ConnectedRoads: # Connected roads are on the board already 
+                                CombinedRoad  = Carcassonne.BoardRoads[CombinedRoadIndex] 
+
+                                if CombinedRoadIndex == MatchingRoadIndex and CombinedRoad.Meeples[0] == 0 and CombinedRoad.Meeples[1] == 0: # Case of an unclaimed road:
+                                    if MeepleKey is not None and MeepleKey[0] == 'R':
+                                        if ['road', tile] not in create_feature_tiles:
+                                            create_feature_tiles.append(['road', tile]) 
+                                # If the index is the same to the one we are comparing to. And player 1 has a meeple on it 
+                                elif CombinedRoadIndex == MatchingRoadIndex and (CombinedRoad.Meeples[0] >= CombinedRoad.Meeples[1]) and CombinedRoad.Meeples[0] > 0: # Case of a player 1 road
+                                    if ['road', tile] not in enhance_feature_tiles:
+                                        enhance_feature_tiles.append(['road', tile]) 
+                                else:
+                                    MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
+                                    MatchingRoad.Pointer = CombinedRoadIndex
+                                    
+                                    # Check owners 
+                                    MatchingOwner = None
+                                    if MatchingRoad.Meeples[0] > MatchingRoad.Meeples[1]:
+                                        MatchingOwner = 1
+                                    elif MatchingRoad.Meeples[1] > MatchingRoad.Meeples[0]:
+                                        MatchingOwner = 2
+                                    else:
+                                        MatchingOwner = 0
+                                    
+                                    CombinedOwner = None 
+                                    if CombinedRoad.Meeples[0] > CombinedRoad.Meeples[1]:
+                                        CombinedOwner = 1
+                                    elif CombinedRoad.Meeples[1] > CombinedRoad.Meeples[0]:
+                                        CombinedOwner = 2
+                                    else:
+                                        CombinedOwner = 0
+                                    
+                                    if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging cities, can create a new
+                                        if MeepleKey is not None and MeepleKey[0] == 'R':
+                                            if ['road', tile] not in create_feature_tiles:
+                                                create_feature_tiles.append(['road', tile]) 
+                                    elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
+                                        if ['road', tile] not in enhance_feature_tiles:
+                                                enhance_feature_tiles.append(['roads', tile]) 
+                                    elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
+                                        if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
+                                            if ['road', tile] not in merge_feature_tiles:
+                                                merge_feature_tiles.append(['road', tile])
+                                                
+            
             #Carcassonne.checkFarmCompletenessAdaptive(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, tile)
 
         print(f"Enhancing List = {enhance_feature_tiles}")
