@@ -253,9 +253,6 @@ def PlayGame(p1, p2):
 
                         if aiCopilotRect.collidepoint(mouseX, mouseY):
                             playAImove = True
-                            # Update weighting 
-                            if p2.identifier == "YCoPilot":
-                                AdaptiveRules.update_weights(adaptive_rules, True)
 
                         elif (X, Y) in NT.possibleCoordsMeeples:
                             rotation = 90 * NT.Rotated
@@ -276,7 +273,7 @@ def PlayGame(p1, p2):
 
                             if p2.identifier == "YCoPilot":
                                 updateKeys(selectedMove[0], meepleLoc, (X,Y), selectedMove[3])
-                                AdaptiveRules.update_weights(adaptive_rules, False)
+                                AdaptiveRules.update_weights(adaptive_rules, False, selectedMove)
                             
                             if Carcassonne.TotalTiles == 0:
                                 isGameOver = True
@@ -311,6 +308,7 @@ def PlayGame(p1, p2):
                 Rotation = selectedMove.Rotation
                 MeepleKey = selectedMove.MeepleInfo
                 selectedMove = [DisplayTileIndex,X,Y,Rotation,MeepleKey]
+                AdaptiveRules.update_weights(adaptive_rules, True, selectedMove)
             Carcassonne.move(selectedMove)
             playerStrat.add(selectedMove)
             X = selectedMove[1]
@@ -406,6 +404,7 @@ def PlayGame(p1, p2):
                 if selectedMove:
                     validMove = True
                     NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
+                    print(moveType, strategyType)
                     NT.updateMoveLabelY(moveType, strategyType)
                 pygame.display.flip()
             else:

@@ -351,18 +351,31 @@ class nextTile:
             'enhance_feature': [
                 f"Keep expanding your {strategy}!",
                 f"Grow your {strategy} further!",
-                f"Keep building your {strategy}!",
+                f"This is your chance to grow your {strategy}!",
             ],
             'enhance_strategy': [
-                f"Keep going with your {strategy}-building.",
                 f"Continue {strategy}-building. Create a new one!",
-                f"Your {strategy}-building is strong—keep it up!"
+                f"Keep {strategy}-building to expand quickly!"
             ],
             'steal_points': [
                 f"Seize the chance for points with this {strategy}!",
                 f"Combine to grab points from this {strategy}!",
                 f"Take advantage of this {strategy} for points!"
+            ],
+            'complete_feature': [
+                f"Seize the chance to secure {strategy} points!",
+                f"A complete {strategy} with this tile!",
+                f"Complete your {strategy} for points!"
+            ],
+            'enhance_least': [
+                f"Don't forget to grab points by {strategy}-building",
+                f"Even out your points by {strategy}-building!"
+            ],
+            'enhance_most': [
+                f"Your {strategy}-building strategy is unbeatable!",
+                f"Your {strategy}-biilding strategy is taking over"
             ]
+
         }
 
         title = random.choice(text[moveType])
