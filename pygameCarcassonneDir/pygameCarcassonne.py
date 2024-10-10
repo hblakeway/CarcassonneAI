@@ -210,7 +210,7 @@ def PlayGame(p1, p2):
                             isStartOfGame,
                             ManualMove=None,
                         )
-
+                        print(selectedMove)
                         opponentStrat.add(selectedMove)
                         X = selectedMove[1] 
                         Y = selectedMove[2] 
@@ -301,12 +301,20 @@ def PlayGame(p1, p2):
         GAME_DISPLAY.blit(background, (0, 0))
         drawGrid(DisplayScreen)
 
-        if playAImove:
+        if playAImove and not isGameOver:
             if p2.identifier == "YCoPilot":
-                DisplayTileIndex = selectedMove.TileIndex
-                X,Y = selectedMove.X, selectedMove.Y
-                Rotation = selectedMove.Rotation
-                MeepleKey = selectedMove.MeepleInfo
+                if isinstance(selectedMove, list):
+                    DisplayTileIndex = selectedMove[0]
+                    X = selectedMove[1]
+                    Y = selectedMove[2]
+                    Rotation = selectedMove[3]
+                    MeepleKey = selectedMove[4]
+                else:
+                    DisplayTileIndex = selectedMove.TileIndex
+                    X,Y = selectedMove.X, selectedMove.Y
+                    Rotation = selectedMove.Rotation
+                    MeepleKey = selectedMove.MeepleInfo
+
                 selectedMove = [DisplayTileIndex,X,Y,Rotation,MeepleKey]
                 AdaptiveRules.update_weights(adaptive_rules, True, selectedMove)
             Carcassonne.move(selectedMove)
@@ -330,9 +338,12 @@ def PlayGame(p1, p2):
             else:
                 Carcassonne.isGameOver
                 if isGameOver:
-                        print(f"Final AI Counter = {aiMove.get()}")
-                        isStartOfTurn = False
-                        hasSomethingNew = False
+                    print(f"Final AI Counter = {aiMove.get()}")
+                    print(
+                        f"Winner: Player {Carcassonne.winner}, Scores:  P1: {Carcassonne.Scores[0]} - P2: {Carcassonne.Scores[1]}"
+                    )
+                    FinalMenu(Carcassonne)
+                        
 
         # If a move has been made
         if hasSomethingNew and not isGameOver:
@@ -399,9 +410,11 @@ def PlayGame(p1, p2):
         else: # Player should be y copilot 
             if firstRotation:
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates, moveType, strategyType = AdaptiveRules.adaptive(adaptive_rules, DisplayScreen, Carcassonne, player_strategy)
+                print(selectedMove)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
                 if selectedMove:
+                    print(selectedMove)
                     validMove = True
                     NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
                     print(moveType, strategyType)

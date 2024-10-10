@@ -425,7 +425,7 @@ class AdaptiveStrategies:
         # print(f"Enhancing List = {enhance_feature_tiles}")
         # print(f"Completing List = {complete_feature_tiles}")
         # print(f"Creating New List = {create_feature_tiles}")
-        # print(f"Merging List = {merge_feature_tiles}")
+        #print(f"Merging List = {merge_feature_tiles}")
 
         return enhance_feature_tiles,complete_feature_tiles, create_feature_tiles, merge_feature_tiles
 
@@ -488,7 +488,7 @@ class AdaptiveRules:
         self.enhanceFeatureWeight = 5.5
         self.completeFeatureWeight = 5
         self.enhanceStrategyWeight = 3
-        self.stealPointsWeight = 10
+        self.stealPointsWeight = 20
         self.enhanceLeastWeight = 1
         self.enhanceMostWeight = 1
 
@@ -525,7 +525,7 @@ class AdaptiveRules:
             elif self.lastMove == 'enhance_strategy':
                 self.enhanceStrategyWeight -= 0.5
             elif self.lastMove == 'steal_points':
-                self.stealPointsWeight -= 0.5
+                self.stealPointsWeight -= 5
             elif self.lastMove == 'complete_feature':
                 self.completeFeatureWeight -= 0.5
             elif self.lastMove == 'enhance_least':
