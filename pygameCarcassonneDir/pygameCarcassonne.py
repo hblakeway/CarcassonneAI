@@ -386,8 +386,8 @@ def PlayGame(p1, p2):
 
         if p2.identifier == "XCoPilot":
             if firstRotation:
-                print(Carcassonne.BoardCities)
                 selectedMove, image,image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
+                print(selectedMove)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
                 NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)

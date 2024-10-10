@@ -175,7 +175,7 @@ class CarcassonneState:
 
         if RunInit:
             # Number of tiles per TileIndex, i.e. 1 tile for 0th tile, 3 for 1st tile, etc.
-            
+            demo = True
             
             if self.no_monasteries:
                 self.TileQuantities = [1,3,1,1,2,3,2,2,2,3,1,3,2,5,3,0,4,3,3,4,0,9,8,1]
@@ -194,45 +194,23 @@ class CarcassonneState:
             self.TotalTiles = sum(self.TileQuantities)
             self.UniqueTilesCount = len(self.TileQuantities)
                 
-            # create deck
-            #self.deck = [x for x in self.TileIndexList]
-            self.deck = self.TileIndexList.copy()
-            rd.shuffle(self.deck)  # shuffle the deck
+            if demo: 
+                self.DemoTileQuantities = [1,3,1,1,2,3,2,2,2,3,1,3,2,5,3,2,4,3,3,4,4,9,8,1]
+                self.DemoTileIndexList = [0, 1, 1, 1, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 
+                                    10, 11, 11, 11, 12, 12, 13, 13, 13, 13, 13, 14, 14, 14, 15, 
+                                    15, 16, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 19, 
+                                    20, 20, 20, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 
+                                    22, 22, 22, 22, 22, 22, 23]
+                self.deck = self.DemoTileIndexList.copy()
+                self.move((16, 0, 0, 0, None))
+                self.move((1, 0, 1, 90, ('C', 0)))
+                self.move((22, -1, 0, 0, ('R', 0)))
+            else:
+                self.deck = self.TileIndexList.copy()
+                rd.shuffle(self.deck)  # shuffle the deck
+                self.move((16, 0, 0, 0, None))
+                self.add_coordmove(0, 0, (16, 0, 0, 0, None),0)
             
-            # each game starts with the same tile (Tile16) being placed
-            # PlayingTileIndex=16, X,Y = 0,0, Rotation=0, MeepleKey=None
-            #Move = (16, 0, 0, 0, None)
-            #PlayingTileIndex = Move[0]
-            #X,Y = Move[1], Move[2]
-            #Rotation = Move[3]
-            #MeepleKey = Move[4]
-            self.move((16, 0, 0, 0, None))
-            self.add_coordmove(0, 0, (16, 0, 0, 0, None),0)
-            
-            #print(self.BoardCities)
-
-            #self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey, Move)
-            #self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
-            #self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
-            #self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
-
-            
-            # code for running tests by arranging the order of the first few tiles
-            """
-            index = self.deck.index(0)
-            self.deck[index] = self.deck[0]
-            self.deck[0] = 0
-            
-            index = self.deck.index(0)
-            self.deck[index] = self.deck[1]
-            self.deck[1] = 0
-            
-            index = self.deck.index(20)
-            self.deck[index] = self.deck[2]
-            self.deck[2] = 20
-            """
-    
-
     def CloneState(self):
         """
         Clones the game state - quicker than using copy.deepcopy()

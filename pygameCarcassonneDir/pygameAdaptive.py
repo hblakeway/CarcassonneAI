@@ -422,10 +422,10 @@ class AdaptiveStrategies:
                                             if ['farm', tile] not in merge_feature_tiles:
                                                 merge_feature_tiles.append(['farm', tile])
 
-        print(f"Enhancing List = {enhance_feature_tiles}")
+        # print(f"Enhancing List = {enhance_feature_tiles}")
         # print(f"Completing List = {complete_feature_tiles}")
         # print(f"Creating New List = {create_feature_tiles}")
-        print(f"Merging List = {merge_feature_tiles}")
+        # print(f"Merging List = {merge_feature_tiles}")
 
         return enhance_feature_tiles,complete_feature_tiles, create_feature_tiles, merge_feature_tiles
 
@@ -642,8 +642,8 @@ class AdaptiveRules:
             max_weight = max(entry[0] for entry in adaptiveRules) 
             max_weight_entries = [entry for entry in adaptiveRules if entry[0] == max_weight]
 
-            print(max_weight)
-            print(max_weight_entries)
+            #print(max_weight)
+            #print(max_weight_entries)
 
             if len(max_weight_entries) > 1:
                 # get max 
