@@ -178,6 +178,7 @@ class AdaptiveStrategies:
                             CombinedCityIndex = ConnectedCities[0][0] # Starting with first connected city 
 
                             for MatchingCityIndex, CitySide in ConnectedCities: # Iterate through Connected Cities, checking if it connected to combinedcity index
+
                                 CombinedCity  = Carcassonne.BoardCities[CombinedCityIndex]
 
                                 # Iterating through connnectedCities. If combined and matching match = this is the same city  
@@ -212,6 +213,8 @@ class AdaptiveStrategies:
                                     else:
                                         CombinedOwner = 0
                                     
+                                    # print(CombinedCity) Player 1
+                                    # print(MatchingCity) Player 2
                                     if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging cities, can create a new
                                         if MeepleKey is not None and MeepleKey[0] == 'C':
                                             if ['city', tile] not in create_feature_tiles:
@@ -219,11 +222,17 @@ class AdaptiveStrategies:
                                     elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
                                         if ['city', tile] not in enhance_feature_tiles:
                                                 enhance_feature_tiles.append(['city', tile]) 
-                                    elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
-                                        if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]):
-                                            if ['city', tile] not in merge_feature_tiles:
-                                                merge_feature_tiles.append(['city', tile])
-                                   
+                                    elif (MatchingOwner == 1 and CombinedOwner == 2): 
+                                        if len(CombinedCity.tileList) > len(MatchingCity.tileList): # Check that Combined is larger 
+                                            if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                                if ['city', tile] not in merge_feature_tiles:
+                                                    merge_feature_tiles.append(['city', tile])
+                                    elif (MatchingOwner == 2 and CombinedOwner == 1):
+                                        if len(MatchingCity.tileList) > len(CombinedCity.tileList): # Check that Matching is larger 
+                                            if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                                if ['city', tile] not in merge_feature_tiles:
+                                                    merge_feature_tiles.append(['city', tile])
+
             if PlayingTile.HasRoads:
                 for i in range(len(PlayingTile.RoadOpenings)):
                     RoadOpenings = PlayingTile.RoadOpenings[i]      
@@ -314,10 +323,16 @@ class AdaptiveStrategies:
                                     elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
                                         if ['road', tile] not in enhance_feature_tiles:
                                                 enhance_feature_tiles.append(['road', tile]) 
-                                    elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
-                                        if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]):
-                                            if ['road', tile] not in merge_feature_tiles:
-                                                merge_feature_tiles.append(['road', tile])
+                                    elif (MatchingOwner == 1 and CombinedOwner == 2): 
+                                        if len(CombinedRoad.tileList) > len(MatchingRoad.tileList): # Check that Combined is larger 
+                                            if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                                if ['road', tile] not in merge_feature_tiles:
+                                                    merge_feature_tiles.append(['road', tile])
+                                    elif (MatchingOwner == 2 and CombinedOwner == 1):
+                                        if len(MatchingRoad.tileList) > len(CombinedRoad.tileList): # Check that Matching is larger 
+                                            if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                                if ['road', tile] not in merge_feature_tiles:
+                                                    merge_feature_tiles.append(['road', tile])
                                                 
             if PlayingTile.HasFarms:
                 for i in range(len(PlayingTile.FarmOpenings)):
@@ -408,8 +423,8 @@ class AdaptiveStrategies:
                                                 merge_feature_tiles.append(['farm', tile])
 
         print(f"Enhancing List = {enhance_feature_tiles}")
-        print(f"Completing List = {complete_feature_tiles}")
-        print(f"Creating New List = {create_feature_tiles}")
+        # print(f"Completing List = {complete_feature_tiles}")
+        # print(f"Creating New List = {create_feature_tiles}")
         print(f"Merging List = {merge_feature_tiles}")
 
         return enhance_feature_tiles,complete_feature_tiles, create_feature_tiles, merge_feature_tiles
@@ -472,8 +487,8 @@ class AdaptiveRules:
 
         self.enhanceFeatureWeight = 5.5
         self.completeFeatureWeight = 5
-        self.enhanceStrategyWeight = 1
-        self.stealPointsWeight = 6
+        self.enhanceStrategyWeight = 3
+        self.stealPointsWeight = 10
         self.enhanceLeastWeight = 1
         self.enhanceMostWeight = 1
 
@@ -561,28 +576,18 @@ class AdaptiveRules:
         
         feature_points_index = {0:'city', 1:'road', 2:'monastery', 3: 'city', 4: 'road', 5:'monastery', 6: 'farm'}
         lowest_category = min(Carcassonne.FeatureScores[0])
-        print(lowest_category)
         highest_category = max(Carcassonne.FeatureScores[0])
-        print(highest_category)
 
         lowest_index = Carcassonne.FeatureScores[0].index(lowest_category)
         highest_index = Carcassonne.FeatureScores[0].index(highest_category)
-        print(Carcassonne.FeatureScores[0])
-        print(feature_points_index[lowest_index])
-        print(feature_points_index[highest_index])
 
-        for tileType, enhanceTile in enumerate(create_feature_tiles):
-            if str(enhanceTile[0]) == str(feature_points_index[lowest_index]):
-                print("okay in here")
+        for tileType, enhanceTile in create_feature_tiles:
+            if str(tileType) == str(feature_points_index[lowest_index]):
                 lowest_points.append([tileType, enhanceTile])
         
-        for tileType, enhanceTile in enumerate(create_feature_tiles):
-            if str(enhanceTile[0]) == str(feature_points_index[highest_index]):
-                print("hi in here")
+        for tileType, enhanceTile in create_feature_tiles:
+            if str(tileType) == str(feature_points_index[highest_index]):
                 highest_points.append([tileType, enhanceTile])
-
-        print(lowest_points)
-        print(highest_points)
 
         self.lastEnhanceLeast = lowest_points
         self.lastEnhanceMost = highest_points
@@ -634,7 +639,6 @@ class AdaptiveRules:
         finalStrategyType = None
 
         if adaptiveRules:
-            print(adaptiveRules)
             max_weight = max(entry[0] for entry in adaptiveRules) 
             max_weight_entries = [entry for entry in adaptiveRules if entry[0] == max_weight]
 
@@ -684,7 +688,6 @@ class AdaptiveRules:
             MeepleKey = selectedMove.MeepleInfo
 
             currentTile = Tile(DisplayTileIndex)
-            # currentTile.Rotate(Rotation)
 
             if not(MeepleKey is None):
                 feature = MeepleKey[0]

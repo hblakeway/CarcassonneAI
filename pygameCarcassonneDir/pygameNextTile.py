@@ -351,7 +351,7 @@ class nextTile:
             'enhance_feature': [
                 f"Keep expanding your {strategy}!",
                 f"Grow your {strategy} further!",
-                f"This is your chance to grow your {strategy}!",
+                f"Build up your {strategy}!",
             ],
             'enhance_strategy': [
                 f"Continue {strategy}-building. Create a new one!",
@@ -365,7 +365,7 @@ class nextTile:
             'complete_feature': [
                 f"Seize the chance to secure {strategy} points!",
                 f"A complete {strategy} with this tile!",
-                f"Complete your {strategy} for points!"
+                f"This is your chance to complete your {strategy}!"
             ],
             'enhance_least': [
                 f"Don't forget to grab points by {strategy}-building",
