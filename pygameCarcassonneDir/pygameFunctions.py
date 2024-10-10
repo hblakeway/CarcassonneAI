@@ -80,14 +80,34 @@ class playerStrategy:
         MeepleKey = Move[4]
     """
     def __init__(self, player_strategy=None, features=None):
-        if player_strategy is None:
-            player_strategy = []
-        
-        if features is None:
-            features = []
+        demo = True 
 
-        self.playerStrategy = player_strategy
-        self.playerFeatures = features
+        if demo:
+            player_strategy = [(6, 0, 1, 180, ('C', 0)), (2, 2, 1, 180, ('C', 0)), (20, 0, -1, 0, ('Monastery', 0)), (21, 1, 0, 0, ('R', 0)),
+                               (1, 3, 2, 270, ('G', 0)), (16, 1, -1, 90, ('C', 0)), (1, 2, -1, 180, None), (21, 1, -2, 180, ('G', 1)),
+                               (14, 2, -2, 0, None), (10, 3, -1, 0, None), (21, -2, 0, 180, None), (22, -3, 1, 0, ('R', 0)), (5, 4, -1, 270, None),
+                               (3, -4, 1, 270, None), (19, 2, 4, 0, ('R', 2)), (21, 3, 0, 180, None), (13, 0, -2, 180, ('C', 0)), (23, 5, 4, 0, None),
+                               (18, 4, 1, 90, None), (0, 0, -3, 0, None), (19, -1, -2, 90, None), (22, 2, -3, 90, None), (22, 2, -4, 90, None), 
+                               (8, 0, -4, 0, None), (7, 1, -3, 180, None), (17, -4, 0, 0, None), (13, -4, 4, 180, ('C', 0)), (9, 3, 4, 90, None),
+                               (7, 1, -4, 270, None), (20, 1, 3, 0, ('Monastery', 0))]
+            
+            if features is None:
+                features = []
+
+            self.playerStrategy = player_strategy
+            self.playerFeatures = features
+        
+        else:
+            if player_strategy is None:
+                player_strategy = []
+            
+            if features is None:
+                features = []
+
+            self.playerStrategy = player_strategy
+            self.playerFeatures = features
+        
+        print(f"Init Player Strat = {player_strategy}")
 
     def add(self, move=None):
         if move is None:

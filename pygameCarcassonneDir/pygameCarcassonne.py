@@ -210,7 +210,7 @@ def PlayGame(p1, p2):
                             isStartOfGame,
                             ManualMove=None,
                         )
-                        print(selectedMove)
+                        
                         opponentStrat.add(selectedMove)
                         X = selectedMove[1] 
                         Y = selectedMove[2] 
@@ -398,7 +398,6 @@ def PlayGame(p1, p2):
         if p2.identifier == "XCoPilot":
             if firstRotation:
                 selectedMove, image,image_coordinate, rect_surf, rect_coordinates = getAImove(DisplayScreen, player, Carcassonne, NT.nextTileIndex) # Gets the AI move each turn 
-                print(selectedMove)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
                 NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
@@ -410,14 +409,11 @@ def PlayGame(p1, p2):
         else: # Player should be y copilot 
             if firstRotation:
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates, moveType, strategyType = AdaptiveRules.adaptive(adaptive_rules, DisplayScreen, Carcassonne, player_strategy)
-                print(selectedMove)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)
                 if selectedMove:
-                    print(selectedMove)
                     validMove = True
                     NT.placeAISuggestion(DisplayScreen, image, image_coordinate, rect_surf, rect_coordinates)
-                    print(moveType, strategyType)
                     NT.updateMoveLabelY(moveType, strategyType)
                 pygame.display.flip()
             else:

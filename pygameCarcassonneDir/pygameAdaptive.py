@@ -149,7 +149,8 @@ class AdaptiveStrategies:
                                         create_feature_tiles.append(['city', tile])
 
                             if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 > 0): # Covers enhancing case 1,1
-                                enhance_feature_tiles.append(['city', tile])
+                                if ['city', tile] not in merge_feature_tiles or ['city', tile] not in complete_feature_tiles:
+                                    enhance_feature_tiles.append(['city', tile])
                             
                             if (MatchingCity.Meeples[0] >= MatchingCity.Meeples[1]) and MatchingCity.Meeples[0] > 0 and (MatchingCity.Openings - 1 == 0):  # Covers closing case 1,1
                                 complete_feature_tiles.append(['city', tile])
@@ -191,6 +192,8 @@ class AdaptiveStrategies:
                                     if ['city', tile] not in enhance_feature_tiles:
                                         enhance_feature_tiles.append(['city', tile]) 
                                 
+                                if ['city', tile] in enhance_feature_tiles and ['city', tile] in merge_feature_tiles:
+                                        enhance_feature_tiles.remove(['city', tile])
                                 # Index is different, this connects two cities 
                                 else:
                                     MatchingCity = Carcassonne.BoardCities[MatchingCityIndex]
@@ -232,6 +235,9 @@ class AdaptiveStrategies:
                                             if (MatchingCity.Meeples[0] + CombinedCity.Meeples[0]) >= (MatchingCity.Meeples[1] + CombinedCity.Meeples[1]): # Check that player 1 meeples will be larger after the merge
                                                 if ['city', tile] not in merge_feature_tiles:
                                                     merge_feature_tiles.append(['city', tile])
+                                    
+                                    if ['city', tile] in enhance_feature_tiles and ['city', tile] in merge_feature_tiles:
+                                        enhance_feature_tiles.remove(['city', tile])
 
             if PlayingTile.HasRoads:
                 for i in range(len(PlayingTile.RoadOpenings)):
@@ -295,6 +301,9 @@ class AdaptiveStrategies:
                                 elif CombinedRoadIndex == MatchingRoadIndex and (CombinedRoad.Meeples[0] >= CombinedRoad.Meeples[1]) and CombinedRoad.Meeples[0] > 0: # Case of a player 1 road
                                     if ['road', tile] not in enhance_feature_tiles:
                                         enhance_feature_tiles.append(['road', tile]) 
+                                
+                                if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
+                                        enhance_feature_tiles.remove(['road', tile])
                                 else:
                                     MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
                                     MatchingRoad.Pointer = CombinedRoadIndex
@@ -333,6 +342,9 @@ class AdaptiveStrategies:
                                             if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
                                                 if ['road', tile] not in merge_feature_tiles:
                                                     merge_feature_tiles.append(['road', tile])
+                                    
+                                    if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
+                                        enhance_feature_tiles.remove(['road', tile])
                                                 
             if PlayingTile.HasFarms:
                 for i in range(len(PlayingTile.FarmOpenings)):
@@ -425,7 +437,7 @@ class AdaptiveStrategies:
         # print(f"Enhancing List = {enhance_feature_tiles}")
         # print(f"Completing List = {complete_feature_tiles}")
         # print(f"Creating New List = {create_feature_tiles}")
-        #print(f"Merging List = {merge_feature_tiles}")
+        print(f"Merging List = {merge_feature_tiles}")
 
         return enhance_feature_tiles,complete_feature_tiles, create_feature_tiles, merge_feature_tiles
 
@@ -485,12 +497,12 @@ class AdaptiveRules:
         self.enhanceMost = enhanceMost # Most Points
         self.enhanceStrategy = enhanceStrategy # Most common place meeple placed
 
-        self.enhanceFeatureWeight = 5.5
-        self.completeFeatureWeight = 5
-        self.enhanceStrategyWeight = 3
-        self.stealPointsWeight = 20
-        self.enhanceLeastWeight = 1
-        self.enhanceMostWeight = 1
+        self.enhanceFeatureWeight = 0.3 #Add to existing
+        self.completeFeatureWeight = 1.5 #Complete Existing
+        self.enhanceStrategyWeight = 0.2 #Create new according to player strategy
+        self.stealPointsWeight = 2.0 #Steal points 
+        self.enhanceLeastWeight = 0.1 #Enhance feature with least points
+        self.enhanceMostWeight = 0.1 #Enhance feature with most points
 
         self.lastMove = 'manual'
 
@@ -517,7 +529,7 @@ class AdaptiveRules:
             elif self.lastMove == 'enhance_least':
                 self.enhanceLeastWeight += 0.2
             elif self.lastMove == 'enhance_most':
-                self.enhanceMostWeight += 0.2
+                self.enhanceMostWeight += 5
             
         else:
             if self.lastMove == 'enhance_feature':
@@ -575,8 +587,10 @@ class AdaptiveRules:
         highest_points = []
         
         feature_points_index = {0:'city', 1:'road', 2:'monastery', 3: 'city', 4: 'road', 5:'monastery', 6: 'farm'}
-        lowest_category = min(Carcassonne.FeatureScores[0])
-        highest_category = max(Carcassonne.FeatureScores[0])
+        featurePoints = Carcassonne.FeatureScores[0]
+        print(f"Current Feature Scores: {featurePoints[:3]}")
+        lowest_category = min(featurePoints[:3])
+        highest_category = max(featurePoints[:3])
 
         lowest_index = Carcassonne.FeatureScores[0].index(lowest_category)
         highest_index = Carcassonne.FeatureScores[0].index(highest_category)
@@ -598,29 +612,32 @@ class AdaptiveRules:
         
         adaptiveRules = []
 
+        # print(mctsMoves)
+
         if enhance_feature_tiles:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(enhance_feature_tiles):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.enhanceFeatureWeight), tile[1], 'enhance_feature', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.enhanceFeatureWeight), tile[1], 'enhance_feature', enhanceTile[0]])
         
         if complete_feature_tiles:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(complete_feature_tiles):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.completeFeatureWeight), tile[1], 'complete_feature', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.completeFeatureWeight), tile[1], 'complete_feature', enhanceTile[0]])
         
         if enhanceStrategyMoves:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(enhanceStrategyMoves):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.enhanceStrategyWeight), tile[1], 'enhance_strategy', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.enhanceStrategyWeight), tile[1], 'enhance_strategy', enhanceTile[0]])
 
         if merge_feature_tiles:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(merge_feature_tiles):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.stealPointsWeight), tile[1], 'steal_points', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.stealPointsWeight), tile[1], 'steal_points', enhanceTile[0]])
+        
         
         if lowest_points:
             for weight, tile in enumerate(mctsMoves):
@@ -639,6 +656,12 @@ class AdaptiveRules:
         finalStrategyType = None
 
         if adaptiveRules:
+            print("Top 20%")
+            sorted_list = sorted(adaptiveRules, key=lambda x: x[0], reverse=True)
+            calc = max(1, len(sorted_list) // 5)
+            for i in sorted_list[:calc]:
+                print(i)
+
             max_weight = max(entry[0] for entry in adaptiveRules) 
             max_weight_entries = [entry for entry in adaptiveRules if entry[0] == max_weight]
 
@@ -654,7 +677,7 @@ class AdaptiveRules:
                     strategies.append(str(strategyType))
                 
                 featureString = self.get_successful_strategy(strategies)
-                print(featureString)
+                # print(featureString)
 
                 for i in max_weight_entries:
                     weightTile, tileFeatures, strategyType, featureType = i
@@ -663,13 +686,13 @@ class AdaptiveRules:
                         self.lastMove = featureString
                         finalMoveType = featureString
                         finalStrategyType = str(featureType)
-                        print("selected", selectedMove,self.lastMove,finalMoveType,finalStrategyType)
+                        print("Selected Move =", selectedMove,self.lastMove,finalMoveType,finalStrategyType)
             else:
                 selectedMove = max_weight_entries[0][1]
                 self.lastMove = max_weight_entries[0][2]
                 finalMoveType = max_weight_entries[0][2]
                 finalStrategyType = max_weight_entries[0][3]
-                print(selectedMove,self.lastMove,finalMoveType,finalStrategyType)
+                print("Selected Move =",selectedMove,self.lastMove,finalMoveType,finalStrategyType)
 
         
         if selectedMove: # Place tile 

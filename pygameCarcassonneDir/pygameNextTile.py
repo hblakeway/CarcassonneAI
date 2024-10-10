@@ -373,7 +373,7 @@ class nextTile:
             ],
             'enhance_most': [
                 f"Your {strategy}-building strategy is unbeatable!",
-                f"Your {strategy}-biilding strategy is taking over"
+                f"Your {strategy}-building strategy is taking over"
             ]
 
         }
