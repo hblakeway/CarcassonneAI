@@ -371,8 +371,8 @@ class AdaptiveStrategies:
                                     if ['farm', tile] not in create_feature_tiles:
                                         create_feature_tiles.append(['farm', tile])
 
-                            if (MatchingFarm.Meeples[0] >= MatchingFarm.Meeples[1]) and MatchingFarm.Meeples[0] > 0: # Covers enhancing case 1,1
-                                enhance_feature_tiles.append(['farm', tile])
+                            #if (MatchingFarm.Meeples[0] >= MatchingFarm.Meeples[1]) and MatchingFarm.Meeples[0] > 0: # Covers enhancing case 1,1
+                            #    enhance_feature_tiles.append(['farm', tile])
                     else:
                         ConnectedFarms = set()
                         for (FarmSide, FarmLine) in FarmOpenings:
@@ -418,16 +418,16 @@ class AdaptiveStrategies:
                                     if MeepleKey is not None and MeepleKey[0] == 'G':
                                         if ['farm', tile] not in create_feature_tiles:
                                             create_feature_tiles.append(['farm', tile]) 
-                                elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
-                                    if ['farm', tile] not in enhance_feature_tiles:
-                                            enhance_feature_tiles.append(['farm', tile]) 
+                                #elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
+                                #    if ['farm', tile] not in enhance_feature_tiles and PlayingTile.HasCities:
+                                #            enhance_feature_tiles.append(['farm', tile]) 
                                 elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
                                     if (MatchingFarm.Meeples[0] + CombinedFarm.Meeples[0]) >= (MatchingFarm.Meeples[1] + CombinedFarm.Meeples[1]):
                                         if ['farm', tile] not in merge_feature_tiles:
                                             merge_feature_tiles.append(['farm', tile])
 
-                                if ['farm', tile] in enhance_feature_tiles and ['farm', tile] in merge_feature_tiles:
-                                    enhance_feature_tiles.remove(['farm', tile])
+                                #if ['farm', tile] in enhance_feature_tiles and ['farm', tile] in merge_feature_tiles:
+                                #    enhance_feature_tiles.remove(['farm', tile])
                             
 
         # print(f"Enhancing List = {enhance_feature_tiles}")
@@ -473,14 +473,14 @@ class AdaptiveStrategies:
                     options.append([meepleDictionary[player_strategy], i])
             
             if not options:
-                return False
+                return []
             
             # selectedMove = random.choice(options)
             #print(f"It would be good to start a new {meepleDictionary[player_strategy]}.")
             return options
         
         else: # Strategy is False for this move
-            return False
+            return []
 
 # Class to manage rule status
 class AdaptiveRules:
@@ -493,12 +493,12 @@ class AdaptiveRules:
         self.enhanceMost = enhanceMost # Most Points
         self.enhanceStrategy = enhanceStrategy # Most common place meeple placed
 
-        self.enhanceFeatureWeight = 0.3 #Add to existing
-        self.completeFeatureWeight = 1.5 #Complete Existing
-        self.enhanceStrategyWeight = 0.2 #Create new according to player strategy
-        self.stealPointsWeight = 2.0 #Steal points 
-        self.enhanceLeastWeight = 0.1 #Enhance feature with least points
-        self.enhanceMostWeight = 0.1 #Enhance feature with most points
+        self.enhanceFeatureWeight = 5 #Add to existing
+        self.completeFeatureWeight = 10 #Complete Existing
+        self.enhanceStrategyWeight = 2 #Create new according to player strategy
+        self.stealPointsWeight = 10 #Steal points 
+        self.enhanceLeastWeight = 1 #Enhance feature with least points
+        self.enhanceMostWeight = 1 #Enhance feature with most points
 
         self.lastMove = 'manual'
 
@@ -515,31 +515,31 @@ class AdaptiveRules:
 
         if outcome:
             if self.lastMove == 'enhance_feature':
-                self.enhanceFeatureWeight * 0.2
+                self.enhanceFeatureWeight * 2
             elif self.lastMove == 'enhance_strategy':
-                self.enhanceStrategyWeight * 0.2
+                self.enhanceStrategyWeight * 1.2
             elif self.lastMove == 'steal_points':
-                self.stealPointsWeight * 0.2
+                self.stealPointsWeight * 2
             elif self.lastMove == 'complete_feature':
-                self.completeFeatureWeight * 0.2
+                self.completeFeatureWeight * 2
             elif self.lastMove == 'enhance_least':
-                self.enhanceLeastWeight * 0.2
+                self.enhanceLeastWeight * 1.2
             elif self.lastMove == 'enhance_most':
-                self.enhanceMostWeight * 0.2
+                self.enhanceMostWeight * 1.2
             
         else:
             if self.lastMove == 'enhance_feature':
                 self.enhanceFeatureWeight -= 0.5
             elif self.lastMove == 'enhance_strategy':
-                self.enhanceStrategyWeight -= 0.5
+                self.enhanceStrategyWeight -= 3
             elif self.lastMove == 'steal_points':
-                self.stealPointsWeight -= 5
+                self.stealPointsWeight -= 1
             elif self.lastMove == 'complete_feature':
                 self.completeFeatureWeight -= 0.5
             elif self.lastMove == 'enhance_least':
-                self.enhanceLeastWeight -= 0.5
+                self.enhanceLeastWeight -= 3
             elif self.lastMove == 'enhance_most':
-                self.enhanceMostWeight -= 0.5
+                self.enhanceMostWeight -= 3
             
         print(self.enhanceFeatureWeight,self.enhanceStrategyWeight,self.stealPointsWeight, self.completeFeatureWeight, self.enhanceLeastWeight, self.enhanceMostWeight)
         
@@ -598,6 +598,24 @@ class AdaptiveRules:
         for tileType, enhanceTile in create_feature_tiles:
             if str(tileType) == str(feature_points_index[highest_index]):
                 highest_points.append([tileType, enhanceTile])
+        
+        for entry in enhanceStrategyMoves:
+            if entry in lowest_points:
+                lowest_points.remove(entry)
+            elif entry in highest_points:
+                highest_points.remove(entry)
+        
+        for entry in merge_feature_tiles:
+            if entry in lowest_points:
+                lowest_points.remove(entry)
+            elif entry in highest_points:
+                highest_points.remove(entry)
+        
+        for entry in complete_feature_tiles:
+            if entry in lowest_points:
+                lowest_points.remove(entry)
+            elif entry in highest_points:
+                highest_points.remove(entry)
 
         self.lastEnhanceLeast = lowest_points
         self.lastEnhanceMost = highest_points
@@ -639,30 +657,27 @@ class AdaptiveRules:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(lowest_points):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.enhanceLeastWeight), tile[1], 'enhance_least', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.enhanceLeastWeight), tile[1], 'enhance_least', enhanceTile[0]])
         
         if highest_points:
             for weight, tile in enumerate(mctsMoves):
                 for tileType, enhanceTile in enumerate(highest_points):
                     if str(enhanceTile[1]) == str(tile[1]):
-                        adaptiveRules.append([int(weight + self.enhanceMostWeight), tile[1], 'enhance_most', enhanceTile[0]])
+                        adaptiveRules.append([int(weight * self.enhanceMostWeight), tile[1], 'enhance_most', enhanceTile[0]])
         
         selectedMove = None
         finalMoveType = None
         finalStrategyType = None
 
         if adaptiveRules:
-            print("Top 20%")
+            print("Top 10%")
             sorted_list = sorted(adaptiveRules, key=lambda x: x[0], reverse=True)
-            calc = max(1, len(sorted_list) // 5)
+            calc = max(1, len(sorted_list) // 10)
             for i in sorted_list[:calc]:
                 print(i)
 
             max_weight = max(entry[0] for entry in adaptiveRules) 
             max_weight_entries = [entry for entry in adaptiveRules if entry[0] == max_weight]
-
-            #print(max_weight)
-            #print(max_weight_entries)
 
             if len(max_weight_entries) > 1:
                 # get max 

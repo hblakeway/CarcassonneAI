@@ -408,7 +408,7 @@ def PlayGame(p1, p2):
                 pygame.display.flip()
         else: # Player should be y copilot 
             if firstRotation:
-                print(Carcassonne.BoardFarms)
+                # print(Carcassonne.BoardFarms)
                 selectedMove, image,image_coordinate,rect_surf, rect_coordinates, moveType, strategyType = AdaptiveRules.adaptive(adaptive_rules, DisplayScreen, Carcassonne, player_strategy)
                 firstRotation = False
                 diplayGameBoard(Carcassonne, DisplayScreen)

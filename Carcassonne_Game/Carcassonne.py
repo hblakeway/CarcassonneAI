@@ -208,7 +208,7 @@ class CarcassonneState:
                 self.move((6, 0, 1, 180, ('C', 0))) # 1
                 self.move((13, 1, 1, 90, ('G', 0)))
                 self.move((2, 2, 1, 180, ('C', 0))) # 1
-                self.move((21, 0, 2, 180, ('R', 0)))
+                self.move((21, 0, 2, 180, None))
                 self.move((20, 0, -1, 0, ('Monastery', 0))) # 1
                 self.move((5, 2, 2, 0, ('C', 0)))
                 self.move((21, 1, 0, 0, ('R', 0))) # 1
@@ -227,29 +227,38 @@ class CarcassonneState:
                 self.move((20, -1, 2, 0, ('Monastery', 0)))
                 self.move((21, -2, 0, 180, None)) # 1
                 self.move((4, 3, 3, 90, None))
-                self.move((22, -3, 1, 0, ('R', 0))) # 1
+                self.move((22, -3, 1, 0, None)) # 1
                 self.move((22, -1, -1, 90, ('R', 0)))
-                self.move((5, 4, -1, 270, None)) #1
+                self.move((5, -1, 3, 270, ('C', 0))) #1
                 self.move((13, 2, 0, 0, None))
-                self.move((3, -4, 1, 270, None)) #1
-                self.move((17, 4, 0, 180, None))
-                self.move((19, 2, 4, 0, ('R', 2))) #1
-                self.move((5, 4, 3, 270, None)) 
-                self.move((21, 3, 0, 180, None)) #1
-                self.move((9, 4, 4, 180, None))
-                self.move((13, 0, -2, 180, ('C', 0)))#1
-                self.move((14, 0, 4, 0, ('C', 0)))
-                self.move((23, 5, 4, 0, None)) # 1
-                self.move((20, 3, -2, 0, ('Monastery', 0)))
-                self.move((18, 4, 1, 90, None))#1
-                self.move((6, 0, 5, 90, None))
-                self.move((0, 0, -3, 0, None))#1
+                self.move((3, -4, 1, 270, ('R', 0))) #1
                 self.move((21, 4, 2, 270, None))
+                self.move((21, 3, 0, 180, None)) #1
+
+
+                
+                self.move((17, 4, 0, 180, None))
+                self.move((13, 0, -2, 180, ('C', 0)))#1
+                
+                self.move((20, 3, -2, 0, ('Monastery', 0)))
+                self.move((0, 0, -3, 0, None))#1
+               
+
+                self.move((22, 5, 2, 0, ('R', 0)))
+                
+
+                self.move((5, 4, 3, 270, None)) 
+                self.move((19, 2, 4, 0, ('R', 2))) #1
+                self.move((9, 4, 4, 180, None))
+                self.move((18, 4, 1, 90, None))#1
+                self.move((14, 0, 4, 0, ('C', 0)))
+                self.move((23, 6, 2, 0, None)) # 1
                 self.move((19, -1, -2, 90, None))#1
+                self.move((6, 0, 5, 90, None))
                 self.move((18, -1, -3, 90, None))
                 self.move((22, 2, -3, 90, None))#1
-                self.move((22, -1, 4, 0, None))
                 self.move((22, 2, -4, 90, None))#1
+
                 self.move((12, -4, 2, 90, ('C', 0)))
                 self.move((8, 0, -4, 0, None))#1
                 self.move((16, -5, 1, 90, None))
@@ -262,9 +271,10 @@ class CarcassonneState:
                 self.move((9, 3, 4, 90, None))#1
                 self.move((1, 5, 1, 180, ('C',0)))
                 self.move((7, 1, -4, 270, None))#1
-                self.move((22, -2, 4, 0, None))
+                self.move((22, -3, -1, 90, None))
                 self.move((20, 1, 3, 0, ('Monastery', 0)))#1
                 self.move((4, 1, 5, 0, None))
+                
 
             else:
                 self.deck = self.TileIndexList.copy()
