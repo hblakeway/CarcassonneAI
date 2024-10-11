@@ -686,7 +686,8 @@ class AdaptiveRules:
                         self.lastMove = featureString
                         finalMoveType = featureString
                         finalStrategyType = str(featureType)
-                        print("Selected Move =", selectedMove,self.lastMove,finalMoveType,finalStrategyType)
+                    
+                print("Selected Move =", selectedMove,self.lastMove,finalMoveType,finalStrategyType)
             else:
                 selectedMove = max_weight_entries[0][1]
                 self.lastMove = max_weight_entries[0][2]
