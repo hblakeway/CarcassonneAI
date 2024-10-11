@@ -328,6 +328,7 @@ def PlayGame(p1, p2):
             
             if Carcassonne.TotalTiles != 0:
                 player = Carcassonne.p2
+                NT.resetImage()
                 NT = nextTile(Carcassonne, DisplayScreen)
                 NT.moveLabel = pygame.Surface((DisplayScreen.Window_Width, 50))
                 isStartOfTurn = True

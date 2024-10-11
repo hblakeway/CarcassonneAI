@@ -292,60 +292,49 @@ class AdaptiveStrategies:
                         
                             for MatchingRoadIndex,RoadSide in ConnectedRoads: # Connected roads are on the board already 
                                 CombinedRoad  = Carcassonne.BoardRoads[CombinedRoadIndex] 
-
-                                if CombinedRoadIndex == MatchingRoadIndex and CombinedRoad.Meeples[0] == 0 and CombinedRoad.Meeples[1] == 0: # Case of an unclaimed road:
+                                MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
+                                    
+                                if CombinedRoadIndex != MatchingRoadIndex:
+                                    MatchingRoad.Pointer = CombinedRoadIndex
+                                
+                                # Check owners 
+                                MatchingOwner = None
+                                if MatchingRoad.Meeples[0] > MatchingRoad.Meeples[1]:
+                                    MatchingOwner = 1
+                                elif MatchingRoad.Meeples[1] > MatchingRoad.Meeples[0]:
+                                    MatchingOwner = 2
+                                else:
+                                    MatchingOwner = 0
+                                
+                                CombinedOwner = None 
+                                if CombinedRoad.Meeples[0] > CombinedRoad.Meeples[1]:
+                                    CombinedOwner = 1
+                                elif CombinedRoad.Meeples[1] > CombinedRoad.Meeples[0]:
+                                    CombinedOwner = 2
+                                else:
+                                    CombinedOwner = 0
+                                
+                                if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging roads, can create a new
                                     if MeepleKey is not None and MeepleKey[0] == 'R':
                                         if ['road', tile] not in create_feature_tiles:
                                             create_feature_tiles.append(['road', tile]) 
-                                # If the index is the same to the one we are comparing to. And player 1 has a meeple on it 
-                                elif CombinedRoadIndex == MatchingRoadIndex and (CombinedRoad.Meeples[0] >= CombinedRoad.Meeples[1]) and CombinedRoad.Meeples[0] > 0: # Case of a player 1 road
+                                elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
                                     if ['road', tile] not in enhance_feature_tiles:
-                                        enhance_feature_tiles.append(['road', tile]) 
+                                            enhance_feature_tiles.append(['road', tile]) 
+                                elif (MatchingOwner == 1 and CombinedOwner == 2): 
+                                    if len(CombinedRoad.tileList) > len(MatchingRoad.tileList): # Check that Combined is larger 
+                                        if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                            if ['road', tile] not in merge_feature_tiles:
+                                                merge_feature_tiles.append(['road', tile])
+                                elif (MatchingOwner == 2 and CombinedOwner == 1):
+                                    if len(MatchingRoad.tileList) > len(CombinedRoad.tileList): # Check that Matching is larger 
+                                        if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
+                                            if ['road', tile] not in merge_feature_tiles:
+                                                merge_feature_tiles.append(['road', tile])
                                 
-                                    if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
-                                            enhance_feature_tiles.remove(['road', tile])
-                                else:
-                                    MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
-                                    MatchingRoad.Pointer = CombinedRoadIndex
-                                    
-                                    # Check owners 
-                                    MatchingOwner = None
-                                    if MatchingRoad.Meeples[0] > MatchingRoad.Meeples[1]:
-                                        MatchingOwner = 1
-                                    elif MatchingRoad.Meeples[1] > MatchingRoad.Meeples[0]:
-                                        MatchingOwner = 2
-                                    else:
-                                        MatchingOwner = 0
-                                    
-                                    CombinedOwner = None 
-                                    if CombinedRoad.Meeples[0] > CombinedRoad.Meeples[1]:
-                                        CombinedOwner = 1
-                                    elif CombinedRoad.Meeples[1] > CombinedRoad.Meeples[0]:
-                                        CombinedOwner = 2
-                                    else:
-                                        CombinedOwner = 0
-                                    
-                                    if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging roads, can create a new
-                                        if MeepleKey is not None and MeepleKey[0] == 'R':
-                                            if ['road', tile] not in create_feature_tiles:
-                                                create_feature_tiles.append(['road', tile]) 
-                                    elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
-                                        if ['road', tile] not in enhance_feature_tiles:
-                                                enhance_feature_tiles.append(['road', tile]) 
-                                    elif (MatchingOwner == 1 and CombinedOwner == 2): 
-                                        if len(CombinedRoad.tileList) > len(MatchingRoad.tileList): # Check that Combined is larger 
-                                            if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
-                                                if ['road', tile] not in merge_feature_tiles:
-                                                    merge_feature_tiles.append(['road', tile])
-                                    elif (MatchingOwner == 2 and CombinedOwner == 1):
-                                        if len(MatchingRoad.tileList) > len(CombinedRoad.tileList): # Check that Matching is larger 
-                                            if (MatchingRoad.Meeples[0] + CombinedRoad.Meeples[0]) >= (MatchingRoad.Meeples[1] + CombinedRoad.Meeples[1]): # Check that player 1 meeples will be larger after the merge
-                                                if ['road', tile] not in merge_feature_tiles:
-                                                    merge_feature_tiles.append(['road', tile])
-                                    
-                                    if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
-                                        enhance_feature_tiles.remove(['road', tile])
-                                                
+                                if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
+                                    enhance_feature_tiles.remove(['road', tile])
+                                            
             if PlayingTile.HasFarms:
                 for i in range(len(PlayingTile.FarmOpenings)):
                     FarmOpenings = PlayingTile.FarmOpenings[i]
@@ -728,18 +717,18 @@ class AdaptiveRules:
                 playerSymbol = MeepleKey[1]
 
             # Place coloured tile 
-            
             GAME_X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + X*Grid_Size + Grid_border
             GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + (Y*-1)*Grid_Size + Grid_border
 
             # Tile = DisplayTileIndex
             # load image
-            image = pygame.image.load('images/' + str(DisplayTileIndex) + '.png')
+            image = pygame.image.load('images/' + str(DisplayTileIndex) + '.png') # not rotated 
 
             if not(MeepleKey is None):
                 # add meeple info if one is played
                 MeepleLocation = currentTile.AvailableMeepleLocs[MeepleKey]
                 currentTile.Meeple = [MeepleKey[0], MeepleLocation, playerSymbol]
+                
                 #   meeple image
                 meepleColour = "blue" 
                 meepleImage = pygame.image.load('meeple_images/' + meepleColour + '.png')
@@ -752,7 +741,9 @@ class AdaptiveRules:
                     
             # add image      
             image = pygame.transform.scale(image, (size,size))
-            image = pygame.transform.rotate(image, Rotation)
+            #image = pygame.transform.rotate(image, Rotation)
+
+            rotated_image = pygame.transform.rotate(image, Rotation)
 
             # draw suggestion place rectangle
             rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size) # White spot size
@@ -763,7 +754,7 @@ class AdaptiveRules:
             # Draw on screen
             image_coordinate  = (1070, 540)
 
-            return(selectedMove, image, image_coordinate, rect_surf, rect_coordinates, finalMoveType, finalStrategyType )
+            return(selectedMove, rotated_image, image_coordinate, rect_surf, rect_coordinates, finalMoveType, finalStrategyType )
         
         else:
             return(None, None, None, None, None, None, None)

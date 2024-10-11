@@ -358,18 +358,18 @@ class nextTile:
                 f"Keep {strategy}-building to expand quickly!"
             ],
             'steal_points': [
-                f"Seize the chance for points with this {strategy}!",
-                f"Combine to grab points from this {strategy}!",
-                f"Take advantage of this {strategy} for points!"
+                f"Seize points from opponents {strategy}!",
+                f"Combine to grab points from opponent {strategy}!",
+                f"Take advantage of opponents {strategy}!"
             ],
             'complete_feature': [
-                f"Seize the chance to secure {strategy} points!",
+                f"Secure your {strategy} points!",
                 f"A complete {strategy} with this tile!",
                 f"This is your chance to complete your {strategy}!"
             ],
             'enhance_least': [
                 f"Don't forget to grab points by {strategy}-building",
-                f"Even out your points by {strategy}-building!"
+                f"You are lacking in {strategy} points"
             ],
             'enhance_most': [
                 f"Your {strategy}-building strategy is unbeatable!",

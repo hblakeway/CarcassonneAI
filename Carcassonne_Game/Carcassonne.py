@@ -175,7 +175,7 @@ class CarcassonneState:
 
         if RunInit:
             # Number of tiles per TileIndex, i.e. 1 tile for 0th tile, 3 for 1st tile, etc.
-            demo = True
+            demo = False
             
             if self.no_monasteries:
                 self.TileQuantities = [1,3,1,1,2,3,2,2,2,3,1,3,2,5,3,0,4,3,3,4,0,9,8,1]

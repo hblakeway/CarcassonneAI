@@ -80,7 +80,7 @@ class playerStrategy:
         MeepleKey = Move[4]
     """
     def __init__(self, player_strategy=None, features=None):
-        demo = True 
+        demo = False 
 
         if demo:
             player_strategy = [(6, 0, 1, 180, ('C', 0)), (2, 2, 1, 180, ('C', 0)), (20, 0, -1, 0, ('Monastery', 0)), (21, 1, 0, 0, ('R', 0)),
