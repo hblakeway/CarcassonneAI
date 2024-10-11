@@ -443,6 +443,13 @@ class CarcassonneState:
         """
         if PlayingTile.HasFarms:
             farmConnections(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+
+    # Referencing Connor Golin Repository for Farm Merging Functionality 
+    def find_root(self, id):
+        if self.BoardFarms[id].Pointer != id:
+            # Recursively find the root and compress the path
+            self.BoardFarms[id].Pointer = self.find_root(self.BoardFarms[id].Pointer)
+        return self.BoardFarms[id].Pointer
                 
     def UpdateVirtualScores(self):
         """

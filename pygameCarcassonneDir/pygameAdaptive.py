@@ -192,8 +192,8 @@ class AdaptiveStrategies:
                                     if ['city', tile] not in enhance_feature_tiles:
                                         enhance_feature_tiles.append(['city', tile]) 
                                 
-                                if ['city', tile] in enhance_feature_tiles and ['city', tile] in merge_feature_tiles:
-                                        enhance_feature_tiles.remove(['city', tile])
+                                    if ['city', tile] in enhance_feature_tiles and ['city', tile] in merge_feature_tiles:
+                                            enhance_feature_tiles.remove(['city', tile])
                                 # Index is different, this connects two cities 
                                 else:
                                     MatchingCity = Carcassonne.BoardCities[MatchingCityIndex]
@@ -302,8 +302,8 @@ class AdaptiveStrategies:
                                     if ['road', tile] not in enhance_feature_tiles:
                                         enhance_feature_tiles.append(['road', tile]) 
                                 
-                                if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
-                                        enhance_feature_tiles.remove(['road', tile])
+                                    if ['road', tile] in enhance_feature_tiles and ['road', tile] in merge_feature_tiles:
+                                            enhance_feature_tiles.remove(['road', tile])
                                 else:
                                     MatchingRoad = Carcassonne.BoardRoads[MatchingRoadIndex]
                                     MatchingRoad.Pointer = CombinedRoadIndex
@@ -374,65 +374,61 @@ class AdaptiveStrategies:
                             if (MatchingFarm.Meeples[0] >= MatchingFarm.Meeples[1]) and MatchingFarm.Meeples[0] > 0: # Covers enhancing case 1,1
                                 enhance_feature_tiles.append(['farm', tile])
                     else:
-                        ConnectedFarms = []
-
-                        for (FarmSide,FarmLine) in FarmOpenings:
+                        ConnectedFarms = set()
+                        for (FarmSide, FarmLine) in FarmOpenings:
                             if Surroundings[FarmSide] is not None:
                                 MatchingFarmIndex = Surroundings[FarmSide].TileFarmsIndex[Carcassonne.MatchingSide[FarmSide]][Carcassonne.MatchingLine[FarmLine]]
-                                while Carcassonne.BoardFarms[MatchingFarmIndex].Pointer != Carcassonne.BoardFarms[MatchingFarmIndex].ID:                            
-                                    MatchingFarmIndex = Carcassonne.BoardFarms[MatchingFarmIndex].Pointer
-                                ConnectedFarms.append([MatchingFarmIndex,FarmSide,FarmLine])
-                        
+                                # Find the root farm with path compression
+                                root_farm_index = Carcassonne.find_root(MatchingFarmIndex)
+                                ConnectedFarms.add(root_farm_index)
+
                         if not ConnectedFarms:
                             if MeepleKey is not None and MeepleKey[0] == 'G':
                                 if ['farm', tile] not in create_feature_tiles:
                                     # create a new farm
-                                    create_feature_tiles.append(['farm', tile]) 
+                                    create_feature_tiles.append(['farm', tile])     
                         else:
-                            CombinedFarmIndex = ConnectedFarms[0][0]
+                            CombinedFarmIndex = min(ConnectedFarms)
                             
-                            for MatchingFarmIndex,FarmSide,FarmLine in ConnectedFarms: 
+                            for MatchingFarmIndex in ConnectedFarms: 
                                 CombinedFarm  = Carcassonne.BoardFarms[CombinedFarmIndex]
+                                MatchingFarm = Carcassonne.BoardFarms[MatchingFarmIndex]
 
-                                if CombinedFarmIndex == MatchingFarmIndex and CombinedFarm.Meeples[0] == 0 and CombinedFarm.Meeples[1] == 0:
-                                    if MeepleKey is not None and MeepleKey[0] == 'G':
-                                        if ['farm', tile] not in create_feature_tiles:
-                                            create_feature_tiles.append(['farm', tile])
-                                elif CombinedFarmIndex == MatchingFarmIndex and (CombinedFarm.Meeples[0] >= CombinedFarm.Meeples[1]) and CombinedFarm.Meeples[0] > 0: # Case of a player 1 farm
-                                    if ['farm', tile] not in enhance_feature_tiles:
-                                        enhance_feature_tiles.append(['farm', tile]) 
-                                else:
-                                    MatchingFarm = Carcassonne.BoardFarms[MatchingFarmIndex]
+                                if CombinedFarmIndex != MatchingFarmIndex:
                                     MatchingFarm.Pointer = CombinedFarmIndex
 
-                                    # Check owners 
-                                    MatchingOwner = None
-                                    if MatchingFarm.Meeples[0] > MatchingFarm.Meeples[1]:
-                                        MatchingOwner = 1
-                                    elif MatchingFarm.Meeples[1] > MatchingFarm.Meeples[0]:
-                                        MatchingOwner = 2
-                                    else:
-                                        MatchingOwner = 0
-                                    
-                                    CombinedOwner = None 
-                                    if CombinedFarm.Meeples[0] > CombinedFarm.Meeples[1]:
-                                        CombinedOwner = 1
-                                    elif CombinedFarm.Meeples[1] > CombinedFarm.Meeples[0]:
-                                        CombinedOwner = 2
-                                    else:
-                                        CombinedOwner = 0
-                                    
-                                    if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging farms, can create a new
-                                        if MeepleKey is not None and MeepleKey[0] == 'G':
-                                            if ['farm', tile] not in create_feature_tiles:
-                                                create_feature_tiles.append(['farm', tile]) 
-                                    elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
-                                        if ['farm', tile] not in enhance_feature_tiles:
-                                                enhance_feature_tiles.append(['farm', tile]) 
-                                    elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
-                                        if (MatchingFarm.Meeples[0] + CombinedFarm.Meeples[0]) >= (MatchingFarm.Meeples[1] + CombinedFarm.Meeples[1]):
-                                            if ['farm', tile] not in merge_feature_tiles:
-                                                merge_feature_tiles.append(['farm', tile])
+                                # Check owners 
+                                MatchingOwner = None
+                                if MatchingFarm.Meeples[0] > MatchingFarm.Meeples[1]:
+                                    MatchingOwner = 1
+                                elif MatchingFarm.Meeples[1] > MatchingFarm.Meeples[0]:
+                                    MatchingOwner = 2
+                                else:
+                                    MatchingOwner = 0
+                                
+                                CombinedOwner = None 
+                                if CombinedFarm.Meeples[0] > CombinedFarm.Meeples[1]:
+                                    CombinedOwner = 1
+                                elif CombinedFarm.Meeples[1] > CombinedFarm.Meeples[0]:
+                                    CombinedOwner = 2
+                                else:
+                                    CombinedOwner = 0
+                                
+                                if MatchingOwner == 0 and CombinedOwner == 0: # No one owns these merging farms, can create a new
+                                    if MeepleKey is not None and MeepleKey[0] == 'G':
+                                        if ['farm', tile] not in create_feature_tiles:
+                                            create_feature_tiles.append(['farm', tile]) 
+                                elif (MatchingOwner == 0 and CombinedOwner == 1) or (MatchingOwner == 1 and CombinedOwner == 0) or (MatchingOwner == 1 and CombinedOwner == 1): # Enhance 
+                                    if ['farm', tile] not in enhance_feature_tiles:
+                                            enhance_feature_tiles.append(['farm', tile]) 
+                                elif (MatchingOwner == 1 and CombinedOwner == 2) or (MatchingOwner == 2 and CombinedOwner == 1): # Player 1 owns one and Player 2 Owns one 
+                                    if (MatchingFarm.Meeples[0] + CombinedFarm.Meeples[0]) >= (MatchingFarm.Meeples[1] + CombinedFarm.Meeples[1]):
+                                        if ['farm', tile] not in merge_feature_tiles:
+                                            merge_feature_tiles.append(['farm', tile])
+
+                                if ['farm', tile] in enhance_feature_tiles and ['farm', tile] in merge_feature_tiles:
+                                    enhance_feature_tiles.remove(['farm', tile])
+                            
 
         # print(f"Enhancing List = {enhance_feature_tiles}")
         # print(f"Completing List = {complete_feature_tiles}")
@@ -519,17 +515,17 @@ class AdaptiveRules:
 
         if outcome:
             if self.lastMove == 'enhance_feature':
-                self.enhanceFeatureWeight += 0.2
+                self.enhanceFeatureWeight * 0.2
             elif self.lastMove == 'enhance_strategy':
-                self.enhanceStrategyWeight += 0.2
+                self.enhanceStrategyWeight * 0.2
             elif self.lastMove == 'steal_points':
-                self.stealPointsWeight += 0.2
+                self.stealPointsWeight * 0.2
             elif self.lastMove == 'complete_feature':
-                self.completeFeatureWeight += 0.2
+                self.completeFeatureWeight * 0.2
             elif self.lastMove == 'enhance_least':
-                self.enhanceLeastWeight += 0.2
+                self.enhanceLeastWeight * 0.2
             elif self.lastMove == 'enhance_most':
-                self.enhanceMostWeight += 5
+                self.enhanceMostWeight * 0.2
             
         else:
             if self.lastMove == 'enhance_feature':
