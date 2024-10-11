@@ -279,7 +279,6 @@ class CarcassonneState:
             else:
                 self.deck = self.TileIndexList.copy()
                 rd.shuffle(self.deck)  # shuffle the deck
-                print(self.deck)
                 self.move((16, 0, 0, 0, None))
                 self.add_coordmove(0, 0, (16, 0, 0, 0, None),0)
             

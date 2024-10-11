@@ -422,7 +422,7 @@ class AdaptiveStrategies:
         # print(f"Enhancing List = {enhance_feature_tiles}")
         # print(f"Completing List = {complete_feature_tiles}")
         # print(f"Creating New List = {create_feature_tiles}")
-        print(f"Merging List = {merge_feature_tiles}")
+        # print(f"Merging List = {merge_feature_tiles}")
 
         return enhance_feature_tiles,complete_feature_tiles, create_feature_tiles, merge_feature_tiles
 
