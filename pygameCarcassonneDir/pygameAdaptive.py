@@ -708,9 +708,11 @@ class AdaptiveRules:
             DisplayTileIndex = selectedMove.TileIndex
             X,Y = selectedMove.X, selectedMove.Y
             Rotation = selectedMove.Rotation
+            displayRotation = 360-Rotation
             MeepleKey = selectedMove.MeepleInfo
 
             currentTile = Tile(DisplayTileIndex)
+            #currentTile.Rotate(Rotation)
 
             if not(MeepleKey is None):
                 feature = MeepleKey[0]
@@ -743,7 +745,7 @@ class AdaptiveRules:
             image = pygame.transform.scale(image, (size,size))
             #image = pygame.transform.rotate(image, Rotation)
 
-            rotated_image = pygame.transform.rotate(image, Rotation)
+            rotated_image = pygame.transform.rotate(image, displayRotation)
 
             # draw suggestion place rectangle
             rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size) # White spot size

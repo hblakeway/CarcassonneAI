@@ -369,7 +369,7 @@ class nextTile:
             ],
             'enhance_least': [
                 f"Don't forget to grab points by {strategy}-building",
-                f"You are lacking in {strategy} points"
+                f"Start creating more {strategy} features"
             ],
             'enhance_most': [
                 f"Your {strategy}-building strategy is unbeatable!",

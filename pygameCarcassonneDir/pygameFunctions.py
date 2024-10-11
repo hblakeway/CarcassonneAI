@@ -505,6 +505,7 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
     DisplayTileIndex = selectedMove[0]
     X,Y = selectedMove[1], selectedMove[2]
     Rotation = selectedMove[3]
+    displayRotation = 360-Rotation
     MeepleKey = selectedMove[4]
 
     currentTile = Tile(DisplayTileIndex)
@@ -512,12 +513,9 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
     if not(MeepleKey is None):
         feature = MeepleKey[0]
         playerSymbol = MeepleKey[1]
-
-    # reverse orientation
-    Y=Y*-1
     
     GAME_X = Grid_Size * math.floor(Grid_Window_Width/(Grid_Size*2)) + X*Grid_Size + Grid_border
-    GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + Y*Grid_Size + Grid_border
+    GAME_Y = Grid_Size * math.floor(Grid_Window_Height/(Grid_Size*2)) + (Y*-1)*Grid_Size + Grid_border
 
     # Tile = DisplayTileIndex
     # load image
@@ -539,7 +537,7 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
             
     # add image      
     image = pygame.transform.scale(image, (size,size))
-    image = pygame.transform.rotate(image, Rotation)
+    rotated_image = pygame.transform.rotate(image, displayRotation)
     
     # draw suggestion place rectangle
     rect_coordinates = (GAME_X,GAME_Y, Grid_Size, Grid_Size) # White spot size
@@ -550,7 +548,7 @@ def getAImove(DisplayScreen, player, Carcassonne, TileIndex):
     # Draw on screen
     image_coordinate  = (1070, 540)
 
-    return(selectedMove, image, image_coordinate, rect_surf, rect_coordinates)
+    return(selectedMove, rotated_image, image_coordinate, rect_surf, rect_coordinates)
 
 def meepleCoordinatesAI(Location, Feature, DICT, TileIndex):
         """
