@@ -27,3 +27,6 @@ python pygameCarcassonneDir/pygameCarcassonne.py
 
 # Adaptive Copilot Implementation
 - See file pygameAdaptive.py
+
+# Demo mode is currently turned on
+- To disable:  set demo = False in pygameFunctions.py and Carcassonne.py
