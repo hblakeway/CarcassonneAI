@@ -24,3 +24,6 @@ python pygameCarcassonneDir/pygameCarcassonne.py
 - Arrow keys to rotate the piece
 - Numbers 0-9 to place a meeple
 - `LEFT_MOUSE` on a highlighted area to place a tile
+
+# Adaptive Copilot Implementation
+- See file pygameAdaptive.py
