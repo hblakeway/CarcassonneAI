@@ -1,12 +1,20 @@
 import random as rd
 import itertools as it
+import pygame
+import math
 
 from Carcassonne_Game.Tile import Tile, ROTATION_DICT, SIDE_CHANGE_DICT, AvailableMove
+from pygameCarcassonneDir.pygameSettings import MEEPLE_SIZE
+from pygameCarcassonneDir.pygameSettings import BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN
 from Carcassonne_Game.GameFeatures import Monastery
 
 from Carcassonne_Game.Carcassonne_CityUtils import cityConnections, cityClosures
 from Carcassonne_Game.Carcassonne_RoadUtils import roadConnections, roadClosures
 from Carcassonne_Game.Carcassonne_FarmUtils import farmConnections
+
+from pygameCarcassonneDir.pygameAdaptive import (
+    AdaptiveStrategies, updateKeys, getKeys
+)
 
 
 """
@@ -58,8 +66,13 @@ SIDE_COMPARISON_DICT={
     1:3
     }
 
+X_DEPTH = 10
+Y_DEPTH = 20
+WIDTH = HEIGHT = 104  # image scaled x2
 
-            
+XSHIFT = YSHIFT = MEEPLE_SIZE//2
+
+      
 class CarcassonneState:
     """
     List of important attributes:
@@ -131,7 +144,8 @@ class CarcassonneState:
         #Never changing:
         self.MatchingSide = [2,3,0,1]
         self.MatchingLine = [2,1,0]
-        #Initialialize variables        
+        #Initialialize variables     
+         
         self.Board = {}
         self.BoardCities = {}
         self.BoardRoads = {}
@@ -140,6 +154,9 @@ class CarcassonneState:
         self.MonasteryOpenings = {}
         self.AvailableSpots = set()
         self.AvailableSpots.add((0,0))  # first tile always placed in this position
+
+        self.coordList = {}
+        
         #self.AvailableMoves = []
         self.Meeples = [7,7]
         self.winner = None
@@ -155,10 +172,10 @@ class CarcassonneState:
             ]
         
         
-        
+
         if RunInit:
             # Number of tiles per TileIndex, i.e. 1 tile for 0th tile, 3 for 1st tile, etc.
-            
+            demo = True
             
             if self.no_monasteries:
                 self.TileQuantities = [1,3,1,1,2,3,2,2,2,3,1,3,2,5,3,0,4,3,3,4,0,9,8,1]
@@ -177,33 +194,94 @@ class CarcassonneState:
             self.TotalTiles = sum(self.TileQuantities)
             self.UniqueTilesCount = len(self.TileQuantities)
                 
-            # create deck
-            #self.deck = [x for x in self.TileIndexList]
-            self.deck = self.TileIndexList.copy()
-            rd.shuffle(self.deck)  # shuffle the deck
+            if demo: 
+                self.DemoTileQuantities = [1,3,1,1,2,3,2,2,2,3,1,3,2,5,3,2,4,3,3,4,4,9,8,1]
+                self.DemoTileIndexList = [16, 6, 13, 2, 21, 20, 5, 21, 19, 1, 15, 16, 14, 
+                                        1, 12, 21, 22, 14, 17, 10, 20, 21, 4, 22, 22, 5,
+                                        13, 3, 19, 17, 21, 5, 9, 13, 14, 23, 18, 20, 6,
+                                        0, 21, 19, 18, 22, 22, 22, 12, 8, 16, 7, 22, 17, 
+                                        11, 13, 21, 9, 1, 7, 22, 20, 4, 21, 11, 9, 21, 15, 
+                                        18, 19, 11, 16, 8, 13]
+                
+                self.deck = self.DemoTileIndexList.copy()
+                self.move((16, 0, 0, 0, None))
+                self.move((6, 0, 1, 180, ('C', 0))) # 1
+                self.move((13, 1, 1, 90, ('G', 0)))
+                self.move((2, 2, 1, 180, ('C', 0))) # 1
+                self.move((21, 0, 2, 180, None))
+                self.move((20, 0, -1, 0, ('Monastery', 0))) # 1
+                self.move((5, 2, 2, 0, ('C', 0)))
+                self.move((21, 1, 0, 0, ('R', 0))) # 1
+                self.move((19, -1, 0, 0, None))
+                self.move((1, 3, 2, 270, ('G', 0))) #1
+                self.move((15, 1, 2, 90, ('Monastery', 0))) 
+                self.move((16, 1, -1, 90, ('C', 0))) # 1
+                self.move((14, 2, 3, 180, None))
+                self.move((1, 2, -1, 180, None)) # 1
+                self.move((12, -1, 1, 0, ('C', 0)))
+                self.move((21, 1, -2, 180, ('G', 1))) # 1
+                self.move(((22, 0, 3, 90, None)))
+                self.move((14, 2, -2, 0, None)) #1
+                self.move(((17, -2, 1, 90, None)))
+                self.move((10, 3, -1, 0, None)) #1 
+                self.move((20, -1, 2, 0, ('Monastery', 0)))
+                self.move((21, -2, 0, 180, None)) # 1
+                self.move((4, 3, 3, 90, None))
+                self.move((22, -3, 1, 0, None)) # 1
+                self.move((22, -1, -1, 90, ('R', 0)))
+                self.move((5, -1, 3, 270, ('C', 0))) #1
+                self.move((13, 2, 0, 0, None))
+                self.move((3, -4, 1, 270, ('R', 0))) #1
+                self.move((21, 4, 2, 270, None))
+                self.move((21, 3, 0, 180, None)) #1
+
+
+                
+                self.move((17, 4, 0, 180, None))
+                self.move((13, 0, -2, 180, ('C', 0)))#1
+                
+                self.move((20, 3, -2, 0, ('Monastery', 0)))
+                self.move((0, 0, -3, 0, None))#1
+               
+
+                self.move((22, 5, 2, 0, ('R', 0)))
+                
+
+                self.move((5, 4, 3, 270, None)) 
+                self.move((19, 2, 4, 0, ('R', 2))) #1
+                self.move((9, 4, 4, 180, None))
+                self.move((18, 4, 1, 90, None))#1
+                self.move((14, 0, 4, 0, ('C', 0)))
+                self.move((23, 6, 2, 0, None)) # 1
+                self.move((19, -1, -2, 90, None))#1
+                self.move((6, 0, 5, 90, None))
+                self.move((18, -1, -3, 90, None))
+                self.move((22, 2, -3, 90, None))#1
+                self.move((22, 2, -4, 90, None))#1
+
+                self.move((12, -4, 2, 90, ('C', 0)))
+                self.move((8, 0, -4, 0, None))#1
+                self.move((16, -5, 1, 90, None))
+                self.move((7, 1, -3, 180, None))#1
+                self.move((22, -2, -2, 0, ('R', 0)))
+                self.move((17, -4, 0, 0, None)) #1
+                self.move((11, -4, 3, 0, None))
+                self.move((13, -4, 4, 180, ('C', 0)))#1
+                self.move((21, -3, -2, 180, None))
+                self.move((9, 3, 4, 90, None))#1
+                self.move((1, 5, 1, 180, ('C',0)))
+                self.move((7, 1, -4, 270, None))#1
+                self.move((22, -3, -1, 90, None))
+                self.move((20, 1, 3, 0, ('Monastery', 0)))#1
+                self.move((4, 1, 5, 0, None))
+                
+
+            else:
+                self.deck = self.TileIndexList.copy()
+                rd.shuffle(self.deck)  # shuffle the deck
+                self.move((16, 0, 0, 0, None))
+                self.add_coordmove(0, 0, (16, 0, 0, 0, None),0)
             
-            # each game starts with the same tile (Tile16) being placed
-            # PlayingTileIndex=16, X,Y = 0,0, Rotation=0, MeepleKey=None
-            self.move([16, 0, 0, 0, None])
-            
-            # code for running tests by arranging the order of the first few tiles
-            """
-            index = self.deck.index(0)
-            self.deck[index] = self.deck[0]
-            self.deck[0] = 0
-            
-            index = self.deck.index(0)
-            self.deck[index] = self.deck[1]
-            self.deck[1] = 0
-            
-            index = self.deck.index(20)
-            self.deck[index] = self.deck[2]
-            self.deck[2] = 20
-            """
-            
-            
-        
-    
     def CloneState(self):
         """
         Clones the game state - quicker than using copy.deepcopy()
@@ -232,8 +310,7 @@ class CarcassonneState:
         Clone.TileIndexList = [x for x in self.TileIndexList]
         Clone.deck = [x for x in self.deck]
         return Clone
-
-    
+  
     def reset(self):
         """
         Create a fresh game board
@@ -245,8 +322,7 @@ class CarcassonneState:
         Shuffles the deck - used for randomness in MCTS
         """
         rd.shuffle(self.deck)
-    
-    
+      
     def AddMeeple(self, MeepleUpdate, MeepleKey, FeatureCharacter, i):
         """
         Add meeple to section of tile
@@ -257,28 +333,29 @@ class CarcassonneState:
             - FeatureCharacter: Possible Meeple Location
             - i: Possible feature index
         """
-        AddedMeeples = [0,0]
+        AddedMeeples = [0,0,0]
         if MeepleKey is not None:
             # which feature the meeple is added to
-                if MeepleKey[0] == FeatureCharacter and MeepleKey[1] == i:
-                    AddedMeeples = MeepleUpdate
-        return AddedMeeples
+            if MeepleKey[0] == FeatureCharacter and MeepleKey[1] == i:
+                AddedMeeples = MeepleUpdate
+                AddedMeeples.append(i)
+        return AddedMeeples  
     
-    
-    def completeMonastery(self, AffectedMonastery):
+    def completeMonastery(self, AffectedMonastery, Move):
         """
         Checks if the monastery is completed (completely surrounded)
         """
         AffectedMonastery.Value += 1
+        AffectedMonastery.Update(Move)
+
         # if monastery is complete
         if AffectedMonastery.Value == 9:
             self.Meeples[AffectedMonastery.Owner] += 1  # return meeple to player
             self.Scores[AffectedMonastery.Owner] += 9  # award points to player
             self.FeatureScores[AffectedMonastery.Owner][2] += 9 # update monastery feature score
             AffectedMonastery.Value = 0  
-    
-    
-    def checkMonasteryCompleteness(self, X,Y, SurroundingSpots, MeepleUpdate, MeepleKey=None ):    
+ 
+    def checkMonasteryCompleteness(self, X,Y, SurroundingSpots, MeepleUpdate, MeepleKey=None, Move=None):    
         """
         Monastery completeness check
         
@@ -290,24 +367,23 @@ class CarcassonneState:
         """
         # check if new tile is surrounding a monastery
         if (X,Y) in self.MonasteryOpenings:
-            # check if monastery is completed
-            [(self.completeMonastery(self.BoardMonasteries[AffectedMonasteryIndex]))  for AffectedMonasteryIndex in self.MonasteryOpenings[(X,Y)]]
+            [(self.completeMonastery(self.BoardMonasteries[AffectedMonasteryIndex], Move))  for AffectedMonasteryIndex in self.MonasteryOpenings[(X,Y)]]
             # spot is now filled, remove from possible locations
-            del self.MonasteryOpenings[(X,Y)]  
-            
-        #Monastery logic
-        if MeepleKey is not None:
+            del self.MonasteryOpenings[(X,Y)] 
+        
+        # New Monastry Logic 
+        if MeepleKey is not None: # Monastry is not a feature without a meeple 
             if MeepleKey[0] == "Monastery":
                 # monastery surroundings include all 8 surrounding positions
                 CompleteSurroundingSpots = SurroundingSpots + [(X-1,Y-1),(X+1,Y+1),(X+1,Y-1),(X-1,Y+1)]
                 NextMonasteryID = len(self.BoardMonasteries)  # increment ID by 1
                 
-                self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1)
+                # Create a new Monastry and add Move 
+                self.BoardMonasteries[NextMonasteryID] = Monastery(NextMonasteryID,self.playerSymbol-1, Move)
                 AffectedMonastery = self.BoardMonasteries[NextMonasteryID]
-                [self.monasterySurroundings(Spot, AffectedMonastery, NextMonasteryID) for Spot in CompleteSurroundingSpots]
+                [self.monasterySurroundings(Spot, AffectedMonastery, NextMonasteryID, Move) for Spot in CompleteSurroundingSpots]
                 
-    
-    def monasterySurroundings(self, Spot, AffectedMonastery, NextMonasteryID):
+    def monasterySurroundings(self, Spot, AffectedMonastery, NextMonasteryID, Move):
         """
         Function for 'for loop'
         
@@ -316,15 +392,22 @@ class CarcassonneState:
             - AffectedMonastery: Monastery feature
             - NextMonasteryID: If Monastery is new, this will be its ID
         """
+      
         if Spot in self.Board:
-            self.completeMonastery(AffectedMonastery)
+            self.completeMonastery(AffectedMonastery, Move)
         elif Spot in self.MonasteryOpenings:
             self.MonasteryOpenings[Spot].append(NextMonasteryID)
         else:
             self.MonasteryOpenings[Spot] = [NextMonasteryID]
-            
-            
-    def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None):
+
+    def add_coordmove(self, X, Y, Move, player):
+        
+        self.coordList[(X,Y)] = [Move, player]
+
+        return self.coordList
+    
+    
+    def checkCityCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):
         """
         Check if city has been completed
         
@@ -334,14 +417,14 @@ class CarcassonneState:
             - MeepleUpdate: [p1_Meeple, p2_Meeple] - List of Meeples (e.g [1,0] means P1 is adding a Meeple)
             - MeepleKey:Feature to which Meeple is added
         """
-
+        #print(PlayingTile)
         if PlayingTile.HasCities:
             ClosingCities = []  # initialize list of closing cities
-            ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey)
+            ClosingCities = cityConnections(self, PlayingTile, Surroundings, ClosingCities, MeepleUpdate, MeepleKey, Move)
+            # print(f"Closing cities {ClosingCities}")
             cityClosures(self, ClosingCities)
-                       
-            
-    def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None):            
+                           
+    def checkRoadCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey=None, Move=None):            
         """
         Check if road has been completed
             
@@ -353,11 +436,11 @@ class CarcassonneState:
         """
         if PlayingTile.HasRoads:
             ClosingRoads = [] # initialize list of closing cities
-            ClosingRoads = roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey)
+            ClosingRoads = roadConnections(self, PlayingTile, Surroundings, ClosingRoads, MeepleUpdate, MeepleKey, Move)
+            # print(f"Closing roads {ClosingRoads}")
             roadClosures(self, ClosingRoads)
     
-    
-    def checkFarmCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey):
+    def checkFarmCompleteness(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move=None):
         """
         Check if farm has been completed
         
@@ -368,10 +451,15 @@ class CarcassonneState:
             - MeepleKey:Feature to which Meeple is added
         """
         if PlayingTile.HasFarms:
-            farmConnections(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
-            
-            
-            
+            farmConnections(self, PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+
+    # Referencing Connor Golin Repository for Farm Merging Functionality 
+    def find_root(self, id):
+        if self.BoardFarms[id].Pointer != id:
+            # Recursively find the root and compress the path
+            self.BoardFarms[id].Pointer = self.find_root(self.BoardFarms[id].Pointer)
+        return self.BoardFarms[id].Pointer
+                
     def UpdateVirtualScores(self):
         """
         Update virtual scores
@@ -415,7 +503,6 @@ class CarcassonneState:
             self.FeatureScores[1][6] += farmP2
         #print(f'VIRTUAL POINTS: \nPlayer1: {self.Scores[2]}, Player2: {self.Scores[3]} \n')
         
-    
     def nextTileIndex(self):
         """
         Returns index of next tile from the deck
@@ -425,8 +512,6 @@ class CarcassonneState:
         else:
             index = self.deck[0]
         return index
-
-    
 
     def move(self, Move = None):
         """
@@ -439,9 +524,15 @@ class CarcassonneState:
                 - Rotation: Rotation of tile
                 - MeepleKey
         """
-        # split up 'Move' object
+        # check if game is over
+        if self.TotalTiles == 0:
+            self.EndGameRoutine()
+            return
+
+        # split up 'Move' objectf
         PlayingTileIndex = Move[0]
-        X,Y = Move[1], Move[2]
+        X = Move[1]
+        Y = Move[2]
         Rotation = Move[3]
         MeepleKey = Move[4]
         
@@ -476,7 +567,7 @@ class CarcassonneState:
             
         # rotate tile to rotation specified and place tile on board
         PlayingTile.Rotate(Rotation)
-        
+
         self.Board[(X,Y)] = PlayingTile  # add to board
         if MeepleKey is None:
             MeepleLoc = [0,0]
@@ -487,27 +578,25 @@ class CarcassonneState:
             MeepleUpdate[player] += 1
             self.Meeples[player] -= 1
             
-       
         # run logic for each of the game features
         # with new move, it is important to check if any features have been completed
-        self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey)
-        self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
-        self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
-        self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey)
+        self.checkMonasteryCompleteness(X,Y,SurroundingSpots, MeepleUpdate, MeepleKey, Move)
+        self.checkCityCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+        self.checkRoadCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
+        self.checkFarmCompleteness(PlayingTile, Surroundings, MeepleUpdate, MeepleKey, Move)
         
         # update virtual scores
         self.UpdateVirtualScores()
-        # check if game is over
-        if self.TotalTiles == 0:
-            self.EndGameRoutine()
-            return
         
         #Turn end routine
         self.playerSymbol = 3 - self.playerSymbol # switch turn
         self.Turn += 1  # increment turns
-    
-    
-    
+
+        if not(MeepleKey is None):
+            return MeepleLocation
+        else: 
+            return (0,0) # no meeple 
+        
     def EndGameRoutine(self):
         """
         Logic to handle when game is finished
@@ -532,8 +621,6 @@ class CarcassonneState:
             
         self.result = self.Scores[2] - self.Scores[3]
         
-    
-
     def doesTileFit(self, EvaluatedTile, Rotation, SurroundingSpots):
         """
         Checks if the tile ('EvaluatedTile') can be placed with this 'Rotation' 
@@ -556,8 +643,6 @@ class CarcassonneState:
                         break
             break
         return IsTileFitting, SideChange
-    
-    
     
     def movesWithMeeples(self, EvaluatedTile, HasFeature, Openings, 
                          Feature, SideChange, SurroundingSpots, 
@@ -602,8 +687,7 @@ class CarcassonneState:
                     TempAvailableMoves.append( AvailableMove(TileIndex,X,Y,Rotation,(Feature,i)) )
                                         
         return TempAvailableMoves
-                                
-                            
+                                                 
     def matchingFeature(self, EvaluatedTile, BoardFeature, Feature, SurroundingSpots, Side, FarmLine = None):
         # cities
         if Feature == "C":
@@ -614,16 +698,13 @@ class CarcassonneState:
         # farms
         else:
             MatchingIndex = self.Board.get(SurroundingSpots[Side]).TileFarmsIndex[self.MatchingSide[Side]][self.MatchingLine[FarmLine]]
-        
+            
         while BoardFeature[MatchingIndex].Pointer != BoardFeature[MatchingIndex].ID:                            
                 MatchingIndex = BoardFeature[MatchingIndex].Pointer
         MatchingFeature = BoardFeature[MatchingIndex]    
         
         return MatchingFeature
-    
-    
-    
-        
+       
     def availableMoves(self, TilesOnly = False, TileIndexOther = None):
         """
         Create a list of all available moves based on the Tile the player just 
@@ -637,7 +718,7 @@ class CarcassonneState:
         # tile is the next tile in the deck
         TileIndex = self.nextTileIndex() if TileIndexOther is None else TileIndexOther
         if TileIndex == -1:
-            print(f'\n\n\n(Carcassonne.availableMoves)  No Moves!!  -  TileIndex: {TileIndex}  -  isGameOver: {self.isGameOver}  -  Deck Length: {len(self.deck)}  -  Game Turn: {self.Turn} \n\n\n')
+            # print(f'\n\n\n(Carcassonne.availableMoves)  No Moves!!  -  TileIndex: {TileIndex}  -  isGameOver: {self.isGameOver}  -  Deck Length: {len(self.deck)}  -  Game Turn: {self.Turn} \n\n\n')
             return [AvailableMove(-1,0,0,0,None)]  # game over
             
         # get the tile matching the index
@@ -657,8 +738,8 @@ class CarcassonneState:
             allAvailableMoves = self.availableMoves()
         
         # list of all moves
+        #print(allAvailableMoves)
         return allAvailableMoves
-    
     
     def discardTile(self, TileIndex):
         """
@@ -672,7 +753,6 @@ class CarcassonneState:
         self.TileQuantities[TileIndex] -= 1
         self.TotalTiles -= 1
         self.TileIndexList.remove(TileIndex)
-    
     
     def availableMovesForSpotRotations(self, Spot, Rotation, EvaluatedTile, TileIndex, TilesOnly):
         """
@@ -716,10 +796,9 @@ class CarcassonneState:
                         # monastery options
                         if EvaluatedTile.HasMonastery:
                             availableMoves.append( AvailableMove(TileIndex,X,Y,Rotation,("Monastery",0)) )
-            #print(f'(Carcassonne.availableMovesForRotation) Available Moves: {availableMoves}')
+            # print(f'(Carcassonne.availableMovesForRotation) Available Moves: {availableMoves}')
         
         return availableMoves 
-    
     
     def checkWinner(self):
         """
@@ -727,20 +806,38 @@ class CarcassonneState:
         """
         return self.result
     
-    
     def getRandomMove(self):
         """
         Returns a random move from all possible moves
         """
         availableMoves = self.availableMoves()
         return rd.choice(availableMoves)
-    
-    
+
     def __repr__(self):
         #Str = str(self.TileIndexList) + "\n" + str(self.Board) + "\n" + str(self.BoardCities) + "\n" + str(self.BoardRoads) + "\n" + str(self.BoardMonasteries) + "\n" + str(self.BoardFarms)
         Str = str(self.TileIndexList)
         return Str
+    
+    #def get_player_city(self):
+    #    for city in self.BoardCities:
 
+    def get_city(self):
+        return self.BoardCities
+    
+    def get_road(self):
+        return self.BoardRoads
+    
+    def get_farm(self):
+        return self.BoardFarms
+    
+    def get_mon(self):
+        return self.BoardMonasteries
+    
+    def get_coordList(self):
+        return self.coordList
+    
+    def get_mon_openings(self):
+        return self.MonasteryOpenings
+    
 
-             
-            
+    

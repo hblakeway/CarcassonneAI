@@ -3,7 +3,7 @@ The Tile class will store information and properties of each of the tiles
 available in Carcassonne
 """
 import cv2
-from Carcassonne_Game.Tile_dict import TILE_DESC_DICT, HAS_NOT_FARM, FARM_OPENINGS_DICT, FARM_CITY_INDEX_DICT, HAS_CITY, CITY_OPENINGS_DICT, IS_DOUBLE, HAS_ROAD, ROAD_OPENINGS_DICT, HAS_MONASTERY, NO_ROTATIONS, ONE_ROTATION, TILE_PROPERTIES_DICT, MEEPLE_LOC_DICT
+from Carcassonne_Game.Tile_dict import TILE_DESC_DICT, HAS_NOT_FARM, FARM_OPENINGS_DICT, FARM_CITY_INDEX_DICT, HAS_CITY, CITY_OPENINGS_DICT, IS_DOUBLE, HAS_ROAD, ROAD_OPENINGS_DICT, HAS_MONASTERY, NO_ROTATIONS, ONE_ROTATION, TILE_PROPERTIES_DICT, MEEPLE_LOC_DICT, TILE_COMBINE_CITY, TILE_COMBINE_ROAD, TILE_COMBINE_FARM
             
 
 def showImage(frame):
@@ -43,6 +43,7 @@ class Tile:
         self.TileFarmsIndex = [[None,None,None],[None,None,None],[None,None,None],[None,None,None]]
         self.Rotation = 0
         self.Meeple = None  # [MeepleFeature, (MeepleLocation), PlayerNumber]
+        self.coordinates = None
         
         # image location
         self.image = "images/" + str(self.TileIndex) + ".png"
@@ -98,7 +99,10 @@ class Tile:
     def TileInfo(self):
         return "Tile Index:" + str(self.TileIndex) + " Properties: " + str(self.Properties) + " Rotation: " + str(self.Rotation) + " Meeple: " + str(self.Meeple)
         
-        
+
+    def tile_coordinate(self, x, y):
+        self.coordinates = (x, y)
+    
     # copy the tile
     def CloneTile(self):
         Clone = Tile(self.TileIndex, RunInit = False)
@@ -195,7 +199,7 @@ class AvailableMove:
         self.Rotation = Rotation
         self.MeepleInfo = MeepleInfo
         self.move = (TileIndex, X, Y, Rotation, MeepleInfo)
-        self.moveString = f'({TileIndex}, {X}, {Y}, {Rotation}, {MeepleInfo})'
+        self.moveString = f'(TileIndex: {TileIndex}, X: {X}, Y: {Y}, Rotation: {Rotation}, Meeples: {MeepleInfo})'
         
     def __repr__(self):
         if self.MeepleInfo is not None:

@@ -22,6 +22,7 @@ class Player:
         self.logfile = None
         self.fullName = "Definitely has no name"
         self.isAIPlayer = True
+        self.isAdaptive = False
         self.family = None
         self.opponent = None
         
@@ -165,6 +166,7 @@ class HumanPlayer(Player):
         self.name = name
         self.fullName = "Human Player"
         self.isAIPlayer = False
+        self.isAdaptive = False
         self.family = "Human"
     
     def chooseAction(self, state, TileIndex):
@@ -201,6 +203,32 @@ class RandomPlayer(Player):
             print(f'({self.name})   TimeTaken: 0 secs  -  Turn: {state.Turn}  -  Time:{time.strftime("%H:%M:%S", time.localtime())}')
         
         return state.getRandomMove().move
+
+class AdaptivePlayer(Player):
+    
+    def __init__(self, name = 'Adaptive'):
+        super().__init__()
+        self.name = name
+        self.fullName = "Adaptive Player"
+        self.family = "Adaptive"
+        self.isAIPlayer = False
+        self.isAdaptive = True 
+        
+    def ClonePlayer(self):
+        return self
+        
+    def chooseAction(self, state, TileIndex):
+        """
+        state - The current state of the game board
+        """
+        positions = state.availableMoves(TileIndex)
+        
+        # user input
+        while True:
+            print(f'Available moves: \n {positions} \n')
+            choice = int(input("Input your choice:"))
+            if choice in positions:
+                return choice 
     
     
 

@@ -3,15 +3,20 @@ from Carcassonne_Game.Tile import Tile, showImage
 
 from pygameCarcassonneDir.pygameSettings import MEEPLE_LABEL_X, MEEPLE_LABEL_Y, MEEPLE_LABEL_SHIFT_X, MEEPLE_LABEL_SHIFT_Y
 from pygameCarcassonneDir.pygameSettings import GRID_WINDOW_WIDTH, MENU_WIDTH, BLUE, WHITE, RED, GREEN, COFFEEBROWN, BROWN, MEEPLE_CHOICE_HIGHLIGHT
-from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_MENU, BLACK
+from pygameCarcassonneDir.pygameSettings import FONT_MEEPLE_IMAGE, FONT_MEEPLE_MENU, BLACK, FONT_COPILOT
 
-from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates
+from pygameCarcassonneDir.pygameFunctions import placeColourTile, get_clicked_X, get_clicked_Y, meepleCoordinates, getAImove, placeColourTileAI
 from pygameCarcassonneDir.pygameLabel import Label
+
+from Carcassonne_Game.Carcassonne import (
+    CarcassonneState
+)
 
 
 # packages
 import pygame
 import cv2
+import random
 
 X_DEPTH = 20
 Y_DEPTH = 40
@@ -62,6 +67,7 @@ class nextTile:
         self.Tile = Tile(self.nextTileIndex, RunInit)
         self.Meeple = None
         
+        
         if RunInit:
             self.image_file = self.Tile.image
             self.image = pygame.image.load(self.image_file)
@@ -92,15 +98,21 @@ class nextTile:
             # rotation images and labels
             self.leftRotImage = pygame.image.load('pygame_images/left_rotate.png')
             self.rightRotImage = pygame.image.load('pygame_images/right_rotate.png')
-            
-    
-    
+
+            # ai co pilot label 
+            aiCopilotRect = (0,0, 300, 120)
+            self.aiLabel = pygame.Surface(pygame.Rect(aiCopilotRect).size)
+            self.aiLabel.set_alpha(180)
+            rectangle = pygame.draw.rect(self.aiLabel, BROWN, self.aiLabel.get_rect(), 10)
+            # print(rectangle.topleft,rectangle.topright,rectangle.bottomleft, rectangle.bottomright)
     
     def resetImage(self):
-        self.image = pygame.image.load(self.image_file)
-        self.image = self.increaseScale(self.image, 2)
-        self.Rotated = 0
-    
+        if self.image_file is None:
+            return
+        else:
+            self.image = pygame.image.load(self.image_file)
+            self.image = self.increaseScale(self.image, 2)
+            self.Rotated = 0
     
     def increaseScale(self, image, ratio):
         new_width = int(ratio * (self.image.get_rect().size)[0])
@@ -156,6 +168,7 @@ class nextTile:
         GAME_DISPLAY.blit(self.leftRotImage, (self.X-60,self.Y+40))
         GAME_DISPLAY.blit(self.rightRotImage, (image_width+self.X+10,self.Y+40))
         GAME_DISPLAY.blit(self.image, (self.X,self.Y))
+        # GAME_DISPLAY.blit(self.image, (self.X + 25,self.Y - 120)) Adds another frame of the tile
         
         
     
@@ -168,8 +181,9 @@ class nextTile:
         Grid_Window_Height = displayScreen.Total_Grid_Height
         Menu_Width = displayScreen.Menu_Width
         width = (self.meepleLabel.get_rect().size)[0]
-        GAME_DISPLAY.blit(self.meepleLabel, (Grid_Window_Width + (Menu_Width - width)/2, 300))
-        GAME_DISPLAY.blit(self.moveLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 340))
+        GAME_DISPLAY.blit(self.meepleLabel, (Grid_Window_Width + (Menu_Width - width)/2, 300)) # Where to place meeple options
+        GAME_DISPLAY.blit(self.moveLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 310)) # Last tile etc. 
+        GAME_DISPLAY.blit(self.aiLabel, (Grid_Window_Width + (Menu_Width - width)/2, Grid_Window_Height - 250))
         
         
     def possibleCoordinates(self):
@@ -256,6 +270,7 @@ class nextTile:
         background = None
         thickness = 2
         
+        
         # change colour for selected meeple location
         if NumberKey == numberSelected:
             if NumberKey == 0:
@@ -267,10 +282,10 @@ class nextTile:
                 circleColour = MEEPLE_CHOICE_HIGHLIGHT
                 self.Meeple = location_key
                 thickness = 0
-        
+               
         text = str(NumberKey)
         X,Y = meepleCoordinates(Location, Feature, MEEPLE_LOCATION_DICT_SCALED, TileIndex)
-        
+
         # image label
         meepleLabelImage = Label(text, font_size=FONT_MEEPLE_IMAGE, background = background)
         pygame.draw.circle(self.image, circleColour, (X+7,Y+12), 16, thickness)
@@ -281,11 +296,11 @@ class nextTile:
         """
         Instruct user to press space to force AI to make move
         """
-        text = "Press SPACEBAR (AI move)"
+        text = "AI Opponent making decision"
         spcaebarLabel = Label(text, font_size=FONT_MEEPLE_MENU, background = WHITE)
         self.meepleLabel.blit(spcaebarLabel.text_surface, (20, 70))
-        
-        
+    
+
     def updateMeepleMenu(self, location_key, Location, NumberKey, numberSelected):
         
         Feature = location_key[0]
@@ -321,39 +336,96 @@ class nextTile:
         self.meepleLabel.blit(meepleInfoLabel.text_surface, (x,y))
         
         
-    def updateMoveLabel(self, Carcassonne, selectedMove, isStartOfGame):
-        # check if any moves have been played yet
-        move = selectedMove
-        player = 3 - Carcassonne.playerSymbol
-        
-        # text
-        title = "Last Move:"
-        tile = " Tile: " + str(move[0]) +" - " + Tile(move[0]).tile_desc
-        location = f' X: {move[1]}, Y: {move[2]}, Rotation: {move[3]}'
-        meeple = " Meeple: None" if move[4] is None else f' Meeple: {FEATURE_DICT[move[4][0]]}'
-        player = f' Player {player}'
-        
-        if isStartOfGame:
-            player = " Game Starting Tile"
+    def updateMoveLabel(self):
+
+        title = "Your next strongest move is"
             
-        moveLabel1 = Label(title, font_size=25, background = WHITE)
-        moveLabel2 = Label(tile, font_size=20, background = None, foreground = WHITE)
-        moveLabel3 = Label(location, font_size=20, background = None, foreground = WHITE)
-        moveLabel4 = Label(meeple, font_size=20, background = None, foreground = WHITE)
-        moveLabel5 = Label(player, font_size=20, background = None, foreground = WHITE)
-        
-        #self.meepleLabel.blit(meepleInfoLabel.text_surface, (x,y))
+        moveLabel1 = Label(title, font_size=30, background = WHITE)
         
         self.moveLabel.blit(moveLabel1.text_surface, (15, 10))
-        self.moveLabel.blit(moveLabel2.text_surface, (15, 35))
-        self.moveLabel.blit(moveLabel3.text_surface, (15, 55))
-        self.moveLabel.blit(moveLabel4.text_surface, (15, 75))
-        self.moveLabel.blit(moveLabel5.text_surface, (15, 95))
+   
+    
+    def updateMoveLabelY(self, moveType, strategy):
+
+        text = {
+            'enhance_feature': [
+                f"Keep expanding your {strategy}!",
+                f"Grow your {strategy} further!",
+                f"Build up your {strategy}!",
+            ],
+            'enhance_strategy': [
+                f"Continue {strategy}-building. Create a new one!",
+                f"Keep {strategy}-building to expand quickly!"
+            ],
+            'steal_points': [
+                f"Seize points from opponents {strategy}!",
+                f"Combine to grab points from opponent {strategy}!",
+                f"Take advantage of opponents {strategy}!"
+            ],
+            'complete_feature': [
+                f"Secure your {strategy} points!",
+                f"A complete {strategy} with this tile!",
+                f"This is your chance to complete your {strategy}!"
+            ],
+            'enhance_least': [
+                f"Don't forget to grab points by {strategy}-building",
+                f"Start creating more {strategy} features"
+            ],
+            'enhance_most': [
+                f"Your {strategy}-building strategy is unbeatable!",
+                f"Your {strategy}-building strategy is taking over"
+            ]
+
+        }
+
+        title = random.choice(text[moveType])
         
+        moveLabel1 = Label(title, font_size=23, background = WHITE)
         
+        self.moveLabel.blit(moveLabel1.text_surface, (15, 10))
+        
+    def coPilotButton(self):
+        """
+        Button for users to press for AI Co pilot
+        """
+        text = "" # Replace with visual of suggestion
+        suggestionLabel = Label(text, font_size=FONT_COPILOT, background = WHITE)
+        self.aiLabel.blit(suggestionLabel.text_surface, (20, 10))
+    
+    
+    def placeAISuggestion(self, displayScreen, tileImage, tilePosition, locationImage, locationPosition):
+        GAME_DISPLAY = displayScreen.pygameDisplay
+        GAME_DISPLAY.blit(tileImage, tilePosition)
+        GAME_DISPLAY.blit(locationImage, locationPosition)   
             
-            
+    """
+    def showNextTile(self, displayScreen, rotation, newRotation):
+        GAME_DISPLAY = displayScreen.pygameDisplay
+        self.rotate(rotation, newRotation)
+        image_width = (self.image.get_rect().size)[0]
         
+        x1 = self.X - 25
+        x2 = self.X + image_width + 25
+        y1 = self.Y + 120
+        
+        left_color = right_color = BLACK
+        
+        # change colour if button clicked
+        if newRotation:
+            left_color = GREEN if rotation == -1 else BLACK 
+            right_color = GREEN if rotation == 1 else BLACK 
+        
+        # arrows
+        pygame.draw.polygon(GAME_DISPLAY, left_color, ((x1,y1), (x1,y1+32), (x1-25,y1+16)))
+        pygame.draw.polygon(GAME_DISPLAY, right_color, ((x2,y1), (x2,y1+32), (x2+25,y1+16)))
+        
+        # image and rotation symbols
+        GAME_DISPLAY.blit(self.leftRotImage, (self.X-60,self.Y+40))
+        GAME_DISPLAY.blit(self.rightRotImage, (image_width+self.X+10,self.Y+40))
+        GAME_DISPLAY.blit(self.image, (self.X,self.Y))
+        # GAME_DISPLAY.blit(self.image, (self.X + 25,self.Y - 120)) Adds another frame of the tile    
+    """        
+    
         
         
         
